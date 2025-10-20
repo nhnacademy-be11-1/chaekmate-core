@@ -1,11 +1,9 @@
 package shop.chaekmate.core.member.entity;
 
-import static jakarta.persistence.EnumType.STRING;
 import static lombok.AccessLevel.PROTECTED;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,7 +13,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
-import shop.chaekmate.core.member.entity.type.GradeType;
 
 @Getter
 @Table(name = "grade")
@@ -29,9 +26,8 @@ public class Grade extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(value = STRING)
     @Column(length = 20, nullable = false)
-    private GradeType gradeType;
+    private String name;
 
     @Column(nullable = false)
     private int pointRate;
