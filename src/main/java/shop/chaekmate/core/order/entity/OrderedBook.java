@@ -45,5 +45,6 @@ public class OrderedBook extends BaseEntity {
     @Column(nullable = false)
     private long quantity;
 
+    @Column(nullable = false)
     private int price;
 }
