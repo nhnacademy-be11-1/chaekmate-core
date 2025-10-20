@@ -39,7 +39,6 @@ public class IssuedCoupon extends BaseEntity {
     @JoinColumn(name = "coupon_policy_id", nullable = false)
     private CouponPolicy couponPolicy;
 
-    @Column(nullable = false)
     private LocalDateTime usedAt;
 
     @Column(nullable = false)
