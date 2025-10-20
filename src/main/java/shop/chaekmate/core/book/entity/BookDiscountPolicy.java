@@ -15,10 +15,10 @@ import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
 @Getter
-@Table(name = "book_discount_polict")
+@Table(name = "book_discount_policy")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE book_discount_polict SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE book_discount_policy SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class BookDiscountPolicy extends BaseEntity {
 
