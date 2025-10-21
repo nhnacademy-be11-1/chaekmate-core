@@ -21,7 +21,7 @@ import shop.chaekmate.core.common.entity.BaseEntity;
 @Table(name = "book_image")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE book_tag SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE book_image SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class BookImage extends BaseEntity {
 
