@@ -1,19 +1,19 @@
 package shop.chaekmate.core.book.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.chaekmate.core.book.dto.CreateCategoryRequest;
 import shop.chaekmate.core.book.dto.CreateCategoryResponse;
-import shop.chaekmate.core.book.dto.DeleteCategoryRequest;
-import shop.chaekmate.core.book.dto.DeleteCategoryResponse;
-import shop.chaekmate.core.book.dto.ReadCategoryRequest;
+import shop.chaekmate.core.book.dto.ReadAllCategoriesResponse;
 import shop.chaekmate.core.book.dto.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.UpdateCategoryResponse;
@@ -28,35 +28,41 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @PostMapping("/category")
-    public ResponseEntity<CreateCategoryResponse> createCategory(
+    @PostMapping("/categories")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CreateCategoryResponse createCategory(
             @Valid @RequestBody CreateCategoryRequest createCategoryRequest) {
-        CreateCategoryResponse createCategoryResponse = categoryService.createCategory(createCategoryRequest);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createCategoryResponse);
+        return categoryService.createCategory(createCategoryRequest);
     }
 
-    @GetMapping("/category")
-    public ResponseEntity<ReadCategoryResponse> readCategory(
-            @Valid @RequestBody ReadCategoryRequest readCategoryRequest) {
-        ReadCategoryResponse readCategoryResponse = categoryService.readCategory(readCategoryRequest);
-
-        return ResponseEntity.status(HttpStatus.OK).body(readCategoryResponse);
+    @GetMapping("/categories")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ReadAllCategoriesResponse> readAllCategories() {
+        return categoryService.readAllCategories();
     }
 
-    @PutMapping("/category")
-    public ResponseEntity<UpdateCategoryResponse> updateCategory(
+    @GetMapping("/categories/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ReadCategoryResponse readCategory(
+            @PathVariable(name = "id") Long categoryId) {
+
+        return categoryService.readCategory(categoryId);
+    }
+
+    @PutMapping("/categories/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UpdateCategoryResponse updateCategory(
+            @PathVariable(name = "id") Long categoryId,
             @Valid @RequestBody UpdateCategoryRequest updateCategoryRequest) {
-        UpdateCategoryResponse updateCategoryResponse = categoryService.updateCategory(updateCategoryRequest);
 
-        return ResponseEntity.status(HttpStatus.OK).body(updateCategoryResponse);
+        return categoryService.updateCategory(categoryId, updateCategoryRequest);
     }
 
-    @DeleteMapping("/category")
-    public ResponseEntity<DeleteCategoryResponse> deleteCategory(
-            @Valid @RequestBody DeleteCategoryRequest deleteCategoryRequest) {
-        DeleteCategoryResponse deleteCategoryResponse = categoryService.deleteCategory(deleteCategoryRequest);
-
-        return ResponseEntity.status(HttpStatus.OK).body(deleteCategoryResponse);
+    @DeleteMapping("/categories/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategory(
+            @PathVariable(name = "id") Long categoryId) {
+        categoryService.deleteCategory(categoryId);
     }
 }
