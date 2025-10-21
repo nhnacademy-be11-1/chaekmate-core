@@ -1,4 +1,5 @@
 package shop.chaekmate.core.book.dto;
 
-public class UpdateCategoryRequest {
+public record UpdateCategoryRequest(Long id, Long parentCategoryId, String name) {
 }
+

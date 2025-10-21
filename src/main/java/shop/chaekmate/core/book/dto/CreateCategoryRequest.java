@@ -1,4 +1,4 @@
 package shop.chaekmate.core.book.dto;
 
-public record CreateCategoryRequest() {
+public record CreateCategoryRequest(Long parentCategoryId, String name) {
 }
