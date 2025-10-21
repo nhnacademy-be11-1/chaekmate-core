@@ -53,9 +53,6 @@ public class Book extends BaseEntity {
     @Column(nullable = false)
     private int salesPrice;
 
-    @Column(columnDefinition = "TEXT")
-    private String imageUrl;
-
     @Column(nullable = false)
     private boolean isWrappable;
 
