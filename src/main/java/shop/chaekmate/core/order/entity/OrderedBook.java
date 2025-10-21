@@ -39,7 +39,7 @@ public class OrderedBook extends BaseEntity {
     private Book book;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "wrapper_id", nullable = false)
+    @JoinColumn(name = "wrapper_id")
     private Wrapper wrapper;
 
     @Column(nullable = false)
