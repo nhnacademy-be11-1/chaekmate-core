@@ -1,5 +1,8 @@
 package shop.chaekmate.core.book.dto;
 
-public record UpdateCategoryRequest(Long id, Long parentCategoryId, String name) {
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record UpdateCategoryRequest(Long parentCategoryId, @NotNull @Size(max = 255) String name) {
 }
 

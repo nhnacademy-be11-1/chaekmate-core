@@ -1,12 +1,14 @@
 package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.CreateCategoryRequest;
 import shop.chaekmate.core.book.dto.CreateCategoryResponse;
-import shop.chaekmate.core.book.dto.DeleteCategoryRequest;
-import shop.chaekmate.core.book.dto.DeleteCategoryResponse;
-import shop.chaekmate.core.book.dto.ReadCategoryRequest;
+import shop.chaekmate.core.book.dto.ReadAllCategoriesResponse;
 import shop.chaekmate.core.book.dto.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.UpdateCategoryResponse;
@@ -55,9 +57,8 @@ public class CategoryService {
     }
 
     @Transactional
-    public ReadCategoryResponse readCategory(ReadCategoryRequest request) {
+    public ReadCategoryResponse readCategory(Long targetCategoryId) {
 
-        Long targetCategoryId = request.id();
         if (categoryRepository.findById(targetCategoryId).isEmpty()) {
             throw new RuntimeException("해당하는 Id 의 Category를 찾을 수 없습니다.");
         }
@@ -73,9 +74,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public UpdateCategoryResponse updateCategory(UpdateCategoryRequest request) {
-
-        Long targetId = request.id();
+    public UpdateCategoryResponse updateCategory(Long targetId, UpdateCategoryRequest request) {
         Long parentCategoryId = request.parentCategoryId();
 
         Category targetCategory = categoryRepository.findById(targetId)
@@ -95,14 +94,35 @@ public class CategoryService {
     }
 
     @Transactional
-    public DeleteCategoryResponse deleteCategory(DeleteCategoryRequest request) {
-        Long targetCategoryId = request.id();
+    public void deleteCategory(Long targetCategoryId) {
         if (categoryRepository.findById(targetCategoryId).isEmpty()) {
             throw new RuntimeException("해당하는 Id의 카테고리를 찾을 수 없습니다.");
         }
         Category targetCategory = categoryRepository.findById(targetCategoryId).get();
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
+    }
 
-        return new DeleteCategoryResponse();
+    @Transactional
+    public List<ReadAllCategoriesResponse> readAllCategories() {
+        List<Category> allCategories = categoryRepository.findAll(); // 또는 부모 없는 것만
+        Map<Long, ReadAllCategoriesResponse> dtoMap = new HashMap<>();
+
+        // 모든 카테고리를 DTO로 변환
+        for (Category c : allCategories) {
+            dtoMap.put(c.getId(), new ReadAllCategoriesResponse(c.getId(), c.getName()));
+        }
+
+        // 부모-자식 연결
+        List<ReadAllCategoriesResponse> roots = new ArrayList<>();
+        for (Category c : allCategories) {
+            ReadAllCategoriesResponse dto = dtoMap.get(c.getId());
+            if (c.getParentCategory() != null) {
+                dtoMap.get(c.getParentCategory().getId()).addChild(dto);
+            } else {
+                roots.add(dto);
+            }
+        }
+
+        return roots;
     }
 }
