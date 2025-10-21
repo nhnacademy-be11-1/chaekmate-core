@@ -1,4 +1,4 @@
 package shop.chaekmate.core.book.dto;
 
-public class ReadCategoryResponse {
+public record ReadCategoryResponse(Long id, String parentCategoryId, String name) {
 }

@@ -1,4 +1,4 @@
 package shop.chaekmate.core.book.dto;
 
-public record ReadCategoryRequest() {
+public record ReadCategoryRequest(Long id) {
 }
