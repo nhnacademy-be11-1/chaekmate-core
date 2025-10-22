@@ -30,4 +30,15 @@ public class Wrapper {
 
     @Column(nullable = false)
     private int price;
+
+    public Wrapper(String name, int price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public void updateWrapper(String name, int price) {
+        this.name = name;
+        this.price = price;
+    }
+
 }
