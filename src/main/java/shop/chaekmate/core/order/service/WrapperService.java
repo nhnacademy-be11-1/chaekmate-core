@@ -21,7 +21,7 @@ public class WrapperService {
     //포장지 이름, 가격 추가
     @Transactional
     public WrapperResponse createWrapper(WrapperRequest wrapperRequest) {
-        if (wrapperRepository.existsByName(wrapperRequest.name())) {
+        if (wrapperRepository.existByNameAndDeletedAtNull(wrapperRequest.name())) {
             throw new WrapperAlreadyExistsException(wrapperRequest.name());
         }
         Wrapper wrapper = new Wrapper(wrapperRequest.name(), wrapperRequest.price());
@@ -35,7 +35,7 @@ public class WrapperService {
     public WrapperResponse modifyWrapper(Long id, WrapperRequest wrapperRequest) {
         Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(() -> new WrapperNotFoundException(id));
 
-        if (wrapperRepository.existsByName(wrapperRequest.name())) {
+        if (wrapperRepository.existByNameAndDeletedAtNull(wrapperRequest.name())) {
             throw new WrapperAlreadyExistsException(wrapperRequest.name());
         }
 
