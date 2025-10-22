@@ -25,7 +25,7 @@ public class Wrapper {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Column(length = 20, nullable = false)
+    @Column(unique = true, length = 30, nullable = false)
     private String name;
 
     @Column(nullable = false)
