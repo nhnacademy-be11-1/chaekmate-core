@@ -36,4 +36,9 @@ public class Like extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
+    public Like(Book book, Member member) {
+        this.book = book;
+        this.member = member;
+    }
 }
