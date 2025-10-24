@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import shop.chaekmate.core.common.entity.BaseEntity;
 
 @Getter
 @Table(name = "wrapper")
@@ -19,7 +20,7 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE wrapper SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
-public class Wrapper {
+public class Wrapper extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
