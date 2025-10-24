@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -34,12 +35,13 @@ public class PaymentHistory extends BaseEntity {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @OneToOne(fetch = LAZY)
-    @JoinColumn(name = "issued_coupon_id")
-    private IssuedCoupon issuedCoupon;
+    private Long issuedCouponId;
 
     private Long pointAmount;
 
     @Column(nullable = false)
     private long totalAmount;
+
+    @Column(nullable = false)
+    private LocalDate paymentDate;
 }
