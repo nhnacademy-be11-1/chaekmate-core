@@ -36,25 +36,22 @@ public class Book extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 300, nullable = false)
     private String author;
 
-    @Column(length = 100)
+    @Column(length = 300)
     private String publisher;
 
     private LocalDateTime publicationDatetime;
 
-    @Column(nullable = false)
-    private long isbn;
+    @Column(length = 13, nullable = false)
+    private String isbn;
 
     @Column(nullable = false)
     private int price;
 
     @Column(nullable = false)
     private int salesPrice;
-
-    @Column(columnDefinition = "TEXT")
-    private String imageUrl;
 
     @Column(nullable = false)
     private boolean isWrappable;
