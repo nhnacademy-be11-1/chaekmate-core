@@ -22,7 +22,9 @@ public class TagService {
 
     @Transactional
     public CreateTagResponse createTag(CreateTagRequest request) {
-        if (tagRepository.existsByNameAndDeletedAtNull(request.name())) {
+
+        // Find by 는 (soft delete가 적용 되지만, exists 는 count 쿼리라서 적용안됨)
+        if (tagRepository.findByName(request.name()).isPresent()) {
             throw new RuntimeException(" 이미 존재하는 Tag 입니다.");
         }
 
@@ -34,31 +36,25 @@ public class TagService {
 
     @Transactional
     public TagResponse readTagById(Long targetId) {
-        if (tagRepository.findById(targetId).isEmpty() ||
-                tagRepository.existsByIdAndDeletedAtNotNull(targetId)) {
-            throw new RuntimeException("해당하는 Id 의 Tag 를 찾을 수 없습니다.");
-        }
 
-        Tag targetTag = tagRepository.findById(targetId).get();
+        // soft delete 적용 됨
+        Tag targetTag = tagRepository.findById(targetId)
+                .orElseThrow(() -> new RuntimeException("해당하는 Id 의 Tag 를 찾을 수 없습니다."));
         return new TagResponse(targetTag.getId(), targetTag.getName());
     }
 
 
     public List<TagResponse> readAllTags() {
 
-        return tagRepository.findByDeletedAtNull().stream().map(tag -> new TagResponse(tag.getId(), tag.getName()))
+        return tagRepository.findAll().stream().map(tag -> new TagResponse(tag.getId(), tag.getName()))
                 .toList();
     }
 
     @Transactional
     public UpdateTagResponse updateTag(Long targetId, UpdateTagRequest request) {
 
-        if (tagRepository.findById(targetId).isEmpty() ||
-                tagRepository.existsByIdAndDeletedAtNotNull(targetId)) {
-            throw new RuntimeException("해당하는 Id 의 Tag 를 찾을 수 없습니다.");
-        }
-
-        Tag targetTag = tagRepository.findById(targetId).get();
+        Tag targetTag = tagRepository.findById(targetId)
+                .orElseThrow(() -> new RuntimeException("해당하는 Id 의 Tag 를 찾을 수 없습니다."));
         targetTag.setName(request.name());
         tagRepository.save(targetTag);
 
@@ -67,13 +63,11 @@ public class TagService {
 
     @Transactional
     public void deleteTagById(Long targetId) {
-        if (!tagRepository.existsByIdAndDeletedAtNull(targetId)) {
-            throw new RuntimeException("해당하는 Id의 Tag를 찾을 수 없습니다.");
-        }
 
-        Tag targetTag = tagRepository.findByIdAndDeletedAtNull(targetId);
+        Tag targetTag = tagRepository.findById(targetId)
+                .orElseThrow(() -> new RuntimeException("해당하는 Id의 Tag를 찾을 수 없습니다."));
         tagRepository.delete(targetTag);
-        
+
     }
 
 }

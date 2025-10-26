@@ -17,7 +17,7 @@ import shop.chaekmate.core.common.entity.BaseEntity;
 
 @Getter
 @Table(name = "tag")
-@SQLRestriction("deleted_at is null")
+@SQLRestriction("deleted_at is null") // delete_at 이 null 인것만 조회 할 수 있게 하겠다
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE tag SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
