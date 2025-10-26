@@ -46,8 +46,7 @@ class LikeServiceTest {
     private LikeService likeService;
 
     @Test
-    @DisplayName("좋아요 생성 성공")
-    void createLike_success() {
+    void 좋아요_생성_성공() {
         // given
         long bookId = 1L;
         long memberId = 1L;
@@ -82,8 +81,7 @@ class LikeServiceTest {
     }
 
     @Test
-    @DisplayName("ID로 좋아요 조회 성공")
-    void readLikeById_success() {
+    void ID로_좋아요_조회_성공() {
         // given
         long likeId = 1L;
         long bookId = 2L;
@@ -110,8 +108,7 @@ class LikeServiceTest {
     }
 
     @Test
-    @DisplayName("ID로 좋아요 조회 실패 - 찾을 수 없음")
-    void readLikeById_notFound() {
+    void ID로_좋아요_조회_실패_찾을_수_없음() {
         // given
         long likeId = 1L;
         when(likeRepository.findById(likeId)).thenReturn(Optional.empty());
@@ -122,7 +119,7 @@ class LikeServiceTest {
 
     @Test
     @DisplayName("책 ID로 좋아요 목록 조회 성공")
-    void getBookLikes_success() {
+    void 책_ID로_좋아요_목록_조회_성공() {
         // given
         long bookId = 1L;
         var book = mock(Book.class);
@@ -149,8 +146,7 @@ class LikeServiceTest {
     }
 
     @Test
-    @DisplayName("회원 ID로 좋아요 목록 조회 성공")
-    void getMemberLikes_success() {
+    void 회원_ID로_좋아요_목록_조회_성공() {
         // given
         long memberId = 1L;
         var book = mock(Book.class);
@@ -176,8 +172,7 @@ class LikeServiceTest {
     }
 
     @Test
-    @DisplayName("ID로 좋아요 삭제 성공")
-    void deleteLikeById_success() {
+    void ID로_좋아요_삭제_성공() {
         // given
         long likeId = 1L;
         var like = mock(Like.class);
@@ -192,8 +187,7 @@ class LikeServiceTest {
     }
 
     @Test
-    @DisplayName("책 및 회원 ID로 좋아요 삭제 성공")
-    void deleteLikeByBookIdAndMemberId_success() {
+    void 책_및_회원_ID로_좋아요_삭제_성공() {
         // given
         long bookId = 1L;
         long memberId = 1L;
