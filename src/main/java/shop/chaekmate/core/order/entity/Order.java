@@ -23,7 +23,7 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.order.entity.type.OrderStatusType;
 
 @Getter
-@Table(name = "order")
+@Table(name = "`order`")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE order SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")

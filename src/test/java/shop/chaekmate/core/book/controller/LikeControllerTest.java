@@ -1,9 +1,6 @@
 package shop.chaekmate.core.book.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,109 +8,123 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collections;
-import org.junit.jupiter.api.DisplayName;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.CreateLikeRequest;
 import shop.chaekmate.core.book.dto.DeleteLikeRequest;
-import shop.chaekmate.core.book.dto.LikeResponse;
-import shop.chaekmate.core.book.service.LikeService;
+import shop.chaekmate.core.book.entity.Book;
+import shop.chaekmate.core.book.entity.Like;
+import shop.chaekmate.core.book.repository.BookRepository;
+import shop.chaekmate.core.book.repository.LikeRepository;
+import shop.chaekmate.core.member.entity.Grade;
+import shop.chaekmate.core.member.entity.Member;
+import shop.chaekmate.core.member.entity.type.PlatformType;
+import shop.chaekmate.core.member.repository.GradeRepository;
+import shop.chaekmate.core.member.repository.MemberRepository;
 
-@WebMvcTest(LikeController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+@ActiveProfiles("test")
 class LikeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockitoBean
-    private LikeService likeService;
-
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private LikeRepository likeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private BookRepository bookRepository;
+    @Autowired
+    private GradeRepository gradeRepository;
+
+    private Member member;
+    private Book book;
+    private Grade grade;
+
+    @BeforeEach
+    void setUp() {
+        grade = gradeRepository.save(new Grade("test-grade"));
+        Member newMember = new Member(grade, "test-login-id", "test-password", "test-name", "010-1234-5678",
+                "test@email.com", LocalDate.now(), PlatformType.LOCAL, 0L);
+        member = memberRepository.save(newMember);
+
+        Book newBook = new Book("Test Book", "index", "description", "author", "publisher", LocalDateTime.now(),
+                "1234567890123", 10000, 9000, true, 0, false, 10);
+        book = bookRepository.save(newBook);
+    }
 
     @Test
-    @DisplayName("좋아요 생성 요청 성공")
-    void createLike_success() throws Exception {
-        Long bookId = 1L;
-        Long memberId = 1L;
-        CreateLikeRequest request = new CreateLikeRequest(memberId);
-        LikeResponse response = new LikeResponse(1L, bookId, memberId);
+    void 좋아요_생성_요청_성공() throws Exception {
+        CreateLikeRequest request = new CreateLikeRequest(member.getId());
 
-        when(likeService.createLike(anyLong(), any(CreateLikeRequest.class))).thenReturn(response);
-
-        mockMvc.perform(post("/books/{bookId}/likes", bookId)
+        mockMvc.perform(post("/books/{bookId}/likes", book.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L));
+                .andExpect(jsonPath("$.bookId").value(book.getId()))
+                .andExpect(jsonPath("$.memeberId").value(member.getId()));
     }
 
     @Test
-    @DisplayName("ID로 좋아요 조회 요청 성공")
-    void readLike_success() throws Exception {
-        Long likeId = 1L;
-        LikeResponse response = new LikeResponse(likeId, 1L, 1L);
+    void ID로_좋아요_조회_요청_성공() throws Exception {
+        Like like = likeRepository.save(new Like(book, member));
 
-        when(likeService.readLikeById(likeId)).thenReturn(response);
-
-        mockMvc.perform(get("/likes/{likeId}", likeId))
+        mockMvc.perform(get("/likes/{likeId}", like.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(likeId));
+                .andExpect(jsonPath("$.id").value(like.getId()));
     }
 
     @Test
-    @DisplayName("책 ID로 좋아요 목록 조회 요청 성공")
-    void getBookLikes_success() throws Exception {
-        Long bookId = 1L;
-        LikeResponse response = new LikeResponse(1L, bookId, 1L);
+    void 책_ID로_좋아요_목록_조회_요청_성공() throws Exception {
+        likeRepository.save(new Like(book, member));
 
-        when(likeService.getBookLikes(bookId)).thenReturn(Collections.singletonList(response));
-
-        mockMvc.perform(get("/books/{bookId}/likes", bookId))
+        mockMvc.perform(get("/books/{bookId}/likes", book.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].bookId").value(bookId));
+                .andExpect(jsonPath("$[0].bookId").value(book.getId()));
     }
 
     @Test
-    @DisplayName("회원 ID로 좋아요 목록 조회 요청 성공")
-    void getMemberLikes_success() throws Exception {
-        Long memberId = 1L;
-        LikeResponse response = new LikeResponse(1L, 1L, memberId);
+    void 회원_ID로_좋아요_목록_조회_요청_성공() throws Exception {
+        likeRepository.save(new Like(book, member));
 
-        when(likeService.getMemberLikes(memberId)).thenReturn(Collections.singletonList(response));
-
-        mockMvc.perform(get("/members/{memberId}/likes", memberId))
+        mockMvc.perform(get("/members/{memberId}/likes", member.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].memeberId").value(memberId));
+                .andExpect(jsonPath("$[0].memeberId").value(member.getId()));
     }
 
     @Test
-    @DisplayName("ID로 좋아요 삭제 요청 성공")
-    void deleteLikeById_success() throws Exception {
-        Long likeId = 1L;
-        doNothing().when(likeService).deleteLikeById(likeId);
+    void ID로_좋아요_삭제_요청_성공() throws Exception {
+        Like like = likeRepository.save(new Like(book, member));
 
-        mockMvc.perform(delete("/likes/{likeId}", likeId))
+        mockMvc.perform(delete("/likes/{likeId}", like.getId()))
                 .andExpect(status().isNoContent());
+
+        assertThat(likeRepository.findById(like.getId())).isEmpty();
     }
 
     @Test
-    @DisplayName("책 및 회원 ID로 좋아요 삭제 요청 성공")
-    void deleteLikeByBookIdAndMemberId_success() throws Exception {
-        Long bookId = 1L;
-        Long memberId = 1L;
-        DeleteLikeRequest request = new DeleteLikeRequest(memberId);
+    void 책_및_회원_ID로_좋아요_삭제_요청_성공() throws Exception {
+        Like like = likeRepository.save(new Like(book, member));
+        DeleteLikeRequest request = new DeleteLikeRequest(member.getId());
 
-        doNothing().when(likeService).deleteLikeByBookIdAndMemberId(anyLong(), any(DeleteLikeRequest.class));
-
-        mockMvc.perform(delete("/books/{bookId}/likes", bookId)
+        mockMvc.perform(delete("/books/{bookId}/likes", book.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
+
+        assertThat(likeRepository.findById(like.getId())).isEmpty();
     }
 }

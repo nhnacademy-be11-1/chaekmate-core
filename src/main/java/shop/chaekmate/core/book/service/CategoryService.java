@@ -87,7 +87,11 @@ public class CategoryService {
         targetCategory.setName(request.name());
         targetCategory.setParentCategory(parentCategory);
 
-        return new UpdateCategoryResponse(targetCategory.getId(), targetCategory.getParentCategory().getId(),
+        categoryRepository.save(targetCategory);
+
+        Long responseParentId = (targetCategory.getParentCategory() != null) ? targetCategory.getParentCategory().getId() : null;
+
+        return new UpdateCategoryResponse(targetCategory.getId(), responseParentId,
                 targetCategory.getName());
     }
 

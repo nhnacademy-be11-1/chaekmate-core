@@ -18,7 +18,7 @@ import shop.chaekmate.core.common.entity.BaseEntity;
 import shop.chaekmate.core.member.entity.Member;
 
 @Getter
-@Table(name = "like")
+@Table(name = "`like`")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE like SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")

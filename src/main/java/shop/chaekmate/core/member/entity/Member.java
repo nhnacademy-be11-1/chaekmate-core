@@ -22,10 +22,13 @@ import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 
+import lombok.AllArgsConstructor;
+
 @Getter
 @Table(name = "member")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE member SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class Member extends BaseEntity {
@@ -64,4 +67,16 @@ public class Member extends BaseEntity {
 
     @Column(nullable = false)
     private long point;
+
+    public Member(Grade grade, String loginId, String password, String name, String phone, String email, LocalDate birthDate, PlatformType platformType, long point) {
+        this.grade = grade;
+        this.loginId = loginId;
+        this.password = password;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.birthDate = birthDate;
+        this.platformType = platformType;
+        this.point = point;
+    }
 }

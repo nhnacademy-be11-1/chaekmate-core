@@ -15,10 +15,13 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
+import lombok.AllArgsConstructor;
+
 @Getter
 @Table(name = "book")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE book SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class Book extends BaseEntity {
@@ -30,10 +33,10 @@ public class Book extends BaseEntity {
     @Column(length = 250, nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "`index`", columnDefinition = "TEXT")
     private String index;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "`description`", columnDefinition = "TEXT")
     private String description;
 
     @Column(length = 300, nullable = false)
@@ -64,4 +67,20 @@ public class Book extends BaseEntity {
 
     @Column(nullable = false)
     private int stock;
+
+    public Book(String title, String index, String description, String author, String publisher, LocalDateTime publicationDatetime, String isbn, int price, int salesPrice, boolean isWrappable, long views, boolean isSaleEnd, int stock) {
+        this.title = title;
+        this.index = index;
+        this.description = description;
+        this.author = author;
+        this.publisher = publisher;
+        this.publicationDatetime = publicationDatetime;
+        this.isbn = isbn;
+        this.price = price;
+        this.salesPrice = salesPrice;
+        this.isWrappable = isWrappable;
+        this.views = views;
+        this.isSaleEnd = isSaleEnd;
+        this.stock = stock;
+    }
 }

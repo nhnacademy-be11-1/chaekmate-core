@@ -59,7 +59,7 @@ public class CategoryController {
         return categoryService.updateCategory(categoryId, updateCategoryRequest);
     }
 
-    @DeleteMapping("/categories/{id}")
+    @DeleteMapping("/admin/categories/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(
             @PathVariable(name = "id") Long categoryId) {

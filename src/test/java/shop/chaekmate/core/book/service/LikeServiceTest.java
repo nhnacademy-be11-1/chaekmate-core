@@ -1,7 +1,6 @@
 package shop.chaekmate.core.book.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -14,12 +13,12 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import shop.chaekmate.core.book.dto.CreateLikeRequest;
 import shop.chaekmate.core.book.dto.DeleteLikeRequest;
 import shop.chaekmate.core.book.dto.LikeResponse;
@@ -30,6 +29,7 @@ import shop.chaekmate.core.book.repository.LikeRepository;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class LikeServiceTest {
 
@@ -54,7 +54,6 @@ class LikeServiceTest {
         var request = new CreateLikeRequest(memberId);
         var book = mock(Book.class);
         var member = mock(Member.class);
-        var savedLike = mock(Like.class);
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
@@ -74,10 +73,10 @@ class LikeServiceTest {
         var response = likeService.createLike(bookId, request);
 
         // then
-        assertNotNull(response);
-        assertEquals(likeId, response.id());
-        assertEquals(bookId, response.bookId());
-        assertEquals(memberId, response.memeberId());
+        assertThat(response).isNotNull();
+        assertThat(response.id()).isEqualTo(likeId);
+        assertThat(response.bookId()).isEqualTo(bookId);
+        assertThat(response.memeberId()).isEqualTo(memberId);
     }
 
     @Test
@@ -101,10 +100,10 @@ class LikeServiceTest {
         var response = likeService.readLikeById(likeId);
 
         // then
-        assertNotNull(response);
-        assertEquals(likeId, response.id());
-        assertEquals(bookId, response.bookId());
-        assertEquals(memberId, response.memeberId());
+        assertThat(response).isNotNull();
+        assertThat(response.id()).isEqualTo(likeId);
+        assertThat(response.bookId()).isEqualTo(bookId);
+        assertThat(response.memeberId()).isEqualTo(memberId);
     }
 
     @Test
@@ -118,7 +117,6 @@ class LikeServiceTest {
     }
 
     @Test
-    @DisplayName("책 ID로 좋아요 목록 조회 성공")
     void 책_ID로_좋아요_목록_조회_성공() {
         // given
         long bookId = 1L;
@@ -140,9 +138,9 @@ class LikeServiceTest {
         List<LikeResponse> responses = likeService.getBookLikes(bookId);
 
         // then
-        assertEquals(1, responses.size());
-        assertEquals(1L, responses.get(0).id());
-        assertEquals(bookId, responses.get(0).bookId());
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).id()).isEqualTo(1L);
+        assertThat(responses.get(0).bookId()).isEqualTo(bookId);
     }
 
     @Test
@@ -167,8 +165,8 @@ class LikeServiceTest {
         List<LikeResponse> responses = likeService.getMemberLikes(memberId);
 
         // then
-        assertEquals(1, responses.size());
-        assertEquals(memberId, responses.get(0).memeberId());
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).memeberId()).isEqualTo(memberId);
     }
 
     @Test

@@ -27,7 +27,7 @@ public class TagController {
         this.tagService = tagService;
     }
 
-    @PostMapping("/tags")
+    @PostMapping("/admin/tags")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateTagResponse createTag(@Valid @RequestBody CreateTagRequest createTagRequest) {
 
@@ -46,7 +46,7 @@ public class TagController {
         return tagService.readAllTags();
     }
 
-    @PutMapping("/tags/{id}")
+    @PutMapping("/admin/tags/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UpdateTagResponse updateTag(@PathVariable(name = "id") Long targetId,
                                        @Valid @RequestBody UpdateTagRequest request) {
@@ -54,7 +54,7 @@ public class TagController {
         return tagService.updateTag(targetId, request);
     }
 
-    @DeleteMapping("/tags/{id}")
+    @DeleteMapping("/admin/tags/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTag(@PathVariable(name = "id") Long targetId) {
         tagService.deleteTagById(targetId);

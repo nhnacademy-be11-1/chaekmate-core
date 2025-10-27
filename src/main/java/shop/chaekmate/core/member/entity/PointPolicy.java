@@ -6,6 +6,7 @@ import static lombok.AccessLevel.PROTECTED;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -29,10 +30,10 @@ public class PointPolicy extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Enumerated(value = STRING)
+    @Enumerated(value = EnumType.STRING)
     @Column(length = 20, nullable = false)
     private PointPolicyType type;
 
-    @Column(nullable = false)
+    @Column(name = "`value`", nullable = false)
     private int value;
 }
