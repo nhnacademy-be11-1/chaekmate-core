@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.CreateCategoryRequest;
 import shop.chaekmate.core.book.dto.CreateCategoryResponse;
@@ -16,13 +17,10 @@ import shop.chaekmate.core.book.entity.Category;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
+    
     private final CategoryRepository categoryRepository;
-
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
-
 
     @Transactional
     public CreateCategoryResponse createCategory(CreateCategoryRequest request) {

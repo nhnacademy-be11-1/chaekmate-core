@@ -2,6 +2,7 @@ package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.CreateLikeRequest;
 import shop.chaekmate.core.book.dto.DeleteLikeRequest;
@@ -14,19 +15,12 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
 @Service
+@RequiredArgsConstructor
 public class LikeService {
 
     private final MemberRepository memberRepository;
     private final LikeRepository likeRepository;
     private final BookRepository bookRepository;
-
-    public LikeService(MemberRepository memberRepository, LikeRepository likeRepository,
-                       BookRepository bookRepository) {
-        this.memberRepository = memberRepository;
-        this.likeRepository = likeRepository;
-        this.bookRepository = bookRepository;
-    }
-
 
     @Transactional
     public LikeResponse createLike(Long bookId, CreateLikeRequest request) {
