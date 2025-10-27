@@ -1,6 +1,5 @@
 package shop.chaekmate.core.member.entity;
 
-import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 

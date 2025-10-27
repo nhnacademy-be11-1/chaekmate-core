@@ -1,7 +1,6 @@
 package shop.chaekmate.core.member.entity;
 
 import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -10,8 +9,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -61,7 +58,8 @@ public class Member extends BaseEntity {
     @Column(length = 20, nullable = false)
     private PlatformType platformType;
 
-    public Member(String loginId, String password, String name, String phone, String email, LocalDate birthDate, PlatformType platformType) {
+    public Member(String loginId, String password, String name, String phone, String email, LocalDate birthDate,
+                  PlatformType platformType) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;

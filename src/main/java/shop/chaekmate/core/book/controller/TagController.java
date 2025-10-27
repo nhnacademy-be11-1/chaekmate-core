@@ -9,25 +9,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import shop.chaekmate.core.book.controller.docs.TagControllerDocs;
-import shop.chaekmate.core.book.dto.CreateTagRequest;
-import shop.chaekmate.core.book.dto.CreateTagResponse;
-import shop.chaekmate.core.book.dto.TagResponse;
-import shop.chaekmate.core.book.dto.UpdateTagRequest;
-import shop.chaekmate.core.book.dto.UpdateTagResponse;
+import shop.chaekmate.core.book.dto.request.CreateTagRequest;
+import shop.chaekmate.core.book.dto.response.CreateTagResponse;
+import shop.chaekmate.core.book.dto.response.TagResponse;
+import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
+import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
 import shop.chaekmate.core.book.service.TagService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
+@RequiredArgsConstructor
 public class TagController implements TagControllerDocs {
 
     private final TagService tagService;
-
-    public TagController(TagService tagService) {
-        this.tagService = tagService;
-    }
 
     @PostMapping("/admin/tags")
     public ResponseEntity<CreateTagResponse> createTag(@Valid @RequestBody CreateTagRequest createTagRequest) {

@@ -19,9 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import shop.chaekmate.core.book.dto.CreateLikeRequest;
-import shop.chaekmate.core.book.dto.DeleteLikeRequest;
-import shop.chaekmate.core.book.dto.LikeResponse;
+import shop.chaekmate.core.book.dto.request.CreateLikeRequest;
+import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
+import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
 import shop.chaekmate.core.book.repository.BookRepository;
@@ -76,7 +76,7 @@ class LikeServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(likeId);
         assertThat(response.bookId()).isEqualTo(bookId);
-        assertThat(response.memeberId()).isEqualTo(memberId);
+        assertThat(response.memberId()).isEqualTo(memberId);
     }
 
     @Test
@@ -103,7 +103,7 @@ class LikeServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(likeId);
         assertThat(response.bookId()).isEqualTo(bookId);
-        assertThat(response.memeberId()).isEqualTo(memberId);
+        assertThat(response.memberId()).isEqualTo(memberId);
     }
 
     @Test
@@ -166,7 +166,7 @@ class LikeServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).memeberId()).isEqualTo(memberId);
+        assertThat(responses.get(0).memberId()).isEqualTo(memberId);
     }
 
     @Test

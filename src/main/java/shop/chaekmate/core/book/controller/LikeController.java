@@ -11,19 +11,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import shop.chaekmate.core.book.controller.docs.LikeControllerDocs;
-import shop.chaekmate.core.book.dto.CreateLikeRequest;
-import shop.chaekmate.core.book.dto.DeleteLikeRequest;
-import shop.chaekmate.core.book.dto.LikeResponse;
+import shop.chaekmate.core.book.dto.request.CreateLikeRequest;
+import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
+import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.service.LikeService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
+@RequiredArgsConstructor
 public class LikeController implements LikeControllerDocs {
 
     private final LikeService likeService;
-
-    public LikeController(LikeService likeService) {
-        this.likeService = likeService;
-    }
 
     @PostMapping("/books/{bookId}/likes")
     public ResponseEntity<LikeResponse> createLike(@PathVariable Long bookId,

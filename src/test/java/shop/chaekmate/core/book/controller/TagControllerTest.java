@@ -17,14 +17,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import shop.chaekmate.core.book.dto.CreateTagRequest;
-import shop.chaekmate.core.book.dto.UpdateTagRequest;
+import shop.chaekmate.core.book.dto.request.CreateTagRequest;
+import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.entity.Tag;
 import shop.chaekmate.core.book.repository.TagRepository;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @Transactional
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 class TagControllerTest {
 

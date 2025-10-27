@@ -21,7 +21,6 @@ import lombok.AllArgsConstructor;
 @Table(name = "book")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
-@AllArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE book SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class Book extends BaseEntity {

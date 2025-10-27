@@ -17,10 +17,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import shop.chaekmate.core.book.dto.CreateCategoryRequest;
-import shop.chaekmate.core.book.dto.ReadAllCategoriesResponse;
-import shop.chaekmate.core.book.dto.ReadCategoryResponse;
-import shop.chaekmate.core.book.dto.UpdateCategoryRequest;
+import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
+import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
+import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.entity.Category;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 

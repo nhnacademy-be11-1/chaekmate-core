@@ -1,4 +1,4 @@
-package shop.chaekmate.core.book.dto;
+package shop.chaekmate.core.book.dto.response;
 
 import java.util.ArrayList;
 import java.util.List;

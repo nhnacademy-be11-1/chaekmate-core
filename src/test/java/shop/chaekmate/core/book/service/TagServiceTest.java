@@ -17,9 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import shop.chaekmate.core.book.dto.CreateTagRequest;
-import shop.chaekmate.core.book.dto.TagResponse;
-import shop.chaekmate.core.book.dto.UpdateTagRequest;
+import shop.chaekmate.core.book.dto.request.CreateTagRequest;
+import shop.chaekmate.core.book.dto.response.TagResponse;
+import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.entity.Tag;
 import shop.chaekmate.core.book.repository.TagRepository;
 

@@ -7,19 +7,19 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import shop.chaekmate.core.book.dto.CreateCategoryRequest;
-import shop.chaekmate.core.book.dto.CreateCategoryResponse;
-import shop.chaekmate.core.book.dto.ReadAllCategoriesResponse;
-import shop.chaekmate.core.book.dto.ReadCategoryResponse;
-import shop.chaekmate.core.book.dto.UpdateCategoryRequest;
-import shop.chaekmate.core.book.dto.UpdateCategoryResponse;
+import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
+import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
+import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
+import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
+import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
 import shop.chaekmate.core.book.entity.Category;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
-    
+
     private final CategoryRepository categoryRepository;
 
     @Transactional
@@ -84,12 +84,12 @@ public class CategoryService {
                     .orElseThrow(() -> new RuntimeException("해당 ID의 부모 카테고리를 찾을 수 없습니다"));
         }
 
-        targetCategory.setName(request.name());
-        targetCategory.setParentCategory(parentCategory);
+        targetCategory.updateCategory(parentCategory, request.name());
 
         categoryRepository.save(targetCategory);
 
-        Long responseParentId = (targetCategory.getParentCategory() != null) ? targetCategory.getParentCategory().getId() : null;
+        Long responseParentId =
+                (targetCategory.getParentCategory() != null) ? targetCategory.getParentCategory().getId() : null;
 
         return new UpdateCategoryResponse(targetCategory.getId(), responseParentId,
                 targetCategory.getName());

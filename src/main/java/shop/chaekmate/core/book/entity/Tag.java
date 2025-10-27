@@ -27,11 +27,14 @@ public class Tag extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Setter
     @Column(nullable = false)
     private String name;
 
     public Tag(String name) {
+        this.name = name;
+    }
+
+    public void updateName(String name) {
         this.name = name;
     }
 }

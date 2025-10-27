@@ -13,22 +13,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import shop.chaekmate.core.book.controller.docs.CategoryControllerDocs;
-import shop.chaekmate.core.book.dto.CreateCategoryRequest;
-import shop.chaekmate.core.book.dto.CreateCategoryResponse;
-import shop.chaekmate.core.book.dto.ReadAllCategoriesResponse;
-import shop.chaekmate.core.book.dto.ReadCategoryResponse;
-import shop.chaekmate.core.book.dto.UpdateCategoryRequest;
-import shop.chaekmate.core.book.dto.UpdateCategoryResponse;
+import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
+import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
+import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
+import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
+import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
 import shop.chaekmate.core.book.service.CategoryService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
+@RequiredArgsConstructor
 public class CategoryController implements CategoryControllerDocs {
 
     private final CategoryService categoryService;
-
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     @PostMapping("/admin/categories")
     public ResponseEntity<CreateCategoryResponse> createCategory(

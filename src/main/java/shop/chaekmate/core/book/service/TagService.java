@@ -3,22 +3,21 @@ package shop.chaekmate.core.book.service;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import shop.chaekmate.core.book.dto.CreateTagRequest;
-import shop.chaekmate.core.book.dto.CreateTagResponse;
-import shop.chaekmate.core.book.dto.TagResponse;
-import shop.chaekmate.core.book.dto.UpdateTagRequest;
-import shop.chaekmate.core.book.dto.UpdateTagResponse;
+import shop.chaekmate.core.book.dto.request.CreateTagRequest;
+import shop.chaekmate.core.book.dto.response.CreateTagResponse;
+import shop.chaekmate.core.book.dto.response.TagResponse;
+import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
+import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
 import shop.chaekmate.core.book.entity.Tag;
 import shop.chaekmate.core.book.repository.TagRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class TagService {
 
     private final TagRepository tagRepository;
-
-    public TagService(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
-    }
 
     @Transactional
     public CreateTagResponse createTag(CreateTagRequest request) {
@@ -56,7 +55,7 @@ public class TagService {
 
         Tag targetTag = tagRepository.findById(targetId)
                 .orElseThrow(() -> new RuntimeException("해당하는 Id 의 Tag 를 찾을 수 없습니다."));
-        targetTag.setName(request.name());
+        targetTag.updateName(request.name());
         tagRepository.save(targetTag);
 
         return new UpdateTagResponse(targetTag.getId(), targetTag.getName());

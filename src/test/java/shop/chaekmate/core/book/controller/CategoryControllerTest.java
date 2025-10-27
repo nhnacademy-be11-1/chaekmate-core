@@ -17,14 +17,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import shop.chaekmate.core.book.dto.CreateCategoryRequest;
-import shop.chaekmate.core.book.dto.UpdateCategoryRequest;
+import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.entity.Category;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @Transactional
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 class CategoryControllerTest {
 

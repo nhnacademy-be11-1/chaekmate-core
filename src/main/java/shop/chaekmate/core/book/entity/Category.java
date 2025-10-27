@@ -30,16 +30,19 @@ public class Category extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
 
-    @Setter
     @Column(nullable = false)
     private String name;
 
     public Category(Category parentCategory, String name){
+        this.parentCategory = parentCategory;
+        this.name = name;
+    }
+
+    public void updateCategory(Category parentCategory, String name) {
         this.parentCategory = parentCategory;
         this.name = name;
     }

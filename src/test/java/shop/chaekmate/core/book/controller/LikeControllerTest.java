@@ -19,8 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import shop.chaekmate.core.book.dto.CreateLikeRequest;
-import shop.chaekmate.core.book.dto.DeleteLikeRequest;
+import shop.chaekmate.core.book.dto.request.CreateLikeRequest;
+import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
 import shop.chaekmate.core.book.repository.BookRepository;
@@ -30,8 +30,8 @@ import shop.chaekmate.core.member.entity.type.PlatformType;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @Transactional
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 class LikeControllerTest {
 
@@ -69,7 +69,7 @@ class LikeControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.bookId").value(book.getId()))
-                .andExpect(jsonPath("$.memeberId").value(member.getId()));
+                .andExpect(jsonPath("$.memberId").value(member.getId()));
     }
 
     @Test
@@ -96,7 +96,7 @@ class LikeControllerTest {
 
         mockMvc.perform(get("/members/{memberId}/likes", member.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].memeberId").value(member.getId()));
+                .andExpect(jsonPath("$[0].memberId").value(member.getId()));
     }
 
     @Test
