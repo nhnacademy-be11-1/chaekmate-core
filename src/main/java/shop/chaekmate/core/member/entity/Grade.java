@@ -33,7 +33,7 @@ public class Grade extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
-    private int pointRate;
+    private Byte pointRate;
 
     @Column(nullable = false)
     private int upgradeStandardAmount; // 승급 기준 금액

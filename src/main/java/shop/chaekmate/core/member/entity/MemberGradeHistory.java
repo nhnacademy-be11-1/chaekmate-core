@@ -1,4 +1,4 @@
-package shop.chaekmate.core.order.entity;
+package shop.chaekmate.core.member.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -9,9 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -19,28 +18,31 @@ import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
 @Getter
-@Table(name = "payment_history")
+@Table(name = "member_grade_history")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE payment_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE member_grade_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
-public class PaymentHistory extends BaseEntity {
+public class MemberGradeHistory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
-    private Long issuedCouponId;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "grade_id", nullable = false)
+    private Grade grade;
 
-    private Long pointAmount;
+    @Column(length = 100, nullable = false)
+    private String reason;
 
-    @Column(nullable = false)
-    private long totalAmount;
-
-    @Column(nullable = false)
-    private LocalDateTime paymentAt;
+    public MemberGradeHistory(Member member, Grade grade, String reason) {
+        this.member = member;
+        this.grade = grade;
+        this.reason = reason;
+    }
 }

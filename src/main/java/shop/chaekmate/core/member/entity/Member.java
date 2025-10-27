@@ -37,10 +37,6 @@ public class Member extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "grade_id", nullable = false)
-    private Grade grade;
-
     @Column(length = 20, unique = true, nullable = false)
     private String loginId;
 
@@ -65,11 +61,7 @@ public class Member extends BaseEntity {
     @Column(length = 20, nullable = false)
     private PlatformType platformType;
 
-    @Column(nullable = false)
-    private long point;
-
-    public Member(Grade grade, String loginId, String password, String name, String phone, String email, LocalDate birthDate, PlatformType platformType, long point) {
-        this.grade = grade;
+    public Member(String loginId, String password, String name, String phone, String email, LocalDate birthDate, PlatformType platformType) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
@@ -77,6 +69,5 @@ public class Member extends BaseEntity {
         this.email = email;
         this.birthDate = birthDate;
         this.platformType = platformType;
-        this.point = point;
     }
 }

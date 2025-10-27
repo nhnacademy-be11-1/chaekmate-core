@@ -1,10 +1,16 @@
 package shop.chaekmate.core.coupon.entity.type;
 
-public enum CouponType {
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-    WELCOME,
-    BIRTHDAY,
-    BOOK,
-    CATEGORY,
+@Getter
+@RequiredArgsConstructor
+public enum CouponType {
+    WELCOME("웰컴"),
+    BIRTHDAY("생일"),
+    BOOK("도서"),
+    CATEGORY("카테고리"),
     ;
+
+    private final String name;
 }

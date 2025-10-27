@@ -13,7 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -48,7 +48,7 @@ public class Order extends BaseEntity {
     private String address;
 
     @Column(nullable = false)
-    private LocalDate deliveryDate;
+    private LocalDateTime deliveryAt;
 
     @Column(nullable = false)
     private int deliveryFee;

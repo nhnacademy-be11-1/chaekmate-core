@@ -45,7 +45,7 @@ public class Book extends BaseEntity {
     @Column(length = 300)
     private String publisher;
 
-    private LocalDateTime publicationDatetime;
+    private LocalDateTime publishedAt;
 
     @Column(length = 13, nullable = false)
     private String isbn;
@@ -68,13 +68,15 @@ public class Book extends BaseEntity {
     @Column(nullable = false)
     private int stock;
 
-    public Book(String title, String index, String description, String author, String publisher, LocalDateTime publicationDatetime, String isbn, int price, int salesPrice, boolean isWrappable, long views, boolean isSaleEnd, int stock) {
+    public Book(String title, String index, String description, String author, String publisher,
+                LocalDateTime publishedAt, String isbn, int price, int salesPrice, boolean isWrappable,
+                long views, boolean isSaleEnd, int stock) {
         this.title = title;
         this.index = index;
         this.description = description;
         this.author = author;
         this.publisher = publisher;
-        this.publicationDatetime = publicationDatetime;
+        this.publishedAt = publishedAt;
         this.isbn = isbn;
         this.price = price;
         this.salesPrice = salesPrice;

@@ -25,10 +25,8 @@ import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
 import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.book.repository.LikeRepository;
-import shop.chaekmate.core.member.entity.Grade;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.type.PlatformType;
-import shop.chaekmate.core.member.repository.GradeRepository;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
 @SpringBootTest
@@ -47,18 +45,14 @@ class LikeControllerTest {
     private MemberRepository memberRepository;
     @Autowired
     private BookRepository bookRepository;
-    @Autowired
-    private GradeRepository gradeRepository;
 
     private Member member;
     private Book book;
-    private Grade grade;
 
     @BeforeEach
     void setUp() {
-        grade = gradeRepository.save(new Grade("test-grade"));
-        Member newMember = new Member(grade, "test-login-id", "test-password", "test-name", "010-1234-5678",
-                "test@email.com", LocalDate.now(), PlatformType.LOCAL, 0L);
+        Member newMember = new Member("test-login-id", "test-password", "test-name", "010-1234-5678", "test@email.com",
+                LocalDate.now(), PlatformType.LOCAL);
         member = memberRepository.save(newMember);
 
         Book newBook = new Book("Test Book", "index", "description", "author", "publisher", LocalDateTime.now(),

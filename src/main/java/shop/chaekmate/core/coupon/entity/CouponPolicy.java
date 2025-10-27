@@ -27,7 +27,6 @@ import shop.chaekmate.core.coupon.entity.type.DiscountType;
 @SQLDelete(sql = "UPDATE coupon_policy SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class CouponPolicy extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
@@ -38,8 +37,6 @@ public class CouponPolicy extends BaseEntity {
     @Enumerated(value = STRING)
     @Column(length = 50, nullable = false)
     private CouponType type;
-
-    private Long couponAppliedTargetId;
 
     @Enumerated(value = STRING)
     @Column(length = 50, nullable = false)
@@ -56,10 +53,60 @@ public class CouponPolicy extends BaseEntity {
     @Column(nullable = false)
     private int discountValue;
 
+    @Column(nullable = false)
     private Integer minAvailableAmount;
 
+    @Column(nullable = false)
     private Long maxAppliedAmount;
 
     @Column(nullable = false)
     private long remainingQuantity;
+
+    public CouponPolicy(
+            String name,
+            CouponType type,
+            CouponAppliedPeriodType appliedPeriodType,
+            LocalDateTime appliedStartedAt,
+            LocalDateTime appliedExpiredAt,
+            DiscountType discountType,
+            int discountValue,
+            Integer minAvailableAmount,
+            Long maxAppliedAmount,
+            long remainingQuantity
+    ) {
+        this.name = name;
+        this.type = type;
+        this.appliedPeriodType = appliedPeriodType;
+        this.appliedStartedAt = appliedStartedAt;
+        this.appliedExpiredAt = appliedExpiredAt;
+        this.discountType = discountType;
+        this.discountValue = discountValue;
+        this.minAvailableAmount = minAvailableAmount;
+        this.maxAppliedAmount = maxAppliedAmount;
+        this.remainingQuantity = remainingQuantity;
+    }
+
+    public void update(
+            String name,
+            CouponType type,
+            CouponAppliedPeriodType appliedPeriodType,
+            LocalDateTime appliedStartedAt,
+            LocalDateTime appliedExpiredAt,
+            DiscountType discountType,
+            int discountValue,
+            Integer minAvailableAmount,
+            Long maxAppliedAmount,
+            long remainingQuantity
+    ) {
+        this.name = name;
+        this.type = type;
+        this.appliedPeriodType = appliedPeriodType;
+        this.appliedStartedAt = appliedStartedAt;
+        this.appliedExpiredAt = appliedExpiredAt;
+        this.discountType = discountType;
+        this.discountValue = discountValue;
+        this.minAvailableAmount = minAvailableAmount;
+        this.maxAppliedAmount = maxAppliedAmount;
+        this.remainingQuantity = remainingQuantity;
+    }
 }

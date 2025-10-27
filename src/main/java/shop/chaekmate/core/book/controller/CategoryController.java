@@ -19,8 +19,10 @@ import shop.chaekmate.core.book.dto.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.UpdateCategoryResponse;
 import shop.chaekmate.core.book.service.CategoryService;
 
+import shop.chaekmate.core.book.controller.docs.CategoryControllerDocs;
+
 @RestController
-public class CategoryController {
+public class CategoryController implements CategoryControllerDocs {
 
     private final CategoryService categoryService;
 

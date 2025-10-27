@@ -15,8 +15,10 @@ import shop.chaekmate.core.book.dto.DeleteLikeRequest;
 import shop.chaekmate.core.book.dto.LikeResponse;
 import shop.chaekmate.core.book.service.LikeService;
 
+import shop.chaekmate.core.book.controller.docs.LikeControllerDocs;
+
 @RestController
-public class LikeController {
+public class LikeController implements LikeControllerDocs {
 
     private final LikeService likeService;
 

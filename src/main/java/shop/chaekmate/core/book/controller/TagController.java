@@ -18,8 +18,10 @@ import shop.chaekmate.core.book.dto.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.UpdateTagResponse;
 import shop.chaekmate.core.book.service.TagService;
 
+import shop.chaekmate.core.book.controller.docs.TagControllerDocs;
+
 @RestController
-public class TagController {
+public class TagController implements TagControllerDocs {
 
     private final TagService tagService;
 

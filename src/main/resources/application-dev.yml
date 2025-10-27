@@ -14,19 +14,17 @@ spring:
       validation-timeout: 5000
 
   jpa:
-    database-platform: org.hibernate.dialect.MySQL8Dialect # MySQL과 똑같이동작
     hibernate:
       # create , update 금지
-      ddl-auto: none # validate 로 수정 (전체 entity  수정 후)
+      ddl-auto: validate # validate 로 수정 (전체 entity  수정 후)
     show-sql: true
     properties:
       hibernate:
-        auto_quote_keyword: true
-        globally_quoted_identifiers: true
         format_sql: true
         use_sql_comments: true
         highlight_sql: true
     open-in-view: false
+    database-platform: org.hibernate.dialect.MySQL8Dialect
 
 logging:
   level:

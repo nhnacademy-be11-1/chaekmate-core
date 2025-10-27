@@ -34,6 +34,6 @@ public class PointPolicy extends BaseEntity {
     @Column(length = 20, nullable = false)
     private PointPolicyType type;
 
-    @Column(name = "`value`", nullable = false)
-    private int value;
+    @Column(name = "`number`", nullable = false)
+    private int number;
 }

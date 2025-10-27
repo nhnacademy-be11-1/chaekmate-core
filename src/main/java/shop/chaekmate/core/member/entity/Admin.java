@@ -30,5 +30,5 @@ public class Admin extends BaseEntity {
     private String adminLoginId;
 
     @Column(length = 100, nullable = false)
-    private String password;
+    private String adminPassword;
 }

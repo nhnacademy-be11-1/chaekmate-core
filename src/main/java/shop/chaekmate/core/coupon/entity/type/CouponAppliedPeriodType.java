@@ -1,9 +1,15 @@
 package shop.chaekmate.core.coupon.entity.type;
 
-public enum CouponAppliedPeriodType {
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-    THIRTY_DAYS,
-    MONTH_LAST_DAY,
-    CUSTOM_PERIOD,
+@Getter
+@RequiredArgsConstructor
+public enum CouponAppliedPeriodType {
+    THIRTY_DAYS("30일"),
+    MONTH_LAST_DAY("월말일"),
+    CUSTOM_PERIOD("특정기간"),
     ;
+
+    private final String name;
 }

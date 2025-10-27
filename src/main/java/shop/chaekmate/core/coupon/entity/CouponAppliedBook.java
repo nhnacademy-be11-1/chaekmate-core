@@ -1,4 +1,4 @@
-package shop.chaekmate.core.order.entity;
+package shop.chaekmate.core.coupon.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -9,9 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -19,28 +18,25 @@ import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
 @Getter
-@Table(name = "payment_history")
+@Table(name = "coupon_applied_book")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE payment_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE coupon_applied_book SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
-public class PaymentHistory extends BaseEntity {
-
+public class CouponAppliedBook extends BaseEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
-
-    private Long issuedCouponId;
-
-    private Long pointAmount;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "coupon_policy_id", nullable = false)
+    private CouponPolicy couponPolicy;
 
     @Column(nullable = false)
-    private long totalAmount;
+    private long bookId;
 
-    @Column(nullable = false)
-    private LocalDateTime paymentAt;
+    public CouponAppliedBook(CouponPolicy couponPolicy, long bookId) {
+        this.couponPolicy = couponPolicy;
+        this.bookId = bookId;
+    }
 }

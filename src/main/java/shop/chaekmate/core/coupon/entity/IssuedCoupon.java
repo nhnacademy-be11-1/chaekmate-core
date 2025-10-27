@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
-import shop.chaekmate.core.member.entity.Member;
 
 @Getter
 @Table(name = "issued_coupon")
@@ -26,14 +25,12 @@ import shop.chaekmate.core.member.entity.Member;
 @SQLDelete(sql = "UPDATE issued_coupon SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class IssuedCoupon extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @Column(nullable = false)
+    private long memberId;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "coupon_policy_id", nullable = false)
