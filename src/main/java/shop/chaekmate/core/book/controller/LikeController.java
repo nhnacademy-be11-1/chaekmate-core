@@ -1,6 +1,6 @@
 package shop.chaekmate.core.book.controller;
 
-import jakarta.validation.Valid;
+
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -8,14 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import shop.chaekmate.core.book.controller.docs.LikeControllerDocs;
 import shop.chaekmate.core.book.dto.CreateLikeRequest;
 import shop.chaekmate.core.book.dto.DeleteLikeRequest;
 import shop.chaekmate.core.book.dto.LikeResponse;
 import shop.chaekmate.core.book.service.LikeService;
-
-import shop.chaekmate.core.book.controller.docs.LikeControllerDocs;
 
 @RestController
 public class LikeController implements LikeControllerDocs {
@@ -26,54 +25,37 @@ public class LikeController implements LikeControllerDocs {
         this.likeService = likeService;
     }
 
-    // 특정 책, 특정 회원 좋아요 생성
-    @PostMapping(path = "/books/{bookId}/likes")
-    @ResponseStatus(HttpStatus.CREATED)
-    public LikeResponse createLike(@PathVariable(name = "bookId") Long bookId,
-                                   @Valid @RequestBody CreateLikeRequest createLikeRequest) {
-
-        return likeService.createLike(bookId, createLikeRequest);
+    @PostMapping("/books/{bookId}/likes")
+    public ResponseEntity<LikeResponse> createLike(@PathVariable Long bookId,
+                                                   @RequestBody CreateLikeRequest createLikeRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(likeService.createLike(bookId, createLikeRequest));
     }
 
-    // 식별자로 좋아요 조회
-    @GetMapping(path = "/likes/{likeId}")
-    @ResponseStatus(HttpStatus.OK)
-    public LikeResponse readLike(@PathVariable(name = "likeId") Long likeId) {
-
-        return likeService.readLikeById(likeId);
+    @GetMapping("/likes/{likeId}")
+    public ResponseEntity<LikeResponse> readLike(@PathVariable(name = "likeId") Long likeId) {
+        return ResponseEntity.ok(likeService.readLikeById(likeId));
     }
 
-    // 특정 도서의 전체 Like 조회
-    @GetMapping(path = "/books/{bookId}/likes")
-    @ResponseStatus(HttpStatus.OK)
-    public List<LikeResponse> getBookLikes(@PathVariable(name = "bookId") Long bookId) {
-
-        return likeService.getBookLikes(bookId);
+    @GetMapping("/books/{bookId}/likes")
+    public ResponseEntity<List<LikeResponse>> getBookLikes(@PathVariable Long bookId) {
+        return ResponseEntity.ok(likeService.getBookLikes(bookId));
     }
 
-    // 특정 회원의 전체 Like 조회
-    @GetMapping(path = "/members/{memberId}/likes")
-    @ResponseStatus(HttpStatus.OK)
-    public List<LikeResponse> getMemberLikes(@PathVariable(name = "memberId") Long memberId) {
-
-        return likeService.getMemberLikes(memberId);
+    @GetMapping("/members/{memberId}/likes")
+    public ResponseEntity<List<LikeResponse>> getMemberLikes(@PathVariable Long memberId) {
+        return ResponseEntity.ok(likeService.getMemberLikes(memberId));
     }
 
-    // 식별자로 좋아요 삭제
-    @DeleteMapping(path = "/likes/{likeId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteLikeById(@PathVariable(name = "likeId") Long likeId) {
-
+    @DeleteMapping("/likes/{likeId}")
+    public ResponseEntity<Void> deleteLikeById(@PathVariable Long likeId) {
         likeService.deleteLikeById(likeId);
+        return ResponseEntity.noContent().build();
     }
 
-    // 회원의 특정 책 좋아요 취소
-    @DeleteMapping(path = "/books/{bookId}/likes")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteLikeByBookIdAndMemberId(@PathVariable(name = "bookId") Long bookId,
-                                              @RequestBody DeleteLikeRequest deleteLikeRequest) {
-
+    @DeleteMapping("/books/{bookId}/likes")
+    public ResponseEntity<Void> deleteLikeByBookIdAndMemberId(@PathVariable Long bookId,
+                                                              @RequestBody DeleteLikeRequest deleteLikeRequest) {
         likeService.deleteLikeByBookIdAndMemberId(bookId, deleteLikeRequest);
+        return ResponseEntity.noContent().build();
     }
-
 }
