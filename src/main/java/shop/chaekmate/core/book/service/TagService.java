@@ -24,6 +24,7 @@ public class TagService {
     public CreateTagResponse createTag(CreateTagRequest request) {
 
         // Find by 는 (soft delete가 적용 되지만, exists 는 count 쿼리라서 적용안됨)
+        // Tag name Unique 취급
         if (tagRepository.findByName(request.name()).isPresent()) {
             throw new RuntimeException(" 이미 존재하는 Tag 입니다.");
         }

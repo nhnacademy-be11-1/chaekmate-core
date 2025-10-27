@@ -18,13 +18,14 @@ spring:
       validation-timeout: 5000
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.MySQL8Dialect # MySQL과 똑같이동작
     hibernate:
-      ddl-auto: create-drop # 개발용: create / update / validate / none
-      globally_quoted_identifiers: true
+      ddl-auto: none # 개발용: create / update / validate / none
     show-sql: true
     properties:
       hibernate:
+        auto_quote_keyword: true
+        globally_quoted_identifiers: true
         format_sql: true
 
   # H2 콘솔 활성화 (개발용)

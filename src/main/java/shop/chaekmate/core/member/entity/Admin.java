@@ -27,7 +27,7 @@ public class Admin extends BaseEntity {
     private Long id;
 
     @Column(length = 100, nullable = false)
-    private String loginId;
+    private String adminLoginId;
 
     @Column(length = 100, nullable = false)
     private String password;

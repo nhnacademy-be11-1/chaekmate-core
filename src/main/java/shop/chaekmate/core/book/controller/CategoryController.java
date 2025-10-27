@@ -28,7 +28,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @PostMapping("/categories")
+    @PostMapping("/admin/categories")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateCategoryResponse createCategory(
             @Valid @RequestBody CreateCategoryRequest createCategoryRequest) {
@@ -50,7 +50,7 @@ public class CategoryController {
         return categoryService.readCategory(categoryId);
     }
 
-    @PutMapping("/categories/{id}")
+    @PutMapping("/admin/categories/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UpdateCategoryResponse updateCategory(
             @PathVariable(name = "id") Long categoryId,
