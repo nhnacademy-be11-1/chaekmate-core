@@ -1,0 +1,52 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:devdb;MODE=MYSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    # HikariCP 설정 (커넥션 풀)
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop # 개발용: create / update / validate / none
+      globally_quoted_identifiers: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # H2 콘솔 활성화 (개발용)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+
+
+# 현실적 검증 설정
+# javax.validation 기반 Bean Validation
+validation:
+  fail-fast: true # 첫 번째 에러 발생 시 바로 예외 발생
+
+# 커넥션 체크용 빈 예시
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  health:
+    db:
+      enabled: true
+      show-details: always
