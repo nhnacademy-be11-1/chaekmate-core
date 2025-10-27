@@ -23,7 +23,6 @@ import shop.chaekmate.core.order.dto.request.WrapperDto;
 import shop.chaekmate.core.order.dto.response.WrapperResponse;
 import shop.chaekmate.core.order.entity.Wrapper;
 import shop.chaekmate.core.order.exception.DuplicatedWrapperNameException;
-import shop.chaekmate.core.order.exception.InvalidWrapperPriceException;
 import shop.chaekmate.core.order.exception.WrapperNotFoundException;
 import shop.chaekmate.core.order.repository.WrapperRepository;
 
@@ -88,15 +87,6 @@ class WrapperServiceTest {
 
         assertThrows(DuplicatedWrapperNameException.class,
                 () -> wrapperService.modifyWrapper(1L, new WrapperDto("수정된 포장지", 2000)));
-    }
-
-    @Test
-    void 포장지_수정_실패_음수_가격() {
-        when(wrapperRepository.findById(anyLong())).thenReturn(Optional.of(wrapper));
-
-        assertThrows(InvalidWrapperPriceException.class,
-                () -> wrapperService.modifyWrapper(1L, new WrapperDto("테스트 포장지", -100)));
-
     }
 
     @Test

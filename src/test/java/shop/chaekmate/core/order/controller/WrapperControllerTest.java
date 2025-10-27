@@ -40,7 +40,7 @@ class WrapperControllerTest {
     void 포장지_등록_성공() throws Exception {
         WrapperRequest request = new WrapperRequest("테스트 포장지", 1000);
 
-        mockMvc.perform(post("/wrappers/admin")
+        mockMvc.perform(post("/admin/wrappers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -54,7 +54,7 @@ class WrapperControllerTest {
         Wrapper wrapper = wrapperRepository.save(new Wrapper("테스트 포장지", 1000));
         WrapperRequest request = new WrapperRequest("수정된 포장지", 2000);
 
-        mockMvc.perform(put("/wrappers/admin/{id}", wrapper.getId())
+        mockMvc.perform(put("/admin/wrappers/{id}", wrapper.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -66,7 +66,7 @@ class WrapperControllerTest {
     void 포장지_삭제_성공() throws Exception {
         Wrapper wrapper = wrapperRepository.save(new Wrapper("테스트 포장지", 1000));
 
-        mockMvc.perform(delete("/wrappers/admin/{id}", wrapper.getId()))
+        mockMvc.perform(delete("/admin/wrappers/{id}", wrapper.getId()))
                 .andExpect(status().isNoContent());
 
         Optional<Wrapper> deleteWrapper = wrapperRepository.findById(wrapper.getId());
@@ -97,5 +97,4 @@ class WrapperControllerTest {
                 .andExpect(jsonPath("$[*].price").value(org.hamcrest.Matchers.containsInAnyOrder(wrapper1.getPrice(),
                         wrapper2.getPrice())));
     }
-
 }

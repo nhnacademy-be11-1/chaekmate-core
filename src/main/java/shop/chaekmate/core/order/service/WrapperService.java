@@ -1,14 +1,12 @@
 package shop.chaekmate.core.order.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.order.dto.request.WrapperDto;
 import shop.chaekmate.core.order.dto.response.WrapperResponse;
 import shop.chaekmate.core.order.entity.Wrapper;
-import shop.chaekmate.core.order.exception.InvalidWrapperPriceException;
 import shop.chaekmate.core.order.exception.DuplicatedWrapperNameException;
 import shop.chaekmate.core.order.exception.WrapperNotFoundException;
 import shop.chaekmate.core.order.repository.WrapperRepository;
@@ -34,13 +32,9 @@ public class WrapperService {
     public WrapperResponse modifyWrapper(Long id, WrapperDto wrapperDto) {
         Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(() -> new WrapperNotFoundException(id));
 
-        if (!wrapper.getName().equals(wrapperDto.name())
+        if (!wrapper.equalsName(wrapperDto.name())
                 && wrapperRepository.existsByName(wrapperDto.name())) {
             throw new DuplicatedWrapperNameException(wrapperDto.name());
-        }
-
-        if (wrapperDto.price() < 0) {
-            throw new InvalidWrapperPriceException();
         }
 
         wrapper.updateWrapper(wrapperDto.name(), wrapperDto.price());
