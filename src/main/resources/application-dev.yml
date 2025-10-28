@@ -5,18 +5,43 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+    # HikariCP 설정 (커넥션 풀)
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
+
   jpa:
     hibernate:
-      ddl-auto: none # validate 로 수정 (전체 entity  수정 후)
+      # create , update 금지
+      ddl-auto: validate # validate 로 수정 (전체 entity  수정 후)
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
         use_sql_comments: true
         highlight_sql: true
-        auto_quote_keyword: true
     open-in-view: false
+    database-platform: org.hibernate.dialect.MySQL8Dialect
 
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
+# javax.validation 기반 Bean Validation
+validation:
+  fail-fast: true # 첫 번째 에러 발생 시 바로 예외 발생
+
+# Spring Boot Actuator 서버 상태(헬스) 모니터링
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  health:
+    db:
+      enabled: true
+      show-details: always

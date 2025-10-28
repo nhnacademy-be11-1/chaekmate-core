@@ -29,21 +29,21 @@ public class Book extends BaseEntity {
     @Column(length = 250, nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "`index`", columnDefinition = "TEXT")
     private String index;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "`description`", columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 300, nullable = false)
     private String author;
 
-    @Column(length = 100)
+    @Column(length = 300)
     private String publisher;
 
     private LocalDateTime publishedAt;
 
-    @Column(nullable = false)
+    @Column(length = 13, nullable = false)
     private String isbn;
 
     @Column(nullable = false)

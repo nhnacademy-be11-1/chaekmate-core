@@ -11,13 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
-import shop.chaekmate.core.coupon.entity.IssuedCoupon;
 
 @Getter
 @Table(name = "payment_history")
@@ -43,5 +42,5 @@ public class PaymentHistory extends BaseEntity {
     private long totalAmount;
 
     @Column(nullable = false)
-    private LocalDate paymentDate;
+    private LocalDateTime paymentAt;
 }

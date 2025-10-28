@@ -1,7 +1,6 @@
 package shop.chaekmate.core.member.entity;
 
 import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -10,8 +9,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,10 +19,13 @@ import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 
+import lombok.AllArgsConstructor;
+
 @Getter
 @Table(name = "member")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE member SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class Member extends BaseEntity {
@@ -33,10 +33,6 @@ public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "grade_id", nullable = false)
-    private Grade grade;
 
     @Column(length = 20, unique = true, nullable = false)
     private String loginId;
@@ -62,6 +58,14 @@ public class Member extends BaseEntity {
     @Column(length = 20, nullable = false)
     private PlatformType platformType;
 
-    @Column(nullable = false)
-    private long point;
+    public Member(String loginId, String password, String name, String phone, String email, LocalDate birthDate,
+                  PlatformType platformType) {
+        this.loginId = loginId;
+        this.password = password;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.birthDate = birthDate;
+        this.platformType = platformType;
+    }
 }

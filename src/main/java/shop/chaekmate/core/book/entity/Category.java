@@ -3,6 +3,7 @@ package shop.chaekmate.core.book.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
@@ -28,4 +29,14 @@ public class Category extends BaseEntity {
 
     @Column(nullable = false)
     private String name;
+
+    public Category(Category parentCategory, String name){
+        this.parentCategory = parentCategory;
+        this.name = name;
+    }
+
+    public void updateCategory(Category parentCategory, String name) {
+        this.parentCategory = parentCategory;
+        this.name = name;
+    }
 }
