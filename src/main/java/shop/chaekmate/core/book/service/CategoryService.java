@@ -25,11 +25,6 @@ public class CategoryService {
     @Transactional
     public CreateCategoryResponse createCategory(CreateCategoryRequest request) {
 
-        if (request.parentCategoryId() != null
-                && categoryRepository.findById(request.parentCategoryId()).isEmpty()) {
-            throw new RuntimeException("해당하는 Id의 Parent Category를 찾을 수 없음");
-        }
-
         if (request.name() == null) {
             throw new RuntimeException("Category Name 이 Null 입니다.");
         }
@@ -37,7 +32,8 @@ public class CategoryService {
         Category parentCategory = null; // request.parentCategoryId 가 null 일때
 
         if (request.parentCategoryId() != null) {
-            parentCategory = categoryRepository.findById(request.parentCategoryId()).get();
+            parentCategory = categoryRepository.findById(request.parentCategoryId())
+                    .orElseThrow(() -> new RuntimeException("해당하는 ID의 부모 카테고리를 찾을 수 없습니다."));
         }
 
         Category category = new Category(parentCategory, request.name());
@@ -57,11 +53,8 @@ public class CategoryService {
     @Transactional
     public ReadCategoryResponse readCategory(Long targetCategoryId) {
 
-        if (categoryRepository.findById(targetCategoryId).isEmpty()) {
-            throw new RuntimeException("해당하는 Id 의 Category를 찾을 수 없습니다.");
-        }
-
-        Category targetCategory = categoryRepository.findById(targetCategoryId).get();
+        Category targetCategory = categoryRepository.findById(targetCategoryId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 카테고리를 찾을 수 없습니다"));
 
         String parentCategoryName = "null";
         if (targetCategory.getParentCategory() != null) {
@@ -97,10 +90,9 @@ public class CategoryService {
 
     @Transactional
     public void deleteCategory(Long targetCategoryId) {
-        if (categoryRepository.findById(targetCategoryId).isEmpty()) {
-            throw new RuntimeException("해당하는 Id의 카테고리를 찾을 수 없습니다.");
-        }
-        Category targetCategory = categoryRepository.findById(targetCategoryId).get();
+        Category targetCategory = categoryRepository.findById(targetCategoryId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 카테고리를 찾을 수 없습니다"));
+
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
     }
 
