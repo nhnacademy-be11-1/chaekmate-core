@@ -38,13 +38,13 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, length = 21, nullable = false)
     private String number;
 
     @Column(length = 20, nullable = false)
     private String phone;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(length = 200, nullable = false)
     private String address;
 
     @Column(nullable = false)
