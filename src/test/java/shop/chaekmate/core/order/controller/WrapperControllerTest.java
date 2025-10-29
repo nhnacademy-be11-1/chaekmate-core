@@ -27,6 +27,7 @@ import shop.chaekmate.core.order.repository.WrapperRepository;
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class WrapperControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 

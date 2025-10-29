@@ -7,30 +7,30 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
-    //admin wrapper
+
     @Bean
-    public GroupedOpenApi adminWrapperApi() {
+    public GroupedOpenApi WrapperApi() {
         return GroupedOpenApi.builder()
-                .group("Admin Wrapper API")
+                .group("Wrapper API")
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
-                                .title("관리자 포장지 관리 API")
-                                .description("포장지 추가, 수정, 삭제 기능 (관리자용)")
+                                .title("포장지 관련 API")
+                                .description("포장지 추가, 수정, 삭제, 조회 기능")
                                 .version("v1.0")))
-                .pathsToMatch("/admin/wrappers/**")
+                .pathsToMatch("/admin/wrappers/**", "/wrappers/**")
                 .build();
     }
-    //user wrapper
+
     @Bean
-    public GroupedOpenApi wrapperApi() {
+    public GroupedOpenApi DeliveryPolicyApi() {
         return GroupedOpenApi.builder()
-                .group("User Wrapper API")
+                .group("Delivery-Policy API")
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
-                                .title("사용자 포장지 조회 API")
-                                .description("포장지 조회 기능 (사용자용)")
+                                .title("배달 정책 관련 API")
+                                .description("배달 정책 등록, 조회, 삭제(등록시 자동 삭제)")
                                 .version("v1.0")))
-                .pathsToMatch("/wrappers/**")
+                .pathsToMatch("/admin/delivery-policy/**","/delivery-policy/**")
                 .build();
     }
 

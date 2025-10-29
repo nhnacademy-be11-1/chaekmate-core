@@ -31,6 +31,7 @@ import shop.chaekmate.core.order.repository.WrapperRepository;
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class WrapperServiceTest {
+
     @Mock
     private WrapperRepository wrapperRepository;
 
@@ -61,8 +62,9 @@ class WrapperServiceTest {
     void 포장지_등록_실패_이름_중복() {
         when(wrapperRepository.existsByName(anyString())).thenReturn(true);
 
+        WrapperDto dto = new WrapperDto("테스트 포장지", 1000);
         assertThrows(DuplicatedWrapperNameException.class,
-                () -> wrapperService.createWrapper(new WrapperDto("테스트 포장지", 1000)));
+                () -> wrapperService.createWrapper(dto));
 
         verify(wrapperRepository, never()).save(any(Wrapper.class));
 
@@ -85,8 +87,9 @@ class WrapperServiceTest {
         when(wrapperRepository.findById(anyLong())).thenReturn(Optional.of(wrapper));
         when(wrapperRepository.existsByName(anyString())).thenReturn(true);
 
+        WrapperDto dto = new WrapperDto("수정된 포장지", 2000);
         assertThrows(DuplicatedWrapperNameException.class,
-                () -> wrapperService.modifyWrapper(1L, new WrapperDto("수정된 포장지", 2000)));
+                () -> wrapperService.modifyWrapper(1L, dto));
     }
 
     @Test
