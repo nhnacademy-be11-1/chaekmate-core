@@ -1,17 +1,16 @@
-package shop.chaekmate.core.order.entity;
+package shop.chaekmate.core.book.entity;
 
-import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -19,28 +18,21 @@ import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
 @Getter
-@Table(name = "payment_history")
+@Table(name = "book_image")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE payment_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE book_image SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
-public class PaymentHistory extends BaseEntity {
+public class BookImage extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
 
-    private Long issuedCouponId;
-
-    private Long pointAmount;
-
-    @Column(nullable = false)
-    private long totalAmount;
-
-    @Column(nullable = false)
-    private LocalDateTime paymentAt;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String imageUrl;
 }
