@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
     @Bean
-    public GroupedOpenApi WrapperApi() {
+    public GroupedOpenApi wrapperApi() {
         return GroupedOpenApi.builder()
                 .group("Wrapper API")
                 .addOpenApiCustomizer(openApi -> openApi
@@ -22,7 +22,7 @@ public class SwaggerConfig {
     }
 
     @Bean
-    public GroupedOpenApi DeliveryPolicyApi() {
+    public GroupedOpenApi deliveryPolicyApi() {
         return GroupedOpenApi.builder()
                 .group("Delivery-Policy API")
                 .addOpenApiCustomizer(openApi -> openApi
