@@ -51,6 +51,7 @@ public class BookController {
 
     @GetMapping
     public ResponseEntity<Page<BookResponse>> getBookList(
+            @RequestParam()
             @PageableDefault(size = 10, page = 0) Pageable pageable) {
         Page<BookResponse> page = bookService.getBookList(pageable);
 
