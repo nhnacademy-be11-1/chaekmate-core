@@ -1,5 +1,10 @@
 package shop.chaekmate.core.external.aladin;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum AladinSearchType {
     TITLE("Title"),
     AUTHOR("Author"),
@@ -8,12 +13,4 @@ public enum AladinSearchType {
     ;
 
     private final String value;
-
-    AladinSearchType(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
 }
