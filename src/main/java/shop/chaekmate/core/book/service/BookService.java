@@ -205,11 +205,7 @@ public class BookService {
     }
 
     @Transactional
-    public void registerFromAladin(Long adminId, AladinBookRegisterRequest request) {
-        if (!adminRepository.existsById(adminId)) {
-            throw new AdminNotFoundException("관리자를 찾을 수 없습니다: " + adminId);
-        }
-
+    public void registerFromAladin(AladinBookRegisterRequest request) {
         if (bookRepository.existsByIsbn(request.isbn())) {
             throw new IllegalArgumentException("이미 등록된 ISBN입니다: " + request.isbn());
         }

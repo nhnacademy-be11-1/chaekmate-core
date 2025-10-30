@@ -22,7 +22,7 @@ public class AdminAladinController {
     @GetMapping("/search")
     public ResponseEntity<Page<BookSearchResponse>> search(
             @RequestParam String query,
-            @RequestParam(defaultValue = "제목") AladinSearchType searchType,
+            @RequestParam(defaultValue = "Title") AladinSearchType searchType,
             @PageableDefault(size = 10, page = 0) Pageable pageable) {
 
         Page<BookSearchResponse> bookSearchResponses = bookService.searchFromAladin(query, searchType, pageable);
@@ -31,11 +31,9 @@ public class AdminAladinController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(
-            @RequestParam Long adminId,
-            @Valid @RequestBody AladinBookRegisterRequest request) {
+    public ResponseEntity<Void> register(@Valid @RequestBody AladinBookRegisterRequest request) {
 
-        bookService.registerFromAladin(adminId, request);
+        bookService.registerFromAladin(request);
 
         return ResponseEntity.ok().build();
     }

@@ -1,10 +1,10 @@
 package shop.chaekmate.core.external.aladin;
 
 public enum AladinSearchType {
-    TITLE("제목"),
-    AUTHOR("저자"),
-    PUBLISHER("출판사"),
-    TITLE_AUTHOR("제목+저자")
+    TITLE("Title"),
+    AUTHOR("Author"),
+    PUBLISHER("Publisher"),
+    TITLE_AUTHOR("Keyword")
     ;
 
     private final String value;
