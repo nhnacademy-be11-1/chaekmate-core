@@ -20,6 +20,7 @@ public class SwaggerConfig {
                 .pathsToMatch("/admin/wrappers/**")
                 .build();
     }
+
     //user wrapper
     @Bean
     public GroupedOpenApi wrapperApi() {
@@ -41,10 +42,10 @@ public class SwaggerConfig {
                 .group("Admin Tag API")
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
-                                .title("관리자 태그 관리 API")
+                                .title("태그 관리 API")
                                 .description("태그 추가, 수정, 삭제 기능 (관리자용)")
                                 .version("v1.0")))
-                .pathsToMatch("/admin/tags/**")
+                .pathsToMatch("/admin/tags/**", "/tags/**")
                 .build();
     }
 

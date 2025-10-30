@@ -24,7 +24,7 @@ spring:
         use_sql_comments: true
         highlight_sql: true
     open-in-view: false
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.MySQLDialect
 
 logging:
   level:
@@ -45,3 +45,5 @@ management:
     db:
       enabled: true
       show-details: always
+server:
+  port: 9100

@@ -51,8 +51,9 @@ class WrapperServiceTest {
 
         WrapperResponse response = wrapperService.createWrapper(new WrapperDto("테스트 포장지", 1000));
 
-        assertEquals("테스트 포장지", response.name());
-        assertEquals(1000, response.price());
+        assertNotNull(response);
+        assertAll(() -> assertEquals("테스트 포장지", response.name()),
+                () -> assertEquals(1000, response.price()));
 
         verify(wrapperRepository).save(any(Wrapper.class));
     }
@@ -75,6 +76,7 @@ class WrapperServiceTest {
 
         WrapperResponse response = wrapperService.modifyWrapper(1L, new WrapperDto("수정된 포장지", 3000));
 
+        assertNotNull(response);
         assertEquals("수정된 포장지", response.name());
         assertEquals(3000, response.price());
 
