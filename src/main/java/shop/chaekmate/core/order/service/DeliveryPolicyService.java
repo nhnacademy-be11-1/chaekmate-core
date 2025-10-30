@@ -40,7 +40,7 @@ public class DeliveryPolicyService {
     // 정책 내역 전체 조회
     @Transactional(readOnly = true)
     public Page<DeliveryPolicyHistoryResponse> getPolicyHistory(Pageable pageable) {
-        return deliveryPolicyRepository.findAllPolicy(pageable)
+        return deliveryPolicyRepository.findAllByOrderByCreatedAtDesc(pageable)
                 .map(policy -> new DeliveryPolicyHistoryResponse(
                         policy.getId(),
                         policy.getFreeStandardAmount(),

@@ -1,8 +1,9 @@
 package shop.chaekmate.core.order.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,10 +56,14 @@ class DeliveryPolicyServiceTest {
         DeliveryPolicyResponse response = deliveryPolicyService.createPolicy(
                 new DeliveryPolicyDto(deliveryPolicy.getFreeStandardAmount(), deliveryPolicy.getDeliveryFee()));
 
-        assertThat(response.freeStandardAmount()).isEqualTo(30000);
-        assertThat(response.deliveryFee()).isEqualTo(5000);
+        assertNotNull(response);
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(30000, response.freeStandardAmount()),
+                () -> assertEquals(5000, response.deliveryFee())
+        );
 
-        verify(deliveryPolicyRepository).save(any(DeliveryPolicy.class));
+        verify(deliveryPolicyRepository, times(1)).save(any(DeliveryPolicy.class));
     }
 
     @Test
@@ -71,11 +76,14 @@ class DeliveryPolicyServiceTest {
         DeliveryPolicyResponse response = deliveryPolicyService.createPolicy(
                 new DeliveryPolicyDto(newDeliveryPolicy.getFreeStandardAmount(), newDeliveryPolicy.getDeliveryFee()));
 
-        assertThat(response.freeStandardAmount()).isEqualTo(50000);
-        assertThat(response.deliveryFee()).isEqualTo(3000);
+        assertNotNull(response);
+        assertAll(
+                () -> assertEquals(50000, response.freeStandardAmount()),
+                () -> assertEquals(3000, response.deliveryFee())
+        );
 
-        verify(deliveryPolicyRepository).deleteById(deliveryPolicy.getId());
-        verify(deliveryPolicyRepository).save(any(DeliveryPolicy.class));
+        verify(deliveryPolicyRepository, times(1)).deleteById(deliveryPolicy.getId());
+        verify(deliveryPolicyRepository, times(1)).save(any(DeliveryPolicy.class));
     }
 
     @Test
@@ -83,20 +91,29 @@ class DeliveryPolicyServiceTest {
         Pageable pageable = PageRequest.of(0, 15);
         DeliveryPolicy newDeliveryPolicy = new DeliveryPolicy(50000, 3000);
 
-        when(deliveryPolicyRepository.findAllPolicy(pageable))
+        when(deliveryPolicyRepository.findAllByOrderByCreatedAtDesc(pageable))
                 .thenReturn(new PageImpl<>(List.of(deliveryPolicy, newDeliveryPolicy), pageable, 2));
 
         Page<DeliveryPolicyHistoryResponse> response = deliveryPolicyService.getPolicyHistory(pageable);
 
-        assertThat(response.getContent()).hasSize(2);
-        assertThat(response.getContent().get(0).freeStandardAmount()).isEqualTo(30000);
-        assertThat(response.getContent().get(1).deliveryFee()).isEqualTo(3000);
+        assertAll(
+                () -> assertThat(response.getContent())
+                        .hasSize(2)
+                        .extracting(
+                                DeliveryPolicyHistoryResponse::freeStandardAmount,
+                                DeliveryPolicyHistoryResponse::deliveryFee
+                        )
+                        .containsExactlyInAnyOrder(
+                                org.assertj.core.api.Assertions.tuple(30000, 5000),
+                                org.assertj.core.api.Assertions.tuple(50000, 3000)
+                        ),
+                () -> assertEquals(0, response.getNumber()),
+                () -> assertEquals(15, response.getSize()),
+                () -> assertEquals(2, response.getTotalElements()),
+                () -> assertEquals(1, response.getTotalPages())
+        );
 
-        assertThat(response.getNumber()).isZero();
-        assertThat(response.getSize()).isEqualTo(15);
-        assertThat(response.getTotalElements()).isEqualTo(2);
-        assertThat(response.getTotalPages()).isEqualTo(1);
-
+        verify(deliveryPolicyRepository, times(1)).findAllByOrderByCreatedAtDesc(pageable);
     }
 
     @Test
@@ -105,10 +122,13 @@ class DeliveryPolicyServiceTest {
 
         DeliveryPolicyResponse response = deliveryPolicyService.getPolicy();
 
-        assertThat(response.freeStandardAmount()).isEqualTo(deliveryPolicy.getFreeStandardAmount());
-        assertThat(response.deliveryFee()).isEqualTo(deliveryPolicy.getDeliveryFee());
+        assertNotNull(response);
+        assertAll(
+                () -> assertEquals(deliveryPolicy.getFreeStandardAmount(), response.freeStandardAmount()),
+                () -> assertEquals(deliveryPolicy.getDeliveryFee(), response.deliveryFee())
+        );
 
-        verify(deliveryPolicyRepository).findByDeletedAtIsNull();
+        verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
     }
 
     @Test
@@ -117,6 +137,6 @@ class DeliveryPolicyServiceTest {
 
         assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.getPolicy());
 
-        verify(deliveryPolicyRepository).findByDeletedAtIsNull();
+        verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
     }
 }

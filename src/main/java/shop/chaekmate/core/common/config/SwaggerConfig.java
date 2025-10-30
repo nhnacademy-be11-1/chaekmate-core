@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
+    //wrapper
     @Bean
     public GroupedOpenApi wrapperApi() {
         return GroupedOpenApi.builder()
@@ -21,6 +22,7 @@ public class SwaggerConfig {
                 .build();
     }
 
+    //delivery-policy
     @Bean
     public GroupedOpenApi deliveryPolicyApi() {
         return GroupedOpenApi.builder()
@@ -34,7 +36,7 @@ public class SwaggerConfig {
                 .build();
     }
 
-    //swagger API 추가
+    //swagger API 추가 ↓
     @Bean
     public GroupedOpenApi adminTagApi() {
         return GroupedOpenApi.builder()

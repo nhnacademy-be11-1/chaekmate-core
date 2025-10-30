@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import shop.chaekmate.core.order.entity.DeliveryPolicy;
 
 public interface DeliveryPolicyRepository extends JpaRepository<DeliveryPolicy, Long> {
+
     Optional<DeliveryPolicy> findByDeletedAtIsNull();
 
-    @Query("SELECT dp FROM DeliveryPolicy dp ORDER BY dp.createdAt DESC")
-    Page<DeliveryPolicy> findAllPolicy(Pageable pageable);
+    Page<DeliveryPolicy> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

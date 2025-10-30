@@ -44,6 +44,8 @@ public interface WrapperControllerDocs {
             responses = {
                     @ApiResponse(responseCode = "200", description = "포장지 수정 성공",
                             content = @Content(schema = @Schema(implementation = WrapperResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "404", description = "해당 ID의 포장지를 찾을 수 없습니다.",
                             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "409", description = "이미 존재하는 포장지입니다.",

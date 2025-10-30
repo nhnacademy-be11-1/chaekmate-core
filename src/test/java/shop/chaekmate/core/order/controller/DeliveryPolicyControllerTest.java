@@ -98,8 +98,6 @@ class DeliveryPolicyControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(3))
                 .andExpect(jsonPath("$.content[0].freeStandardAmount").value(50000))
                 .andExpect(jsonPath("$.content[1].deliveryFee").value(4000));
-
-
     }
 
     @Test
