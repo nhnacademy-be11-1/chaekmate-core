@@ -27,7 +27,6 @@ public class DeliveryPolicyController implements DeliveryControllerDocs {
     @PostMapping("/admin/delivery-policy")
     public ResponseEntity<DeliveryPolicyResponse> createDeliveryPolicy(
             @Valid @RequestBody DeliveryPolicyRequest request) {
-
         DeliveryPolicyDto dto = new DeliveryPolicyDto(request.freeStandardAmount(), request.deliveryFee());
         DeliveryPolicyResponse response = deliveryPolicyService.createPolicy(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -36,7 +35,6 @@ public class DeliveryPolicyController implements DeliveryControllerDocs {
     @GetMapping("/admin/delivery-policy")
     public ResponseEntity<Page<DeliveryPolicyHistoryResponse>> getDeliveryPolicies(
             @PageableDefault(size = 15) Pageable pageable) {
-
         Page<DeliveryPolicyHistoryResponse> response = deliveryPolicyService.getPolicyHistory(pageable);
         return ResponseEntity.ok().body(response);
     }

@@ -11,8 +11,8 @@ public record DeliveryPolicyHistoryResponse(
         @Schema(description = "배송비 금액", example = "5000")
         int deliveryFee,
         @Schema(description = "정책 생성 일자", example = "2025-10-23T09:00:00")
-        LocalDateTime createAt,
+        LocalDateTime createdAt,
         @Schema(description = "정책 종료 일자", example = "2025-10-24T09:00:00")
-        LocalDateTime deleteAt
+        LocalDateTime deletedAt
 ) {
 }
