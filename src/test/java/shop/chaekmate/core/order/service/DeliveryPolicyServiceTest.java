@@ -27,6 +27,7 @@ import shop.chaekmate.core.order.dto.response.DeliveryPolicyHistoryResponse;
 import shop.chaekmate.core.order.dto.response.DeliveryPolicyResponse;
 import shop.chaekmate.core.order.entity.DeliveryPolicy;
 import shop.chaekmate.core.order.exception.DeliveryPolicyNotFoundException;
+import shop.chaekmate.core.order.exception.DuplicatedDeliveryPolicyException;
 import shop.chaekmate.core.order.repository.DeliveryPolicyRepository;
 
 @ActiveProfiles("test")
@@ -63,7 +64,21 @@ class DeliveryPolicyServiceTest {
                 () -> assertEquals(5000, response.deliveryFee())
         );
 
+        verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
         verify(deliveryPolicyRepository, times(1)).save(any(DeliveryPolicy.class));
+    }
+
+    @Test
+    void 배달_정책_등록_중복() {
+        when(deliveryPolicyRepository.findByDeletedAtIsNull()).thenReturn(Optional.of(deliveryPolicy));
+
+        DeliveryPolicy newDeliveryPolicy = new DeliveryPolicy(30000, 5000);
+
+        assertThrows(DuplicatedDeliveryPolicyException.class, () ->
+                deliveryPolicyService.createPolicy(new DeliveryPolicyDto(newDeliveryPolicy.getFreeStandardAmount(), newDeliveryPolicy.getDeliveryFee()))
+        );
+
+        verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
     }
 
     @Test
@@ -82,6 +97,7 @@ class DeliveryPolicyServiceTest {
                 () -> assertEquals(3000, response.deliveryFee())
         );
 
+        verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
         verify(deliveryPolicyRepository, times(1)).deleteById(deliveryPolicy.getId());
         verify(deliveryPolicyRepository, times(1)).save(any(DeliveryPolicy.class));
     }
