@@ -50,7 +50,8 @@ jobs:
             -Dsonar.projectKey=chaekmate-core \
             -Dsonar.projectName="chaekmate-core" \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}\
+            -Dsonar.coverage.jacoco.xmlReportPaths=api/target/site/jacoco/jacoco.xml
 
       # Step.6 JAR 파일 이름 변경
       - name: Rename JAR File
