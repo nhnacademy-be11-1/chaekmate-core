@@ -1,10 +1,13 @@
 package shop.chaekmate.core.order.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +34,7 @@ import shop.chaekmate.core.order.repository.WrapperRepository;
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class WrapperServiceTest {
+
     @Mock
     private WrapperRepository wrapperRepository;
 
@@ -51,21 +55,23 @@ class WrapperServiceTest {
 
         WrapperResponse response = wrapperService.createWrapper(new WrapperDto("테스트 포장지", 1000));
 
-        assertEquals("테스트 포장지", response.name());
-        assertEquals(1000, response.price());
+        assertNotNull(response);
+        assertAll(
+                () -> assertEquals("테스트 포장지", response.name()),
+                () -> assertEquals(1000, response.price())
+        );
 
-        verify(wrapperRepository).save(any(Wrapper.class));
+        verify(wrapperRepository, times(1)).save(any(Wrapper.class));
     }
 
     @Test
     void 포장지_등록_실패_이름_중복() {
         when(wrapperRepository.existsByName(anyString())).thenReturn(true);
 
-        assertThrows(DuplicatedWrapperNameException.class,
-                () -> wrapperService.createWrapper(new WrapperDto("테스트 포장지", 1000)));
+        WrapperDto dto = new WrapperDto("테스트 포장지", 1000);
+        assertThrows(DuplicatedWrapperNameException.class, () -> wrapperService.createWrapper(dto));
 
         verify(wrapperRepository, never()).save(any(Wrapper.class));
-
     }
 
     @Test
@@ -75,9 +81,14 @@ class WrapperServiceTest {
 
         WrapperResponse response = wrapperService.modifyWrapper(1L, new WrapperDto("수정된 포장지", 3000));
 
-        assertEquals("수정된 포장지", response.name());
-        assertEquals(3000, response.price());
+        assertNotNull(response);
+        assertAll(
+                () -> assertEquals("수정된 포장지", response.name()),
+                () -> assertEquals(3000, response.price())
+        );
 
+        verify(wrapperRepository, times(1)).findById(anyLong());
+        verify(wrapperRepository, times(1)).existsByName(anyString());
     }
 
     @Test
@@ -85,17 +96,20 @@ class WrapperServiceTest {
         when(wrapperRepository.findById(anyLong())).thenReturn(Optional.of(wrapper));
         when(wrapperRepository.existsByName(anyString())).thenReturn(true);
 
-        assertThrows(DuplicatedWrapperNameException.class,
-                () -> wrapperService.modifyWrapper(1L, new WrapperDto("수정된 포장지", 2000)));
+        WrapperDto dto = new WrapperDto("수정된 포장지", 2000);
+        assertThrows(DuplicatedWrapperNameException.class, () -> wrapperService.modifyWrapper(1L, dto));
+
+        verify(wrapperRepository, times(1)).findById(anyLong());
+        verify(wrapperRepository, times(1)).existsByName(anyString());
     }
 
     @Test
     void 포장지_삭제_성공() {
         when(wrapperRepository.existsById(anyLong())).thenReturn(true);
 
-        wrapperService.deleteWrapper(1L);
+        wrapperService.deleteWrapper(anyLong());
 
-        verify(wrapperRepository).deleteById(1L);
+        verify(wrapperRepository, times(1)).deleteById(anyLong());
     }
 
     @Test
@@ -111,10 +125,15 @@ class WrapperServiceTest {
     void 포장지_단일_조회_성공() {
         when(wrapperRepository.findById(anyLong())).thenReturn(Optional.of(wrapper));
 
-        WrapperResponse response = wrapperService.getWrapperById(1L);
+        WrapperResponse response = wrapperService.getWrapperById(anyLong());
 
-        assertEquals("테스트 포장지", response.name());
-        assertEquals(1000, response.price());
+        assertNotNull(response);
+        assertAll(
+                () -> assertEquals("테스트 포장지", response.name()),
+                () -> assertEquals(1000, response.price())
+        );
+
+        verify(wrapperRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -122,16 +141,24 @@ class WrapperServiceTest {
         when(wrapperRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(WrapperNotFoundException.class, () -> wrapperService.getWrapperById(1L));
+
+        verify(wrapperRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void 포장지_전체_조회_성공() {
-        when(wrapperRepository.findAll()).thenReturn(List.of(new Wrapper("포장지1", 1000), new Wrapper("포장지1", 2000)));
+        when(wrapperRepository.findAll()).thenReturn(List.of(new Wrapper("포장지1", 1000), new Wrapper("포장지2", 2000)));
 
         List<WrapperResponse> responses = wrapperService.getWrappers();
 
-        assertEquals(2, responses.size());
-        assertEquals("포장지1", responses.get(0).name());
-        assertEquals(2000, responses.get(1).price());
+        assertThat(responses)
+                .hasSize(2)
+                .extracting(WrapperResponse::name, WrapperResponse::price)
+                .containsExactlyInAnyOrder(
+                        tuple("포장지1", 1000),
+                        tuple("포장지2", 2000)
+                );
+
+        verify(wrapperRepository, times(1)).findAll();
     }
 }

@@ -2,8 +2,9 @@ package shop.chaekmate.core.order.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "포장지 응답 DTO")
+@Schema(description = "포장지 응답")
 public record WrapperResponse(
+
         @Schema(description = "포장지 ID", example = "1")
         Long id,
 
