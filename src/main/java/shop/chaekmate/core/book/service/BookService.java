@@ -93,8 +93,10 @@ public class BookService {
         book.update(request);
 
         BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElseThrow(() -> new BookImageNotFoundException("책 이미지를 찾을 수 없습니다."));
+                .orElse(new BookImage(book, request.imageUrl())); // 이미지 교체
         bookImage.updateUrl(request.imageUrl());
+
+        bookImageRepository.save(bookImage);
 
         // 책 카테고리 업데이트
         if (request.categoryIds() != null) {
