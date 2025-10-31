@@ -13,7 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -23,7 +23,7 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.order.entity.type.OrderStatusType;
 
 @Getter
-@Table(name = "order")
+@Table(name = "`order`")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE order SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
@@ -38,17 +38,17 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, length = 21, nullable = false)
     private String number;
 
     @Column(length = 20, nullable = false)
     private String phone;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(length = 200, nullable = false)
     private String address;
 
     @Column(nullable = false)
-    private LocalDate deliveryDate;
+    private LocalDateTime deliveryAt;
 
     @Column(nullable = false)
     private int deliveryFee;

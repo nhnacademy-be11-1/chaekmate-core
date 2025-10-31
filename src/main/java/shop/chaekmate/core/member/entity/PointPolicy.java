@@ -1,11 +1,11 @@
 package shop.chaekmate.core.member.entity;
 
-import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -29,10 +29,10 @@ public class PointPolicy extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Enumerated(value = STRING)
+    @Enumerated(value = EnumType.STRING)
     @Column(length = 20, nullable = false)
     private PointPolicyType type;
 
-    @Column(nullable = false)
-    private int value;
+    @Column(name = "`number`", nullable = false)
+    private int number;
 }
