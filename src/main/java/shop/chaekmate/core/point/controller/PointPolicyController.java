@@ -3,10 +3,11 @@ package shop.chaekmate.core.point.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import shop.chaekmate.core.point.dto.request.CreatePointPolicyRequest;
+import shop.chaekmate.core.point.dto.request.DeletePointPolicyRequest;
 import shop.chaekmate.core.point.dto.request.UpdatePointPolicyRequest;
-import shop.chaekmate.core.point.dto.request.UpdatePointValueRequest;
-import shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;
-import shop.chaekmate.core.point.entity.type.PointEarnedType;
+import shop.chaekmate.core.point.dto.response.CreatePointPolicyResponse;
+import shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;
 import shop.chaekmate.core.point.service.PointService;
 
 import jakarta.validation.Valid;
@@ -17,16 +18,21 @@ import jakarta.validation.Valid;
 public class PointPolicyController {
     private final PointService pointService;
 
-    @PatchMapping("/{type}/value")
-    public ResponseEntity<ReadPointPolicyResponse> updateValue(@PathVariable PointEarnedType type, @Valid @RequestBody UpdatePointValueRequest req) {
-        var updated = pointService.updatePointValueByType(type, req);
-        return ResponseEntity.ok(ReadPointPolicyResponse.fromEntity(updated));
+    @PostMapping
+    public ResponseEntity<CreatePointPolicyResponse> create(@Valid @RequestBody CreatePointPolicyRequest req) {
+        var created = pointService.createPointPolicyRequest(req);
+        return ResponseEntity.status(201).body(created);
     }
 
-    // Unified update endpoint: accept type + point in body
     @PatchMapping
-    public ResponseEntity<ReadPointPolicyResponse> updateByBody(@Valid @RequestBody UpdatePointPolicyRequest req) {
-        var updated = pointService.updatePointValueByType(req.pointEarnedType(), new shop.chaekmate.core.point.dto.request.UpdatePointValueRequest(req.point()));
-        return ResponseEntity.ok(ReadPointPolicyResponse.fromEntity(updated));
+    public ResponseEntity<UpdatePointPolicyResponse> update(@Valid @RequestBody UpdatePointPolicyRequest req) {
+        var updated = pointService.updatePointPolicy(req);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> delete(@Valid @RequestBody DeletePointPolicyRequest req) {
+        pointService.deletePointPolicyResponse(req);
+        return ResponseEntity.noContent().build();
     }
 }
