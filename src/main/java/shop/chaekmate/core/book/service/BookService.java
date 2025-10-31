@@ -93,7 +93,7 @@ public class BookService {
         book.update(request);
 
         BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElse(new BookImage(book, request.imageUrl())); // 이미지 교체
+                .orElse(new BookImage(book, request.imageUrl())); // 이미지 교체 (없으면 생성)
         bookImage.updateUrl(request.imageUrl());
 
         bookImageRepository.save(bookImage);
