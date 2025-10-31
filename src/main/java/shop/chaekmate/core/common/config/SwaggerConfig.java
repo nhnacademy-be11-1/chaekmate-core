@@ -32,62 +32,37 @@ public class SwaggerConfig {
                                 .title("배달 정책 관련 API")
                                 .description("배달 정책 등록, 조회, 삭제(등록시 자동 삭제)")
                                 .version("v1.0")))
-                .pathsToMatch("/admin/delivery-policy/**","/delivery-policy/**")
+                .pathsToMatch("/admin/delivery-policy/**", "/delivery-policy/**")
                 .build();
     }
 
-    //swagger API 추가 ↓
+    //tag 추가 ↓
     @Bean
-    public GroupedOpenApi adminTagApi() {
+    public GroupedOpenApi tagApi() {
         return GroupedOpenApi.builder()
-                .group("Admin Tag API")
+                .group("Tag API")
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
-                                .title("태그 관리 API")
-                                .description("태그 추가, 수정, 삭제 기능 (관리자용)")
+                                .title("태그 관련 API")
+                                .description("태그 추가, 수정, 삭제, 조회 기능")
                                 .version("v1.0")))
                 .pathsToMatch("/admin/tags/**", "/tags/**")
                 .build();
     }
 
     @Bean
-    public GroupedOpenApi userTagApi() {
+    public GroupedOpenApi categoryApi() {
         return GroupedOpenApi.builder()
-                .group("User Tag API")
+                .group("Category API")
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
-                                .title("사용자 태그 조회 API")
-                                .description("태그 조회 기능 (사용자용)")
+                                .title("카테고리 관련 API")
+                                .description("카테고리 추가, 수정, 삭제 , 조회기능")
                                 .version("v1.0")))
-                .pathsToMatch("/tags/**")
+                .pathsToMatch("/admin/categories/**", "/categories/**")
                 .build();
     }
 
-    @Bean
-    public GroupedOpenApi adminCategoryApi() {
-        return GroupedOpenApi.builder()
-                .group("Admin Category API")
-                .addOpenApiCustomizer(openApi -> openApi
-                        .info(new Info()
-                                .title("관리자 카테고리 관리 API")
-                                .description("카테고리 추가, 수정, 삭제 기능 (관리자용)")
-                                .version("v1.0")))
-                .pathsToMatch("/admin/categories/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi userCategoryApi() {
-        return GroupedOpenApi.builder()
-                .group("User Category API")
-                .addOpenApiCustomizer(openApi -> openApi
-                        .info(new Info()
-                                .title("사용자 카테고리 조회 API")
-                                .description("카테고리 조회 기능 (사용자용)")
-                                .version("v1.0")))
-                .pathsToMatch("/categories/**")
-                .build();
-    }
 
     @Bean
     public GroupedOpenApi likeApi() {
@@ -99,6 +74,19 @@ public class SwaggerConfig {
                                 .description("좋아요 생성, 삭제, 조회 기능")
                                 .version("v1.0")))
                 .pathsToMatch("/books/**/likes", "/likes/**", "/members/**/likes")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi bookApi() {
+        return GroupedOpenApi.builder()
+                .group("Book API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("북 관련 API")
+                                .description("북 생성, 수정, 삭제, 조회 기능")
+                                .version("v1.0")))
+                .pathsToMatch("/books/**", "/admin/books/**")
                 .build();
     }
 }
