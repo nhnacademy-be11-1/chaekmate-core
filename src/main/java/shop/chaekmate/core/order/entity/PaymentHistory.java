@@ -25,7 +25,6 @@ import shop.chaekmate.core.common.entity.BaseEntity;
 @SQLDelete(sql = "UPDATE payment_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class PaymentHistory extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
