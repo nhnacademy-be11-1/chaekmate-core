@@ -119,8 +119,9 @@ public class BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(String.format("Book id %d not found", bookId)));
 
+        // 책 이미지 없는 책 있음
         BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElseThrow(() -> new BookImageNotFoundException("책 이미지를 찾을 수 없습니다."));
+                .orElse(null);
 
         List<BookCategory> bookCategories = bookCategoryRepository.findByBook(book);
         List<Long> categoryIds = new ArrayList<>();
@@ -134,7 +135,11 @@ public class BookService {
             tagIds.add(bookTag.getTag().getId());
         }
 
-        return BookResponse.from(book, bookImage.getImageUrl(), categoryIds, tagIds);
+        String imageUrl = null;
+        if (bookImage != null) {
+            imageUrl = bookImage.getImageUrl();
+        }
+        return BookResponse.from(book, imageUrl, categoryIds, tagIds);
     }
 
     public Page<BookResponse> getBookList(Pageable pageable) {
@@ -296,7 +301,6 @@ public class BookService {
         // 삭제할 카테고리 아이디들 담기
         Set<Long> idsToRemove = new HashSet<>(existingCategoryIds);
         idsToRemove.removeAll(newIds);
-
 
         // 삭제할 책과 연관된 카테고리들 삭제
         if (!idsToRemove.isEmpty()) {
