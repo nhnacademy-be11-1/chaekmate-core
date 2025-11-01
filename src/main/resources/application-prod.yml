@@ -1,3 +1,5 @@
+# prod 프로파일 포트는 배포 설명
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
