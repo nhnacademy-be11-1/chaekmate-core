@@ -31,10 +31,6 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
 
-# javax.validation 기반 Bean Validation
-validation:
-  fail-fast: true # 첫 번째 에러 발생 시 바로 예외 발생
-
 # Spring Boot Actuator 서버 상태(헬스) 모니터링
 management:
   endpoints:
@@ -44,7 +40,6 @@ management:
   health:
     db:
       enabled: true
-      show-details: always
 
 eureka:
   client:
