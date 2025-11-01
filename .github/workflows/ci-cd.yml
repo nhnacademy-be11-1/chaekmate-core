@@ -15,6 +15,12 @@ jobs:
       SPRING_PROFILES_ACTIVE: prod
       DOMAIN: ${{ secrets.DOMAIN_NAME }}
       PORT: ${{ secrets.PORT_NUMBER }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      EUREKA_URL: ${{ secrets.EUREKA_URL }}
 
     steps:
       # Step.1 코드 체크아웃
