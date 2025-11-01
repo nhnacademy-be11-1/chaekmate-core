@@ -45,3 +45,12 @@ management:
     db:
       enabled: true
       show-details: always
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      # 개발환경
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+

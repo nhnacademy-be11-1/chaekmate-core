@@ -71,7 +71,9 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      defaultZone: ${CHAEKMATE_EUREKA_SERVER:http://localhost:8761/eureka}
-    # registry-fetch-interval-seconds: 5
+      # 배포 시
+      defaultZone: ${EUREKA_URL}
+
+  
   instance:
     prefer-ip-address: true
