@@ -43,6 +43,10 @@ management:
   health:
     db:
       enabled: true
+    redis:
+      enabled: false
+    rabbit:
+      enabled: false
 
 eureka:
   client:
