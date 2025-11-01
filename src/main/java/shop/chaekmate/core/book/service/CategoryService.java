@@ -14,6 +14,7 @@ import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
 import shop.chaekmate.core.book.entity.Category;
+import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
 @Service
@@ -21,6 +22,7 @@ import shop.chaekmate.core.book.repository.CategoryRepository;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final BookCategoryRepository bookCategoryRepository;
 
     @Transactional
     public CreateCategoryResponse createCategory(CreateCategoryRequest request) {
@@ -92,6 +94,16 @@ public class CategoryService {
     public void deleteCategory(Long targetCategoryId) {
         Category targetCategory = categoryRepository.findById(targetCategoryId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 카테고리를 찾을 수 없습니다"));
+
+        if (bookCategoryRepository.existsByCategory(targetCategory)) {
+            throw new RuntimeException("해당 카테고리에 해당하는 책이 있어 삭제가 불가능 합니다");
+        }
+
+        if (categoryRepository.existsByParentCategory(targetCategory)) {
+            throw new RuntimeException("해당 카테고리의 하위 카테고리가 있어 삭제가 불가능 합니다");
+        }
+
+        // TODO: 해당 카테고리에 해당하는 쿠폰 정책이 있을때 삭제불가
 
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
     }
