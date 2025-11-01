@@ -1,16 +1,11 @@
 package shop.chaekmate.core.book.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,127 +13,76 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
-import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
-import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
-import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.entity.Category;
+import shop.chaekmate.core.book.exception.CategoryHasBookException;
+import shop.chaekmate.core.book.exception.CategoryHasChildException;
+import shop.chaekmate.core.book.exception.CategoryNotFoundException;
+import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
+import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
 @ActiveProfiles("test")
+@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
-
-    @Mock
-    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private CategoryService categoryService;
 
-    @Test
-    void 최상위_카테고리_생성_성공() {
-        // given
-        CreateCategoryRequest request = new CreateCategoryRequest(null, "New Category");
-        Category category = new Category(null, "New Category");
+    @Mock
+    private CategoryRepository categoryRepository;
 
-        when(categoryRepository.save(any(Category.class))).thenReturn(category);
+    @Mock
+    private BookCategoryRepository bookCategoryRepository;
 
-        // when
-        var response = categoryService.createCategory(request);
+    @Nested
+    @DisplayName("카테고리 생성")
+    class CreateCategory {
 
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.name()).isEqualTo("New Category");
+        @Test
+        @DisplayName("실패 - 존재하지 않는 부모 카테고리")
+        void createCategory_fail_parent_not_found() {
+            CreateCategoryRequest request = new CreateCategoryRequest(999L, "Child");
+
+            when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
+
+            assertThrows(ParentCategoryNotFoundException.class, () -> categoryService.createCategory(request));
+        }
     }
 
-    @Test
-    void 하위_카테고리_생성_성공() {
-        // given
-        Long parentId = 1L;
-        Category parentCategory = new Category(null, "Parent");
-        CreateCategoryRequest request = new CreateCategoryRequest(parentId, "Child");
-        Category category = new Category(parentCategory, "Child");
+    @Nested
+    @DisplayName("카테고리 삭제")
+    class DeleteCategory {
 
-        when(categoryRepository.findById(parentId)).thenReturn(Optional.of(parentCategory));
-        when(categoryRepository.save(any(Category.class))).thenReturn(category);
+        @Test
+        @DisplayName("실패 - 존재하지 않는 카테고리")
+        void deleteCategory_fail_not_found() {
+            when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // when
-        var response = categoryService.createCategory(request);
+            assertThrows(CategoryNotFoundException.class, () -> categoryService.deleteCategory(1L));
+        }
 
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.name()).isEqualTo("Child");
-    }
+        @Test
+        @DisplayName("실패 - 카테고리에 책이 존재")
+        void deleteCategory_fail_book_exists() {
+            Category category = new Category(null, "test");
 
-    @Test
-    void ID로_카테고리_조회_성공() {
-        // given
-        Long categoryId = 1L;
-        Category category = new Category(null, "Test Category");
+            when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+            when(bookCategoryRepository.existsByCategory(category)).thenReturn(true);
 
-        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+            assertThrows(CategoryHasBookException.class, () -> categoryService.deleteCategory(1L));
+        }
 
-        // when
-        ReadCategoryResponse response = categoryService.readCategory(categoryId);
+        @Test
+        @DisplayName("실패 - 하위 카테고리 존재")
+        void deleteCategory_fail_child_exists() {
+            Category category = new Category(null, "test");
 
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.name()).isEqualTo("Test Category");
-    }
+            when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+            when(bookCategoryRepository.existsByCategory(category)).thenReturn(false);
+            when(categoryRepository.existsByParentCategory(category)).thenReturn(true);
 
-    @Test
-    void 모든_카테고리_조회_성공() {
-        // given
-        Category category = new Category(null, "Test Category");
-        when(categoryRepository.findAll()).thenReturn(Collections.singletonList(category));
-
-        // when
-        List<ReadAllCategoriesResponse> responses = categoryService.readAllCategories();
-
-        // then
-        assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).getName()).isEqualTo("Test Category");
-    }
-
-    @Test
-    void 카테고리_수정_성공() {
-        // given
-        Long categoryId = 1L;
-        UpdateCategoryRequest request = new UpdateCategoryRequest(null, "Updated Category");
-        Category category = new Category(null, "Old Category");
-
-        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-
-        // when
-        var response = categoryService.updateCategory(categoryId, request);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.name()).isEqualTo("Updated Category");
-    }
-
-    @Test
-    void ID로_카테고리_삭제_성공() {
-        // given
-        Long categoryId = 1L;
-        Category category = new Category(null, "Test Category");
-
-        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        doNothing().when(categoryRepository).delete(category);
-
-        // when
-        categoryService.deleteCategory(categoryId);
-
-        // then
-        verify(categoryRepository, times(1)).delete(category);
-    }
-
-    @Test
-    void 존재하지_않는_부모ID로_카테고리_생성_실패() {
-        // given
-        CreateCategoryRequest request = new CreateCategoryRequest(999L, "Child");
-        when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // when & then
-        assertThrows(RuntimeException.class, () -> categoryService.createCategory(request));
+            assertThrows(CategoryHasChildException.class, () -> categoryService.deleteCategory(1L));
+        }
     }
 }

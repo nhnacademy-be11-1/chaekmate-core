@@ -24,6 +24,7 @@ import shop.chaekmate.core.book.entity.Tag;
 import shop.chaekmate.core.book.repository.TagRepository;
 
 @ActiveProfiles("test")
+@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
 

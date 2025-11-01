@@ -32,6 +32,7 @@ import shop.chaekmate.core.member.repository.MemberRepository;
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
+@SuppressWarnings("NonAsciiCharacters")
 @ActiveProfiles("test")
 class LikeControllerTest {
 
