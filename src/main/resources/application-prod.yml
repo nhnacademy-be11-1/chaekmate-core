@@ -5,17 +5,73 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+    # HikariCP 설정 (커넥션 풀)
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
+
   jpa:
     hibernate:
-      ddl-auto: validate
+      # create , update 금지
+      ddl-auto: validate # validate 로 수정 (전체 entity  수정 후)
+    show-sql: true
     properties:
       hibernate:
-        format_sql: false
-        use_sql_comments: false
-        highlight_sql: false
+        format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
     open-in-view: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+  application:
+    name: chaekmate-core  # Eureka 서버에 등록될 서버 이름
 
 logging:
   level:
     org.hibernate.SQL: warn
     org.hibernate.orm.jdbc.bind: off
+
+# javax.validation 기반 Bean Validation
+validation:
+  fail-fast: true # 첫 번째 에러 발생 시 바로 예외 발생
+
+# Spring Boot Actuator 서버 상태(헬스) 모니터링
+management:
+  endpoints:
+    jolokia:
+      enabled: true
+    metrics:
+      enabled: true
+    pause:
+      enabled: true
+    resume:
+      enabled: true
+    restart:
+      enabled: true
+    shutdown:
+      enabled: true
+    web:
+      exposure:
+        include: "*"
+  health:
+    status:
+      order: DOWN, UP
+    db:
+      enabled: true
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${CHAEKMATE_EUREKA_SERVER:http://localhost:8761/eureka}
+    # registry-fetch-interval-seconds: 5
+  instance:
+    prefer-ip-address: true
