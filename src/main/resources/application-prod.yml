@@ -15,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      # create , update 금지
+      # create , update 금지 , prod 에선 None 고려
       ddl-auto: validate # validate 로 수정 (전체 entity  수정 후)
     show-sql: true
     properties:
@@ -25,9 +25,6 @@ spring:
         highlight_sql: true
     open-in-view: false
     database-platform: org.hibernate.dialect.MySQLDialect
-
-  application:
-    name: chaekmate-core  # Eureka 서버에 등록될 서버 이름
 
 logging:
   level:
@@ -55,6 +52,5 @@ eureka:
       # 배포 시
       defaultZone: ${EUREKA_URL}
 
-  
   instance:
     prefer-ip-address: true
