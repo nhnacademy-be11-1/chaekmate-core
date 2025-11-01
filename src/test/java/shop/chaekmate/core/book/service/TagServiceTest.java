@@ -102,7 +102,7 @@ class TagServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).name()).isEqualTo("Test Tag");
+        assertThat(responses.getFirst().name()).isEqualTo("Test Tag");
     }
 
     @Test
