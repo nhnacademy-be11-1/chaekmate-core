@@ -9,6 +9,10 @@ import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
 import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
+import shop.chaekmate.core.book.exception.BookNotFoundException;
+import shop.chaekmate.core.book.exception.LikeNotFoundException;
+import shop.chaekmate.core.book.exception.LikeNotFoundForBookAndMemberException;
+import shop.chaekmate.core.book.exception.MemberNotFoundException;
 import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.book.repository.LikeRepository;
 import shop.chaekmate.core.member.entity.Member;
@@ -27,10 +31,10 @@ public class LikeService {
         Long memberId = request.memberId();
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("해당하는 도서를 찾을 수 없습니다"));
+                .orElseThrow(BookNotFoundException::new);
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("해당하는 회원을 찾을 수 없습니다"));
+                .orElseThrow(MemberNotFoundException::new);
 
         Like like = new Like(book, member);
 
@@ -43,7 +47,7 @@ public class LikeService {
     public LikeResponse readLikeById(Long likeId) {
 
         Like like = likeRepository.findById(likeId)
-                .orElseThrow(() -> new RuntimeException("해당하는 Id의 like 를 찾을 수 없습니다"));
+                .orElseThrow(LikeNotFoundException::new);
 
         return new LikeResponse(like.getId(), like.getBook().getId(), like.getMember().getId());
     }
@@ -51,7 +55,7 @@ public class LikeService {
     @Transactional
     public List<LikeResponse> getBookLikes(Long bookId) {
         if (!bookRepository.existsById(bookId)) {
-            throw new RuntimeException("해당하는 Id의 book을 찾을 수 없습니다");
+            throw new BookNotFoundException();
         }
 
         List<Like> likeList = likeRepository.findByBook_Id(bookId);
@@ -63,7 +67,7 @@ public class LikeService {
     @Transactional
     public List<LikeResponse> getMemberLikes(Long memberId) {
         if (!memberRepository.existsById(memberId)) {
-            throw new RuntimeException("해당하는 Id의 member를 찾을 수 없습니다");
+            throw new MemberNotFoundException();
         }
 
         List<Like> likeList = likeRepository.findByMember_Id(memberId);
@@ -76,7 +80,7 @@ public class LikeService {
     public void deleteLikeById(Long likeId) {
 
         Like like = likeRepository.findById(likeId)
-                .orElseThrow(() -> new RuntimeException("해당하는 Id의 like 를 찾을 수 없습니다"));
+                .orElseThrow(LikeNotFoundException::new);
 
         likeRepository.delete(like);
     }
@@ -85,7 +89,7 @@ public class LikeService {
     public void deleteLikeByBookIdAndMemberId(Long bookId, DeleteLikeRequest request) {
 
         Like like = likeRepository.findByBook_IdAndMember_Id(bookId, request.memberId())
-                .orElseThrow(() -> new RuntimeException("해당하는 bookId, memberId 의 like 가 없습니다"));
+                .orElseThrow(LikeNotFoundForBookAndMemberException::new);
 
         likeRepository.delete(like);
     }
