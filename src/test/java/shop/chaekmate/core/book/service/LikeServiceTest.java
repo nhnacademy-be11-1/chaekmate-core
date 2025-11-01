@@ -24,6 +24,7 @@ import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
 import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
+import shop.chaekmate.core.book.exception.LikeNotFoundException;
 import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.book.repository.LikeRepository;
 import shop.chaekmate.core.member.entity.Member;
@@ -114,7 +115,7 @@ class LikeServiceTest {
         when(likeRepository.findById(likeId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(RuntimeException.class, () -> likeService.readLikeById(likeId));
+        assertThrows(LikeNotFoundException.class, () -> likeService.readLikeById(likeId));
     }
 
     @Test
@@ -140,8 +141,8 @@ class LikeServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).id()).isEqualTo(1L);
-        assertThat(responses.get(0).bookId()).isEqualTo(bookId);
+        assertThat(responses.getFirst().id()).isEqualTo(1L);
+        assertThat(responses.getFirst().bookId()).isEqualTo(bookId);
     }
 
     @Test
@@ -167,7 +168,7 @@ class LikeServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).memberId()).isEqualTo(memberId);
+        assertThat(responses.getFirst().memberId()).isEqualTo(memberId);
     }
 
     @Test

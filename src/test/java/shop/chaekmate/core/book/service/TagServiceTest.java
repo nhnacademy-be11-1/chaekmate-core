@@ -21,6 +21,8 @@ import shop.chaekmate.core.book.dto.request.CreateTagRequest;
 import shop.chaekmate.core.book.dto.response.TagResponse;
 import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.entity.Tag;
+import shop.chaekmate.core.book.exception.DuplicateTagNameException;
+import shop.chaekmate.core.book.exception.TagNotFoundException;
 import shop.chaekmate.core.book.repository.TagRepository;
 
 @ActiveProfiles("test")
@@ -59,7 +61,7 @@ class TagServiceTest {
         when(tagRepository.findByName("Existing Tag")).thenReturn(Optional.of(new Tag("Existing Tag")));
 
         // when & then
-        assertThrows(RuntimeException.class, () -> tagService.createTag(request));
+        assertThrows(DuplicateTagNameException.class, () -> tagService.createTag(request));
     }
 
     @Test
@@ -86,7 +88,7 @@ class TagServiceTest {
         when(tagRepository.findById(tagId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(RuntimeException.class, () -> tagService.readTagById(tagId));
+        assertThrows(TagNotFoundException.class, () -> tagService.readTagById(tagId));
     }
 
     @Test
