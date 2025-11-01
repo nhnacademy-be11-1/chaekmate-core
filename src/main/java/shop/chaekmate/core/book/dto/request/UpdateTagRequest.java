@@ -1,7 +1,14 @@
 package shop.chaekmate.core.book.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record UpdateTagRequest(@NotNull @Size(max = 255) String name) {
+@Schema(description = "태그 수정 요청")
+public record UpdateTagRequest(
+        @NotBlank(message = "태그명은 필수입니다.")
+        @Size(max = 255, message = "태그명은 255자 이하여야 합니다.")
+        @Schema(description = "태그명", example = "크리스마스")
+        String name
+) {
 }

@@ -14,6 +14,11 @@ import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
 import shop.chaekmate.core.book.entity.Category;
+import shop.chaekmate.core.book.exception.CategoryHasBookException;
+import shop.chaekmate.core.book.exception.CategoryHasChildException;
+import shop.chaekmate.core.book.exception.CategoryNotFoundException;
+import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
+import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
 @Service
@@ -21,19 +26,16 @@ import shop.chaekmate.core.book.repository.CategoryRepository;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final BookCategoryRepository bookCategoryRepository;
 
     @Transactional
     public CreateCategoryResponse createCategory(CreateCategoryRequest request) {
-
-        if (request.name() == null) {
-            throw new RuntimeException("Category Name 이 Null 입니다.");
-        }
 
         Category parentCategory = null; // request.parentCategoryId 가 null 일때
 
         if (request.parentCategoryId() != null) {
             parentCategory = categoryRepository.findById(request.parentCategoryId())
-                    .orElseThrow(() -> new RuntimeException("해당하는 ID의 부모 카테고리를 찾을 수 없습니다."));
+                    .orElseThrow(ParentCategoryNotFoundException::new);
         }
 
         Category category = new Category(parentCategory, request.name());
@@ -54,7 +56,7 @@ public class CategoryService {
     public ReadCategoryResponse readCategory(Long targetCategoryId) {
 
         Category targetCategory = categoryRepository.findById(targetCategoryId)
-                .orElseThrow(() -> new RuntimeException("해당 ID의 카테고리를 찾을 수 없습니다"));
+                .orElseThrow(CategoryNotFoundException::new);
 
         String parentCategoryName = "null";
         if (targetCategory.getParentCategory() != null) {
@@ -69,12 +71,12 @@ public class CategoryService {
         Long parentCategoryId = request.parentCategoryId();
 
         Category targetCategory = categoryRepository.findById(targetId)
-                .orElseThrow(() -> new RuntimeException("해당 ID의 카테고리를 찾을 수 없습니다"));
+                .orElseThrow(CategoryNotFoundException::new);
 
         Category parentCategory = null;
         if (parentCategoryId != null) {
             parentCategory = categoryRepository.findById(parentCategoryId)
-                    .orElseThrow(() -> new RuntimeException("해당 ID의 부모 카테고리를 찾을 수 없습니다"));
+                    .orElseThrow(ParentCategoryNotFoundException::new);
         }
 
         targetCategory.updateCategory(parentCategory, request.name());
@@ -91,7 +93,17 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(Long targetCategoryId) {
         Category targetCategory = categoryRepository.findById(targetCategoryId)
-                .orElseThrow(() -> new RuntimeException("해당 ID의 카테고리를 찾을 수 없습니다"));
+                .orElseThrow(CategoryNotFoundException::new);
+
+        if (bookCategoryRepository.existsByCategory(targetCategory)) {
+            throw new CategoryHasBookException();
+        }
+
+        if (categoryRepository.existsByParentCategory(targetCategory)) {
+            throw new CategoryHasChildException();
+        }
+
+        // TODO: 해당 카테고리에 해당하는 쿠폰 정책이 있을때 삭제불가
 
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
     }
