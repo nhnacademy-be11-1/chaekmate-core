@@ -1,4 +1,15 @@
-# prod 프로파일 포트는 배포 설명
+# Core/Eureka Server Port (prod) : "배포설명" 확인
+
+# Core Server Port
+server:
+  port: ${PORT_NUMBER}
+
+# Eureka Server URL
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL_PROD}
+
 
 spring:
   datasource:
@@ -50,14 +61,3 @@ management:
   info:
     env:
       enabled: true
-
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      # 배포 시
-      defaultZone: ${EUREKA_URL}
-
-  instance:
-    prefer-ip-address: true

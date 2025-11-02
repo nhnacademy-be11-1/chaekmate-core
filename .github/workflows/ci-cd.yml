@@ -20,7 +20,7 @@ jobs:
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      EUREKA_URL: ${{ secrets.EUREKA_URL }}
+      EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
 
     steps:
       # Step.1 코드 체크아웃

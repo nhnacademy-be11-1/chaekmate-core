@@ -1,5 +1,12 @@
+# Core Server Port
 server:
   port: 9100
+
+# Eureka Server URL
+eureka:
+  client:
+    service-url:
+      defaultZone: http://chaekmate:1234@localhost:8761/eureka
 
 spring:
   datasource:
@@ -47,11 +54,3 @@ management:
       enabled: false
     rabbit:
       enabled: false
-
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      # 개발환경
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}

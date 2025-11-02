@@ -1,3 +1,18 @@
 spring:
   application:
-    name: chaekmate-core # 공통 설정
+    name: chaekmate-core
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
