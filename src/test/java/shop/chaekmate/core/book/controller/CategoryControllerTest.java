@@ -26,6 +26,7 @@ import shop.chaekmate.core.book.repository.CategoryRepository;
 @Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@SuppressWarnings("NonAsciiCharacters")
 class CategoryControllerTest {
 
     @Autowired
