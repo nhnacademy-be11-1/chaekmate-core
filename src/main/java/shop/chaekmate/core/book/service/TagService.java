@@ -1,19 +1,19 @@
 package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.request.CreateTagRequest;
+import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.CreateTagResponse;
 import shop.chaekmate.core.book.dto.response.TagResponse;
-import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
 import shop.chaekmate.core.book.entity.Tag;
 import shop.chaekmate.core.book.exception.DuplicateTagNameException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
 import shop.chaekmate.core.book.repository.TagRepository;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public class TagService {
 
         // soft delete 적용 됨
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(TagNotFoundException::new);
+                .orElseThrow(() -> new TagNotFoundException("Target tag not found"));
         return new TagResponse(targetTag.getId(), targetTag.getName());
     }
 
@@ -56,7 +56,7 @@ public class TagService {
     public UpdateTagResponse updateTag(Long targetId, UpdateTagRequest request) {
 
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(TagNotFoundException::new);
+                .orElseThrow(() -> new TagNotFoundException("Target tag not found"));
         targetTag.updateName(request.name());
         tagRepository.save(targetTag);
 
@@ -67,7 +67,7 @@ public class TagService {
     public void deleteTagById(Long targetId) {
 
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(TagNotFoundException::new);
+                .orElseThrow(() -> new TagNotFoundException("Target tag not found"));
         tagRepository.delete(targetTag);
 
     }

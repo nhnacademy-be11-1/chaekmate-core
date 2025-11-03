@@ -1,17 +1,13 @@
 package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
 import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
 import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
-import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
 import shop.chaekmate.core.book.entity.Category;
 import shop.chaekmate.core.book.exception.CategoryHasBookException;
@@ -20,6 +16,11 @@ import shop.chaekmate.core.book.exception.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
 import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +57,7 @@ public class CategoryService {
     public ReadCategoryResponse readCategory(Long targetCategoryId) {
 
         Category targetCategory = categoryRepository.findById(targetCategoryId)
-                .orElseThrow(CategoryNotFoundException::new);
+                .orElseThrow(() -> new CategoryNotFoundException("Target category not found"));
 
         String parentCategoryName = "null";
         if (targetCategory.getParentCategory() != null) {
@@ -71,7 +72,7 @@ public class CategoryService {
         Long parentCategoryId = request.parentCategoryId();
 
         Category targetCategory = categoryRepository.findById(targetId)
-                .orElseThrow(CategoryNotFoundException::new);
+                .orElseThrow(() -> new CategoryNotFoundException("Target category not found"));
 
         Category parentCategory = null;
         if (parentCategoryId != null) {
@@ -93,7 +94,7 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(Long targetCategoryId) {
         Category targetCategory = categoryRepository.findById(targetCategoryId)
-                .orElseThrow(CategoryNotFoundException::new);
+                .orElseThrow(() -> new CategoryNotFoundException("Target category not found"));
 
         if (bookCategoryRepository.existsByCategory(targetCategory)) {
             throw new CategoryHasBookException();
