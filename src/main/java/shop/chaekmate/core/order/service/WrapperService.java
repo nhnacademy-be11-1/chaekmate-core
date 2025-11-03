@@ -14,13 +14,14 @@ import shop.chaekmate.core.order.repository.WrapperRepository;
 @Service
 @RequiredArgsConstructor
 public class WrapperService {
+
     private final WrapperRepository wrapperRepository;
 
     //포장지 이름, 가격 추가
     @Transactional
     public WrapperResponse createWrapper(WrapperDto wrapperDto) {
         if (wrapperRepository.existsByName(wrapperDto.name())) {
-            throw new DuplicatedWrapperNameException(wrapperDto.name());
+            throw new DuplicatedWrapperNameException();
         }
         Wrapper wrapper = wrapperRepository.save(new Wrapper(wrapperDto.name(), wrapperDto.price()));
 
@@ -30,11 +31,11 @@ public class WrapperService {
     //포장지 수정(이름+가격)
     @Transactional
     public WrapperResponse modifyWrapper(Long id, WrapperDto wrapperDto) {
-        Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(() -> new WrapperNotFoundException(id));
+        Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(WrapperNotFoundException::new);
 
         if (!wrapper.equalsName(wrapperDto.name())
                 && wrapperRepository.existsByName(wrapperDto.name())) {
-            throw new DuplicatedWrapperNameException(wrapperDto.name());
+            throw new DuplicatedWrapperNameException();
         }
 
         wrapper.updateWrapper(wrapperDto.name(), wrapperDto.price());
@@ -46,7 +47,7 @@ public class WrapperService {
     @Transactional
     public void deleteWrapper(Long id) {
         if (!wrapperRepository.existsById(id)) {
-            throw new WrapperNotFoundException(id);
+            throw new WrapperNotFoundException();
         }
 
         wrapperRepository.deleteById(id);
@@ -55,7 +56,7 @@ public class WrapperService {
     //포장지 단일 조회
     @Transactional(readOnly = true)
     public WrapperResponse getWrapperById(Long id) {
-        Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(() -> new WrapperNotFoundException(id));
+        Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(WrapperNotFoundException::new);
         return new WrapperResponse(wrapper.getId(), wrapper.getName(), wrapper.getPrice());
     }
 
