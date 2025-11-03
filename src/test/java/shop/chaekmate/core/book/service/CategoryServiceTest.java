@@ -1,6 +1,10 @@
 package shop.chaekmate.core.book.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -41,6 +45,8 @@ class CategoryServiceTest {
         when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ParentCategoryNotFoundException.class, () -> categoryService.createCategory(request));
+
+        verify(categoryRepository, never()).delete(any(Category.class));
     }
 
 
@@ -49,6 +55,8 @@ class CategoryServiceTest {
         when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(CategoryNotFoundException.class, () -> categoryService.deleteCategory(1L));
+
+        verify(categoryRepository, never()).delete(any(Category.class));
     }
 
     @Test
@@ -59,6 +67,8 @@ class CategoryServiceTest {
         when(bookCategoryRepository.existsByCategory(category)).thenReturn(true);
 
         assertThrows(CategoryHasBookException.class, () -> categoryService.deleteCategory(1L));
+
+        verify(categoryRepository, never()).delete(any(Category.class));
     }
 
     @Test
@@ -70,6 +80,8 @@ class CategoryServiceTest {
         when(categoryRepository.existsByParentCategory(category)).thenReturn(true);
 
         assertThrows(CategoryHasChildException.class, () -> categoryService.deleteCategory(1L));
+
+        verify(categoryRepository, never()).delete(any(Category.class));
     }
 
 }
