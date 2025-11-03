@@ -18,6 +18,7 @@ import shop.chaekmate.core.book.controller.docs.CategoryControllerDocs;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
 import shop.chaekmate.core.book.dto.response.CategoryHierarchyResponse;
 import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
+import shop.chaekmate.core.book.dto.response.PageResponse;
 import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
 import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
@@ -44,8 +45,8 @@ public class CategoryController implements CategoryControllerDocs {
     }
 
     @GetMapping(value = "/categories", params = {"page", "size"})
-    public ResponseEntity<Page<CategoryHierarchyResponse>> readAllCategoriesByPage(Pageable pageable) {
-        return ResponseEntity.ok(categoryService.readAllCategoriesByPage(pageable));
+    public ResponseEntity<PageResponse<CategoryHierarchyResponse>> readAllCategoriesByPage(Pageable pageable) {
+        return ResponseEntity.ok(PageResponse.from(categoryService.readAllCategoriesByPage(pageable)));
     }
 
     @GetMapping("/categories/{id}")
