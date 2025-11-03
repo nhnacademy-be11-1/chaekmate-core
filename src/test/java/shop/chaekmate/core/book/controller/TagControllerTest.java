@@ -25,8 +25,8 @@ import shop.chaekmate.core.book.repository.TagRepository;
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@SuppressWarnings("NonAsciiCharacters")
 @ActiveProfiles("test")
+@SuppressWarnings("NonAsciiCharacters")
 class TagControllerTest {
 
     @Autowired
