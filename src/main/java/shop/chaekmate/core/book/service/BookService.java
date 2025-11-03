@@ -8,10 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
+import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
-import shop.chaekmate.core.book.exception.*;
+import shop.chaekmate.core.book.exception.BookImageNotFoundException;
+import shop.chaekmate.core.book.exception.BookNotFoundException;
+import shop.chaekmate.core.book.exception.CategoryNotFoundException;
+import shop.chaekmate.core.book.exception.TagNotFoundException;
 import shop.chaekmate.core.book.repository.*;
 import shop.chaekmate.core.external.aladin.AladinBook;
 import shop.chaekmate.core.external.aladin.AladinClient;
@@ -22,7 +27,10 @@ import shop.chaekmate.core.external.aladin.dto.response.BookSearchResponse;
 import shop.chaekmate.core.member.repository.AdminRepository;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +51,10 @@ public class BookService {
 
     @Transactional
     public void createBook(BookCreateRequest request) {
+        if (bookRepository.existsByIsbn(request.isbn())) {
+            throw new IllegalArgumentException("이미 등록된 ISBN입니다: " + request.isbn());
+        }
+
         Book book = Book.builder()
                 .title(request.title())
                 .index(request.index())
@@ -137,31 +149,8 @@ public class BookService {
         return BookResponse.from(book, bookImage.getImageUrl(), categoryIds, tagIds);
     }
 
-    public Page<BookResponse> getBookList(Pageable pageable) {
-        Page<Book> bookPage = bookRepository.findAll(pageable);
-
-        List<BookResponse> bookResponses = new ArrayList<>();
-
-        for (Book book : bookPage.getContent()) {
-            BookImage bookImage = bookImageRepository.findByBookId(book.getId())
-                    .orElseThrow(() -> new BookImageNotFoundException("책 이미지를 찾을 수 없습니다."));
-
-            List<BookCategory> bookCategories = bookCategoryRepository.findByBook(book);
-            List<Long> categoryIds = new ArrayList<>();
-            for (BookCategory bookCategory : bookCategories) {
-                categoryIds.add(bookCategory.getCategory().getId());
-            }
-
-            List<BookTag> bookTags = bookTagRepository.findByBook(book);
-            List<Long> tagIds = new ArrayList<>();
-            for (BookTag bookTag : bookTags) {
-                tagIds.add(bookTag.getTag().getId());
-            }
-
-            bookResponses.add(BookResponse.from(book, bookImage.getImageUrl(), categoryIds, tagIds));
-        }
-
-        return new PageImpl<>(bookResponses, pageable, bookPage.getTotalElements());
+    public Page<BookListResponse> getBookList(BookSearchCondition condition, Pageable pageable) {
+        return bookRepository.searchBooks(condition, pageable);
     }
 
     public Page<BookSearchResponse> searchFromAladin(String query, AladinSearchType searchType, Pageable pageable) {
