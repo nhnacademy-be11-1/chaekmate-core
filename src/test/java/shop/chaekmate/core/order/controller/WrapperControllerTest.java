@@ -27,6 +27,7 @@ import shop.chaekmate.core.order.repository.WrapperRepository;
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class WrapperControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -49,7 +50,7 @@ class WrapperControllerTest {
                 .andExpect(jsonPath("$.price").value(request.price()));
     }
 
-   @Test
+    @Test
     void 포장지_수정_성공() throws Exception {
         Wrapper wrapper = wrapperRepository.save(new Wrapper("테스트 포장지", 1000));
         WrapperRequest request = new WrapperRequest("수정된 포장지", 2000);

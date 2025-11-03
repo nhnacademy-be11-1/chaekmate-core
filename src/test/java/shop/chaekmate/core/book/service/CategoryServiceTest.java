@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,21 +19,30 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
 import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
-import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.entity.Category;
+import shop.chaekmate.core.book.exception.CategoryHasBookException;
+import shop.chaekmate.core.book.exception.CategoryHasChildException;
+import shop.chaekmate.core.book.exception.CategoryNotFoundException;
+import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
+import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
 @ActiveProfiles("test")
+@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
+
+    @InjectMocks
+    private CategoryService categoryService;
 
     @Mock
     private CategoryRepository categoryRepository;
 
-    @InjectMocks
-    private CategoryService categoryService;
+    @Mock
+    private BookCategoryRepository bookCategoryRepository;
 
     @Test
     void 최상위_카테고리_생성_성공() {
@@ -96,7 +106,7 @@ class CategoryServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).getName()).isEqualTo("Test Category");
+        assertThat(responses.getFirst().getName()).isEqualTo("Test Category");
     }
 
     @Test
@@ -133,12 +143,49 @@ class CategoryServiceTest {
     }
 
     @Test
-    void 존재하지_않는_부모ID로_카테고리_생성_실패() {
-        // given
+    void 카테고리_삭제_실패_존재하지_않는_부모_카테고리() {
         CreateCategoryRequest request = new CreateCategoryRequest(999L, "Child");
+
         when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // when & then
-        assertThrows(RuntimeException.class, () -> categoryService.createCategory(request));
+        assertThrows(ParentCategoryNotFoundException.class, () -> categoryService.createCategory(request));
+
+        verify(categoryRepository, never()).delete(any(Category.class));
     }
+
+
+    @Test
+    void 카테고리_삭제_실패_존재하지_않는_카테고리() {
+        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.deleteCategory(1L));
+
+        verify(categoryRepository, never()).delete(any(Category.class));
+    }
+
+    @Test
+    void 카테고리_삭제_실패_카테고리에_책이_존재() {
+        Category category = new Category(null, "test");
+
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(bookCategoryRepository.existsByCategory(category)).thenReturn(true);
+
+        assertThrows(CategoryHasBookException.class, () -> categoryService.deleteCategory(1L));
+
+        verify(categoryRepository, never()).delete(any(Category.class));
+    }
+
+    @Test
+    void 카테고리_삭제_실패_하위_카테고리_존재() {
+        Category category = new Category(null, "test");
+
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(bookCategoryRepository.existsByCategory(category)).thenReturn(false);
+        when(categoryRepository.existsByParentCategory(category)).thenReturn(true);
+
+        assertThrows(CategoryHasChildException.class, () -> categoryService.deleteCategory(1L));
+
+        verify(categoryRepository, never()).delete(any(Category.class));
+    }
+
 }

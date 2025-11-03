@@ -26,6 +26,7 @@ import shop.chaekmate.core.book.repository.TagRepository;
 @Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@SuppressWarnings("NonAsciiCharacters")
 class TagControllerTest {
 
     @Autowired

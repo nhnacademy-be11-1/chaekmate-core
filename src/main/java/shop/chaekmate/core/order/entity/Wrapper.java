@@ -21,6 +21,7 @@ import shop.chaekmate.core.common.entity.BaseEntity;
 @SQLDelete(sql = "UPDATE wrapper SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class Wrapper extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
