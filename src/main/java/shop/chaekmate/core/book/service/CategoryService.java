@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -147,8 +148,9 @@ public class CategoryService {
         }
 
         List<CategoryHierarchyResponse> responses = categoriesPage.getContent().stream()
-            .map(category -> new CategoryHierarchyResponse(category.getId(), categoryHierarchyMap.get(category.getId())))
-            .toList();
+                .map(category -> new CategoryHierarchyResponse(category.getId(),
+                        categoryHierarchyMap.get(category.getId())))
+                .toList();
 
         return new PageImpl<>(responses, pageable, categoriesPage.getTotalElements());
     }
@@ -156,7 +158,7 @@ public class CategoryService {
     private String buildCategoryHierarchy(Category category, List<Category> allCategories) {
         StringBuilder hierarchy = new StringBuilder(category.getName());
         Category current = category;
-        while (current.getParentCategory() != null) {
+        while (Objects.requireNonNull(current).getParentCategory() != null) {
             Long parentId = current.getParentCategory().getId();
             current = allCategories.stream().filter(c -> c.getId().equals(parentId)).findFirst().orElse(null);
             if (current != null) {
