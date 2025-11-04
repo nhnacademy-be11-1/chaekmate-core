@@ -37,6 +37,20 @@ class TagControllerTest {
     private TagRepository tagRepository;
 
     @Test
+    void 페이지네이션으로_태그_조회_요청_성공() throws Exception {
+        // given
+        tagRepository.save(new Tag("Tag1"));
+        tagRepository.save(new Tag("Tag2"));
+
+        // when & then
+        mockMvc.perform(get("/tags?page=0&size=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Tag1"));
+    }
+
+    @Test
     void 태그_생성_요청_성공() throws Exception {
         CreateTagRequest request = new CreateTagRequest("New Tag");
 

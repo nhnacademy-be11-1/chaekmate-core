@@ -7,12 +7,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import shop.chaekmate.core.book.controller.docs.LikeControllerDocs;
-import shop.chaekmate.core.book.dto.request.CreateLikeRequest;
-import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
+import shop.chaekmate.core.common.utils.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
+
+
 import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.service.LikeService;
 
@@ -23,11 +24,15 @@ import lombok.RequiredArgsConstructor;
 public class LikeController implements LikeControllerDocs {
 
     private final LikeService likeService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private static final String AUTHORIZATION_HEADER = "Authorization";
 
     @PostMapping("/books/{bookId}/likes")
     public ResponseEntity<LikeResponse> createLike(@PathVariable Long bookId,
-                                                   @RequestBody CreateLikeRequest createLikeRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(likeService.createLike(bookId, createLikeRequest));
+                                                   HttpServletRequest request) {
+        String token = request.getHeader(AUTHORIZATION_HEADER);
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        return ResponseEntity.status(HttpStatus.CREATED).body(likeService.createLike(bookId, memberId));
     }
 
     @GetMapping("/likes/{likeId}")
@@ -40,8 +45,10 @@ public class LikeController implements LikeControllerDocs {
         return ResponseEntity.ok(likeService.getBookLikes(bookId));
     }
 
-    @GetMapping("/members/{memberId}/likes")
-    public ResponseEntity<List<LikeResponse>> getMemberLikes(@PathVariable Long memberId) {
+    @GetMapping("/members/likes")
+    public ResponseEntity<List<LikeResponse>> getMemberLikes(HttpServletRequest request) {
+        String token = request.getHeader(AUTHORIZATION_HEADER);
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
         return ResponseEntity.ok(likeService.getMemberLikes(memberId));
     }
 
@@ -53,8 +60,10 @@ public class LikeController implements LikeControllerDocs {
 
     @DeleteMapping("/books/{bookId}/likes")
     public ResponseEntity<Void> deleteLikeByBookIdAndMemberId(@PathVariable Long bookId,
-                                                              @RequestBody DeleteLikeRequest deleteLikeRequest) {
-        likeService.deleteLikeByBookIdAndMemberId(bookId, deleteLikeRequest);
+                                                              HttpServletRequest request) {
+        String token = request.getHeader(AUTHORIZATION_HEADER);
+        Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        likeService.deleteLikeByBookIdAndMemberId(bookId, memberId);
         return ResponseEntity.noContent().build();
     }
 }

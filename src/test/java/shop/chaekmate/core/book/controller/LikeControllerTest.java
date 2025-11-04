@@ -7,7 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import shop.chaekmate.core.book.dto.request.CreateLikeRequest;
-import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
 import shop.chaekmate.core.book.repository.BookRepository;
@@ -39,8 +39,6 @@ class LikeControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
     private LikeRepository likeRepository;
     @Autowired
     private MemberRepository memberRepository;
@@ -49,6 +47,7 @@ class LikeControllerTest {
 
     private Member member;
     private Book book;
+    private String token;
 
     @BeforeEach
     void setUp() {
@@ -59,15 +58,19 @@ class LikeControllerTest {
         Book newBook = new Book("Test Book", "index", "description", "author", "publisher", LocalDateTime.now(),
                 "1234567890123", 10000, 9000, true, 0, false, 10);
         book = bookRepository.save(newBook);
+
+        token = "Bearer " + Jwts.builder()
+                .claim("memberId", member.getId())
+                .signWith(Keys.hmacShaKeyFor(
+                        "chaekmatedummykeychaekmatedummykeychaekmatedummykey".getBytes(StandardCharsets.UTF_8)))
+                .compact();
     }
 
     @Test
     void 좋아요_생성_요청_성공() throws Exception {
-        CreateLikeRequest request = new CreateLikeRequest(member.getId());
-
         mockMvc.perform(post("/books/{bookId}/likes", book.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.bookId").value(book.getId()))
                 .andExpect(jsonPath("$.data.memberId").value(member.getId()));
@@ -95,7 +98,8 @@ class LikeControllerTest {
     void 회원_ID로_좋아요_목록_조회_요청_성공() throws Exception {
         likeRepository.save(new Like(book, member));
 
-        mockMvc.perform(get("/members/{memberId}/likes", member.getId()))
+        mockMvc.perform(get("/members/likes")
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].memberId").value(member.getId()));
     }
@@ -113,11 +117,9 @@ class LikeControllerTest {
     @Test
     void 책_및_회원_ID로_좋아요_삭제_요청_성공() throws Exception {
         Like like = likeRepository.save(new Like(book, member));
-        DeleteLikeRequest request = new DeleteLikeRequest(member.getId());
 
         mockMvc.perform(delete("/books/{bookId}/likes", book.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .header("Authorization", token))
                 .andExpect(status().isNoContent());
 
         assertThat(likeRepository.findById(like.getId())).isEmpty();
