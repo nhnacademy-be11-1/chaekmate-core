@@ -12,7 +12,7 @@ import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
 import shop.chaekmate.core.book.entity.Tag;
 import shop.chaekmate.core.book.exception.DuplicateTagNameException;
-import shop.chaekmate.core.book.exception.TagNotFoundException;
+import shop.chaekmate.core.book.exception.tag.TagNotFoundException;
 import shop.chaekmate.core.book.repository.TagRepository;
 
 import lombok.RequiredArgsConstructor;
