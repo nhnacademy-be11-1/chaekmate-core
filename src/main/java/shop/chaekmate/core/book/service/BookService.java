@@ -13,7 +13,6 @@ import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
-import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.exception.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
@@ -105,8 +104,11 @@ public class BookService {
         book.update(request);
 
         BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElseThrow(() -> new BookImageNotFoundException("책 이미지를 찾을 수 없습니다."));
-        bookImage.updateUrl(request.imageUrl());
+                .orElse(null);
+
+        if (bookImage != null) {
+            bookImage.updateUrl(request.imageUrl());
+        }
 
         // 책 카테고리 업데이트
         if (request.categoryIds() != null) {
@@ -132,7 +134,7 @@ public class BookService {
                 .orElseThrow(() -> new BookNotFoundException(String.format("Book id %d not found", bookId)));
 
         BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElseThrow(() -> new BookImageNotFoundException("책 이미지를 찾을 수 없습니다."));
+                .orElse(null);
 
         List<BookCategory> bookCategories = bookCategoryRepository.findByBook(book);
         List<Long> categoryIds = new ArrayList<>();
@@ -146,7 +148,9 @@ public class BookService {
             tagIds.add(bookTag.getTag().getId());
         }
 
-        return BookResponse.from(book, bookImage.getImageUrl(), categoryIds, tagIds);
+        String imageUrl = (bookImage != null) ? bookImage.getImageUrl() : null;
+
+        return BookResponse.from(book, imageUrl, categoryIds, tagIds);
     }
 
     public Page<BookListResponse> getBookList(BookSearchCondition condition, Pageable pageable) {
