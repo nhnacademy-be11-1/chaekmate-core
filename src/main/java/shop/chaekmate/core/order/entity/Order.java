@@ -35,11 +35,11 @@ public class Order extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @Column(unique = true, length = 21, nullable = false)
-    private String number;
+    private String orderNumber;
 
     @Column(length = 20, nullable = false)
     private String phone;

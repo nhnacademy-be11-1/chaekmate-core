@@ -73,10 +73,10 @@ class DeliveryPolicyServiceTest {
         when(deliveryPolicyRepository.findByDeletedAtIsNull()).thenReturn(Optional.of(deliveryPolicy));
 
         DeliveryPolicy newDeliveryPolicy = new DeliveryPolicy(30000, 5000);
+        DeliveryPolicyDto dto = new DeliveryPolicyDto(newDeliveryPolicy.getFreeStandardAmount(),
+                newDeliveryPolicy.getDeliveryFee());
 
-        assertThrows(DuplicatedDeliveryPolicyException.class, () ->
-                deliveryPolicyService.createPolicy(new DeliveryPolicyDto(newDeliveryPolicy.getFreeStandardAmount(), newDeliveryPolicy.getDeliveryFee()))
-        );
+        assertThrows(DuplicatedDeliveryPolicyException.class, () -> deliveryPolicyService.createPolicy(dto));
 
         verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
     }
