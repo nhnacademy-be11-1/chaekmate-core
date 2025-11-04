@@ -1,7 +1,17 @@
 package shop.chaekmate.core.book.dto.request;
 
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record UpdateCategoryRequest(Long parentCategoryId, @NotNull @Size(max = 255) String name) {
+@Schema(description = "카테고리 수정 요청")
+public record UpdateCategoryRequest(
+        @Schema(description = "부모 카테고리 ID")
+        Long parentCategoryId,
+
+        @NotBlank(message = "카테고리명은 필수입니다.")
+        @Size(max = 255, message = "카테고리명은 255자 이하여야 합니다.")
+        @Schema(description = "카테고리명", example = "소설")
+        String name
+) {
 }
