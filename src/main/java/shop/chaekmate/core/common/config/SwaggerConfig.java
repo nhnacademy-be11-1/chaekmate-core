@@ -76,6 +76,19 @@ public class SwaggerConfig {
     }
 
     @Bean
+    public GroupedOpenApi bookApi() {
+        return GroupedOpenApi.builder()
+                .group("Book API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("도서 관리 API")
+                                .description("도서 생성, 수정, 삭제, 조회 기능")
+                                .version("v1.0")))
+                .pathsToMatch("/books/**")
+                .build();
+    }
+
+    @Bean
     public GroupedOpenApi pointPolicyApi() {
         return GroupedOpenApi.builder()
                 .group("Point Policy API")
