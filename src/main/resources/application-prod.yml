@@ -19,3 +19,6 @@ logging:
   level:
     org.hibernate.SQL: warn
     org.hibernate.orm.jdbc.bind: off
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}

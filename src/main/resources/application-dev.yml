@@ -45,3 +45,6 @@ management:
     db:
       enabled: true
       show-details: always
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY:chaekmatedummykeychaekmatedummykeychaekmatedummykey}
