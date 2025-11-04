@@ -20,5 +20,5 @@ logging:
     org.hibernate.SQL: warn
     org.hibernate.orm.jdbc.bind: off
 
-jwt:
-  secret-key: ${JWT_SECRET_KEY}
+jwt: # 추 후 안 쓰게 될거지만 돌아가게 하기위해 적어놓음
+  secret-key: ${JWT_SECRET_KEY:chaekmatedummykeychaekmatedummykeychaekmatedummykey}
