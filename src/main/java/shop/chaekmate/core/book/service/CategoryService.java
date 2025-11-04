@@ -21,7 +21,7 @@ import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
 import shop.chaekmate.core.book.entity.Category;
 import shop.chaekmate.core.book.exception.CategoryHasBookException;
 import shop.chaekmate.core.book.exception.CategoryHasChildException;
-import shop.chaekmate.core.book.exception.CategoryNotFoundException;
+import shop.chaekmate.core.book.exception.category.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
 import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;

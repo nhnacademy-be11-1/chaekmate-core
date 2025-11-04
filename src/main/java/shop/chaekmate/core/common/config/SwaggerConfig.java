@@ -1,11 +1,23 @@
 package shop.chaekmate.core.common.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.info.Info;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@OpenAPIDefinition(
+        info = @io.swagger.v3.oas.annotations.info.Info(title = "chaekmate core API", version = "v1", description = "chaekmate core 서버 API 문서")
+)
+@SecurityScheme(
+        name = "bearerAuth",               // 사용할 인증 이름
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     //wrapper

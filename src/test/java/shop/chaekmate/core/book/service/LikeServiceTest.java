@@ -19,8 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import shop.chaekmate.core.book.dto.request.CreateLikeRequest;
-import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
+
 import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
@@ -53,7 +52,6 @@ class LikeServiceTest {
         long bookId = 1L;
         long memberId = 1L;
         long likeId = 1L;
-        var request = new CreateLikeRequest(memberId);
         var book = mock(Book.class);
         var member = mock(Member.class);
 
@@ -72,7 +70,7 @@ class LikeServiceTest {
         when(member.getId()).thenReturn(memberId);
 
         // when
-        var response = likeService.createLike(bookId, request);
+        var response = likeService.createLike(bookId, memberId);
 
         // then
         assertThat(response).isNotNull();
@@ -191,14 +189,13 @@ class LikeServiceTest {
         // given
         long bookId = 1L;
         long memberId = 1L;
-        var request = new DeleteLikeRequest(memberId);
         var like = mock(Like.class);
 
         when(likeRepository.findByBook_IdAndMember_Id(bookId, memberId)).thenReturn(Optional.of(like));
         doNothing().when(likeRepository).delete(like);
 
         // when
-        likeService.deleteLikeByBookIdAndMemberId(bookId, request);
+        likeService.deleteLikeByBookIdAndMemberId(bookId, memberId);
 
         // then
         verify(likeRepository, times(1)).delete(like);
