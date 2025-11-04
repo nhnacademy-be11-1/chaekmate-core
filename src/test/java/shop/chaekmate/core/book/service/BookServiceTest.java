@@ -47,6 +47,7 @@ import static org.mockito.Mockito.never;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class BookServiceTest {
 
