@@ -74,4 +74,17 @@ public class SwaggerConfig {
                 .pathsToMatch("/books/**/likes", "/likes/**", "/members/**/likes")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi pointPolicyApi() {
+        return GroupedOpenApi.builder()
+                .group("Point Policy API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("포인트 정책 API")
+                                .description("포인트 정책 조회 및 관리 API")
+                                .version("v1.0")))
+                .pathsToMatch("/admin/point-policies/**", "/point-policies/**")
+                .build();
+    }
 }
