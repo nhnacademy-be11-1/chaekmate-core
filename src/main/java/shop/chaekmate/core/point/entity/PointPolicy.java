@@ -4,30 +4,30 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 import shop.chaekmate.core.point.entity.type.PointEarnedType;
 
-import static jakarta.persistence.GenerationType.TABLE;
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @Table(name = "point_policy")
-@Where(clause = "deleted_at is null")
+@SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE point_policy SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class PointPolicy extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = TABLE)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "point_earn_type", nullable = false, length = 30)
+    @Column(name = "type", nullable = false, length = 30)
     private PointEarnedType type;
 
-    @Column(nullable = false)
+    @Column(name = "number", nullable = false)
     private int point;
 
     public PointPolicy(PointEarnedType type, int point) {
