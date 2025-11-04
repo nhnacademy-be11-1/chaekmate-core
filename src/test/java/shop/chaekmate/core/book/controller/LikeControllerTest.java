@@ -69,8 +69,8 @@ class LikeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.bookId").value(book.getId()))
-                .andExpect(jsonPath("$.memberId").value(member.getId()));
+                .andExpect(jsonPath("$.data.bookId").value(book.getId()))
+                .andExpect(jsonPath("$.data.memberId").value(member.getId()));
     }
 
     @Test
@@ -79,7 +79,7 @@ class LikeControllerTest {
 
         mockMvc.perform(get("/likes/{likeId}", like.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(like.getId()));
+                .andExpect(jsonPath("$.data.id").value(like.getId()));
     }
 
     @Test
@@ -88,7 +88,7 @@ class LikeControllerTest {
 
         mockMvc.perform(get("/books/{bookId}/likes", book.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].bookId").value(book.getId()));
+                .andExpect(jsonPath("$.data[0].bookId").value(book.getId()));
     }
 
     @Test
@@ -97,7 +97,7 @@ class LikeControllerTest {
 
         mockMvc.perform(get("/members/{memberId}/likes", member.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].memberId").value(member.getId()));
+                .andExpect(jsonPath("$.data[0].memberId").value(member.getId()));
     }
 
     @Test

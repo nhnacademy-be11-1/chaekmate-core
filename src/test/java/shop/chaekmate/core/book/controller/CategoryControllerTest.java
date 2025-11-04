@@ -44,7 +44,7 @@ class CategoryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("New Category"));
+                .andExpect(jsonPath("$.data.name").value("New Category"));
     }
 
     @Test
@@ -53,7 +53,7 @@ class CategoryControllerTest {
 
         mockMvc.perform(get("/categories"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Test Category"));
+                .andExpect(jsonPath("$.data[0].name").value("Test Category"));
     }
 
     @Test
@@ -62,8 +62,8 @@ class CategoryControllerTest {
 
         mockMvc.perform(get("/categories/{id}", category.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(category.getId()))
-                .andExpect(jsonPath("$.name").value("Test Category"));
+                .andExpect(jsonPath("$.data.id").value(category.getId()))
+                .andExpect(jsonPath("$.data.name").value("Test Category"));
     }
 
     @Test
@@ -75,8 +75,8 @@ class CategoryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(category.getId()))
-                .andExpect(jsonPath("$.name").value("Updated Category"));
+                .andExpect(jsonPath("$.data.id").value(category.getId()))
+                .andExpect(jsonPath("$.data.name").value("Updated Category"));
     }
 
     @Test

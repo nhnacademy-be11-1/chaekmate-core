@@ -44,7 +44,7 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("New Tag"));
+                .andExpect(jsonPath("$.data.name").value("New Tag"));
     }
 
     @Test
@@ -53,8 +53,8 @@ class TagControllerTest {
 
         mockMvc.perform(get("/tags/{id}", tag.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(tag.getId()))
-                .andExpect(jsonPath("$.name").value("Test Tag"));
+                .andExpect(jsonPath("$.data.id").value(tag.getId()))
+                .andExpect(jsonPath("$.data.name").value("Test Tag"));
     }
 
     @Test
@@ -63,7 +63,7 @@ class TagControllerTest {
 
         mockMvc.perform(get("/tags"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Test Tag"));
+                .andExpect(jsonPath("$.data[0].name").value("Test Tag"));
     }
 
     @Test
@@ -75,8 +75,8 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(tag.getId()))
-                .andExpect(jsonPath("$.name").value("Updated Tag"));
+                .andExpect(jsonPath("$.data.id").value(tag.getId()))
+                .andExpect(jsonPath("$.data.name").value("Updated Tag"));
     }
 
     @Test
