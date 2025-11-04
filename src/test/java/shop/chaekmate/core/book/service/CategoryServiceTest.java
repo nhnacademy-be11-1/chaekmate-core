@@ -1,9 +1,12 @@
 package shop.chaekmate.core.book.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +33,12 @@ import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
 import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import shop.chaekmate.core.book.dto.response.CategoryHierarchyResponse;
+
 @ActiveProfiles("test")
 @SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +52,44 @@ class CategoryServiceTest {
 
     @Mock
     private BookCategoryRepository bookCategoryRepository;
+
+    @Test
+    void 페이지네이션으로_카테고리_조회_성공() {
+
+        // mock 객체 사용
+        Category parentCategory = mock(Category.class);
+        Category childCategory = mock(Category.class);
+        Category grandChildCategory = mock(Category.class);
+
+        when(parentCategory.getId()).thenReturn(1L);
+        when(parentCategory.getName()).thenReturn("부모");
+        when(parentCategory.getParentCategory()).thenReturn(null);
+
+        when(childCategory.getId()).thenReturn(2L);
+        when(childCategory.getName()).thenReturn("자식");
+        when(childCategory.getParentCategory()).thenReturn(parentCategory);
+
+        when(grandChildCategory.getId()).thenReturn(3L);
+        when(grandChildCategory.getName()).thenReturn("아기");
+        when(grandChildCategory.getParentCategory()).thenReturn(childCategory);
+
+        List<Category> allCategories = List.of(parentCategory, childCategory, grandChildCategory);
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Category> categoryPage = new PageImpl<>(List.of(parentCategory, childCategory), pageable,
+                allCategories.size());
+
+        when(categoryRepository.findAll()).thenReturn(allCategories);
+        when(categoryRepository.findAll(pageable)).thenReturn(categoryPage);
+
+        Page<CategoryHierarchyResponse> responsePage = categoryService.readAllCategoriesByPage(pageable);
+
+        assertAll(
+                () -> assertNotNull(responsePage),
+                () -> assertThat(responsePage.getTotalElements()).isEqualTo(allCategories.size()),
+                () -> assertThat(responsePage.getContent()).hasSize(2),
+                () -> assertThat(responsePage.getContent().getFirst().hierarchy()).isEqualTo("부모"),
+                () -> assertThat(responsePage.getContent().get(1).hierarchy()).isEqualTo("부모 > 자식"));
+    }
 
     @Test
     void 최상위_카테고리_생성_성공() {

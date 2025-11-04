@@ -37,6 +37,22 @@ class CategoryControllerTest {
     private CategoryRepository categoryRepository;
 
     @Test
+    void 페이지네이션으로_카테고리_조회_요청_성공() throws Exception {
+        // given
+        Category parentCategory = categoryRepository.save(new Category(null, "Parent"));
+        Category childCategory = categoryRepository.save(new Category(parentCategory, "Child"));
+        categoryRepository.save(new Category(childCategory, "Grandchild"));
+
+        // when & then
+        mockMvc.perform(get("/categories?page=0&size=2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].hierarchy").value("Parent"))
+                .andExpect(jsonPath("$.content[1].hierarchy").value("Parent > Child"));
+    }
+
+    @Test
     void 카테고리_생성_요청_성공() throws Exception {
         CreateCategoryRequest request = new CreateCategoryRequest(null, "New Category");
 

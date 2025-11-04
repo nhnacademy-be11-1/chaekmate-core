@@ -1,7 +1,6 @@
 package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +17,8 @@ import shop.chaekmate.core.book.repository.LikeRepository;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class LikeService {
@@ -29,7 +30,7 @@ public class LikeService {
     @Transactional
     public LikeResponse createLike(Long bookId, Long memberId) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(BookNotFoundException::new);
+                .orElseThrow(() -> new BookNotFoundException("Book not found"));
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -53,7 +54,7 @@ public class LikeService {
     @Transactional
     public List<LikeResponse> getBookLikes(Long bookId) {
         if (!bookRepository.existsById(bookId)) {
-            throw new BookNotFoundException();
+            throw new BookNotFoundException("Book not found");
         }
 
         List<Like> likeList = likeRepository.findByBook_Id(bookId);
