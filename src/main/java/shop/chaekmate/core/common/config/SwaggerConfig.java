@@ -74,4 +74,20 @@ public class SwaggerConfig {
                 .pathsToMatch("/books/**/likes", "/likes/**", "/members/**/likes")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi memberApi() {
+        return GroupedOpenApi.builder()
+                .group("Member API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("회원 관련 API")
+                                .description("회원 가입, 조회, 수정, 탈퇴 기능")
+                                .version("v1.0")))
+                .pathsToMatch(
+                        "/members/**"
+                )
+                .build();
+    }
+
 }

@@ -21,13 +21,13 @@ import shop.chaekmate.core.member.entity.type.PlatformType;
 
 import lombok.AllArgsConstructor;
 
+@Entity
 @Getter
 @Table(name = "member")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE member SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@Entity
 public class Member extends BaseEntity {
 
     @Id
@@ -67,5 +67,15 @@ public class Member extends BaseEntity {
         this.email = email;
         this.birthDate = birthDate;
         this.platformType = platformType;
+    }
+
+    public void modifyMember(String name, String email, String phone) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+    }
+
+    public void markAsDeleted() {
+        this.setDeletedAt(LocalDateTime.now());
     }
 }
