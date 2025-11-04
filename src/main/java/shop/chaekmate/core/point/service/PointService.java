@@ -8,11 +8,12 @@ import shop.chaekmate.core.point.dto.request.CreatePointPolicyRequest;
 import shop.chaekmate.core.point.dto.request.DeletePointPolicyRequest;
 import shop.chaekmate.core.point.dto.request.UpdatePointPolicyRequest;
 import shop.chaekmate.core.point.dto.response.CreatePointPolicyResponse;
-import shop.chaekmate.core.point.dto.response.DeletePointPolicyResponse;
 import shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;
 import shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;
 import shop.chaekmate.core.point.entity.PointPolicy;
-import shop.chaekmate.core.point.exception.DuplicatePolicyException;
+import shop.chaekmate.core.point.entity.type.PointEarnedType;
+import shop.chaekmate.core.point.exception.DuplicatePointPolicyException;
+import shop.chaekmate.core.point.exception.PointPolicyNotFoundException;
 import shop.chaekmate.core.point.repository.PointPolicyRepository;
 
 import java.util.NoSuchElementException;
@@ -26,7 +27,7 @@ public class PointService {
     @Transactional
     public CreatePointPolicyResponse createPointPolicyRequest(CreatePointPolicyRequest request) {
         if (pointPolicyRepository.existsByType(request.earnedType())) {
-            throw new DuplicatePolicyException("Policy already exists: " + request.earnedType());
+            throw new DuplicatePointPolicyException();
         }
 
         try {
@@ -34,7 +35,7 @@ public class PointService {
             pointPolicyRepository.save(policy);
             return new CreatePointPolicyResponse(policy.getId(), policy.getType(), policy.getPoint());
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicatePolicyException("Policy already exists: " + e);
+            throw new DuplicatePointPolicyException();
         }
     }
 
@@ -42,7 +43,7 @@ public class PointService {
     @Transactional
     public UpdatePointPolicyResponse updatePointPolicy(UpdatePointPolicyRequest request) {
         PointPolicy policy = pointPolicyRepository.findByType(request.type())
-                .orElseThrow(() -> new NoSuchElementException("PointPolicy not found type=" + request.type()));
+                .orElseThrow(PointPolicyNotFoundException::new);
 
         policy.updatePointPolicy(request.type(), request.point());
         PointPolicy saved = pointPolicyRepository.save(policy);
@@ -50,9 +51,9 @@ public class PointService {
     }
 
     // 추가: 단건 조회
-    public ReadPointPolicyResponse getPolicyByType(shop.chaekmate.core.point.entity.type.PointEarnedType type) {
+    public ReadPointPolicyResponse getPolicyByType(PointEarnedType type) {
         PointPolicy policy = pointPolicyRepository.findByType(type)
-                .orElseThrow(() -> new NoSuchElementException("PointPolicy not found type=" + type));
+                .orElseThrow(PointPolicyNotFoundException::new);
         return new ReadPointPolicyResponse(policy.getId(), policy.getType(), policy.getPoint());
     }
 
@@ -60,7 +61,7 @@ public class PointService {
     @Transactional
     public void deletePointPolicyResponse(DeletePointPolicyRequest request) {
         PointPolicy policy = pointPolicyRepository.findByType(request.pointEarnedType())
-                .orElseThrow(() -> new NoSuchElementException("PointPolicy not found type=" + request.pointEarnedType()));
+                .orElseThrow(PointPolicyNotFoundException::new);
         pointPolicyRepository.delete(policy);
 
 

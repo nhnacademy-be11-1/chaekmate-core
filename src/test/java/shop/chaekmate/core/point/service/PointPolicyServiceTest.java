@@ -1,6 +1,5 @@
 package shop.chaekmate.core.point.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -28,7 +27,8 @@ import shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;
 import shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;
 import shop.chaekmate.core.point.entity.PointPolicy;
 import shop.chaekmate.core.point.entity.type.PointEarnedType;
-import shop.chaekmate.core.point.exception.DuplicatePolicyException;
+import shop.chaekmate.core.point.exception.DuplicatePointPolicyException;
+import shop.chaekmate.core.point.exception.PointPolicyNotFoundException;
 import shop.chaekmate.core.point.repository.PointPolicyRepository;
 
 //테스트 작성
@@ -79,7 +79,7 @@ class PointPolicyServiceTest {
         when(pointPolicyRepository.existsByType(PointEarnedType.ORDER)).thenReturn(true);
 
         // when & then
-        assertThrows(DuplicatePolicyException.class, () -> pointService.createPointPolicyRequest(request));
+        assertThrows(DuplicatePointPolicyException.class, () -> pointService.createPointPolicyRequest(request));
         verify(pointPolicyRepository, times(1)).existsByType(PointEarnedType.ORDER);
         verify(pointPolicyRepository, times(0)).save(any(PointPolicy.class));
     }
@@ -112,7 +112,7 @@ class PointPolicyServiceTest {
         when(pointPolicyRepository.findByType(PointEarnedType.REVIEW)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> pointService.updatePointPolicy(request));
+        assertThrows(PointPolicyNotFoundException.class, () -> pointService.updatePointPolicy(request));
         verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.REVIEW);
         verify(pointPolicyRepository, times(0)).save(any(PointPolicy.class));
     }
@@ -140,7 +140,7 @@ class PointPolicyServiceTest {
         when(pointPolicyRepository.findByType(PointEarnedType.REVIEW)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> pointService.getPolicyByType(PointEarnedType.REVIEW));
+        assertThrows(PointPolicyNotFoundException.class, () -> pointService.getPolicyByType(PointEarnedType.REVIEW));
         verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.REVIEW);
     }
 
@@ -165,7 +165,7 @@ class PointPolicyServiceTest {
         when(pointPolicyRepository.findByType(PointEarnedType.REVIEW)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(NoSuchElementException.class, () -> pointService.deletePointPolicyResponse(request));
+        assertThrows(PointPolicyNotFoundException.class, () -> pointService.deletePointPolicyResponse(request));
         verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.REVIEW);
         verify(pointPolicyRepository, times(0)).delete(any(PointPolicy.class));
     }

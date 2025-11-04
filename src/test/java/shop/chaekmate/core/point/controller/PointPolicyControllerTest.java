@@ -114,6 +114,6 @@ class PointPolicyControllerTest {
         mockMvc.perform(post("/admin/point-policies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
     }
 }
