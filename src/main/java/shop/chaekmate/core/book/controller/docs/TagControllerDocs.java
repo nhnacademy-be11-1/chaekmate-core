@@ -6,10 +6,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import shop.chaekmate.core.book.dto.request.CreateTagRequest;
 import shop.chaekmate.core.book.dto.response.CreateTagResponse;
+import shop.chaekmate.core.book.dto.response.PageResponse;
 import shop.chaekmate.core.book.dto.response.TagResponse;
 import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
@@ -32,6 +34,10 @@ public interface TagControllerDocs {
     @Operation(summary = "태그 전체 조회", description = "모든 태그를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     ResponseEntity<List<TagResponse>> readAllTags();
+
+    @Operation(summary = "태그 전체 페이지네이션 조회", description = "모든 태그를 페이지네이션 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "페이지네이션 조회 성공")
+    ResponseEntity<PageResponse<TagResponse>> readAllTagsByPage(Pageable pageable);
 
     @Operation(summary = "태그 수정", description = "태그 이름을 수정합니다.")
     @ApiResponse(responseCode = "200", description = "수정 성공")

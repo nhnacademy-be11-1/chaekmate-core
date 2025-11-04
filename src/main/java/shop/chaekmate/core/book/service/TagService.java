@@ -2,6 +2,8 @@ package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.request.CreateTagRequest;
 import shop.chaekmate.core.book.dto.response.CreateTagResponse;
@@ -10,7 +12,7 @@ import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
 import shop.chaekmate.core.book.entity.Tag;
 import shop.chaekmate.core.book.exception.DuplicateTagNameException;
-import shop.chaekmate.core.book.exception.TagNotFoundException;
+import shop.chaekmate.core.book.exception.tag.TagNotFoundException;
 import shop.chaekmate.core.book.repository.TagRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,10 @@ public class TagService {
 
         return tagRepository.findAll().stream().map(tag -> new TagResponse(tag.getId(), tag.getName()))
                 .toList();
+    }
+
+    public Page<TagResponse> readAllTagsByPage(Pageable pageable) {
+        return tagRepository.findAll(pageable).map(tag -> new TagResponse(tag.getId(), tag.getName()));
     }
 
     @Transactional
