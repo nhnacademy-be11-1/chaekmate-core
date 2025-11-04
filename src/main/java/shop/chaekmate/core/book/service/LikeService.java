@@ -4,8 +4,8 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import shop.chaekmate.core.book.dto.request.CreateLikeRequest;
-import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
+
+
 import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
@@ -27,9 +27,7 @@ public class LikeService {
     private final BookRepository bookRepository;
 
     @Transactional
-    public LikeResponse createLike(Long bookId, CreateLikeRequest request) {
-        Long memberId = request.memberId();
-
+    public LikeResponse createLike(Long bookId, Long memberId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(BookNotFoundException::new);
 
@@ -86,9 +84,9 @@ public class LikeService {
     }
 
     @Transactional
-    public void deleteLikeByBookIdAndMemberId(Long bookId, DeleteLikeRequest request) {
+    public void deleteLikeByBookIdAndMemberId(Long bookId, Long memberId) {
 
-        Like like = likeRepository.findByBook_IdAndMember_Id(bookId, request.memberId())
+        Like like = likeRepository.findByBook_IdAndMember_Id(bookId, memberId)
                 .orElseThrow(LikeNotFoundForBookAndMemberException::new);
 
         likeRepository.delete(like);
