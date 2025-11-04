@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -40,8 +39,6 @@ class LikeControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
     private LikeRepository likeRepository;
     @Autowired
     private MemberRepository memberRepository;
@@ -64,7 +61,8 @@ class LikeControllerTest {
 
         token = "Bearer " + Jwts.builder()
                 .claim("memberId", member.getId())
-                .signWith(Keys.hmacShaKeyFor("chaekmatedummykeychaekmatedummykeychaekmatedummykey".getBytes(StandardCharsets.UTF_8)))
+                .signWith(Keys.hmacShaKeyFor(
+                        "chaekmatedummykeychaekmatedummykeychaekmatedummykey".getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 

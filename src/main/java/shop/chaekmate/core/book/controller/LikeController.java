@@ -25,11 +25,12 @@ public class LikeController implements LikeControllerDocs {
 
     private final LikeService likeService;
     private final JwtTokenProvider jwtTokenProvider;
+    private static final String AUTHORIZATION_HEADER = "Authorization";
 
     @PostMapping("/books/{bookId}/likes")
     public ResponseEntity<LikeResponse> createLike(@PathVariable Long bookId,
                                                    HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
+        String token = request.getHeader(AUTHORIZATION_HEADER);
         Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
         return ResponseEntity.status(HttpStatus.CREATED).body(likeService.createLike(bookId, memberId));
     }
@@ -46,7 +47,7 @@ public class LikeController implements LikeControllerDocs {
 
     @GetMapping("/members/likes")
     public ResponseEntity<List<LikeResponse>> getMemberLikes(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
+        String token = request.getHeader(AUTHORIZATION_HEADER);
         Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
         return ResponseEntity.ok(likeService.getMemberLikes(memberId));
     }
@@ -60,7 +61,7 @@ public class LikeController implements LikeControllerDocs {
     @DeleteMapping("/books/{bookId}/likes")
     public ResponseEntity<Void> deleteLikeByBookIdAndMemberId(@PathVariable Long bookId,
                                                               HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
+        String token = request.getHeader(AUTHORIZATION_HEADER);
         Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
         likeService.deleteLikeByBookIdAndMemberId(bookId, memberId);
         return ResponseEntity.noContent().build();
