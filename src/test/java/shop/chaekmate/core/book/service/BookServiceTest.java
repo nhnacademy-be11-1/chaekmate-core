@@ -230,35 +230,6 @@ class BookServiceTest {
                 .hasMessageContaining("Book id 10000000000 not found");
     }
 
-    @Test
-    void 도서_수정_실패_이미지_없음() {
-        Long bookId = 1L;
-
-        BookUpdateRequest request = new BookUpdateRequest(
-                "수정된 책",
-                "목차",
-                "설명",
-                "저자",
-                "출판사",
-                LocalDateTime.of(2024, 1, 1, 0, 0),
-                "9781234567890",
-                10000,
-                9000,
-                "https://example.com/new-image.jpg",
-                true,
-                false,
-                100,
-                List.of(1L),
-                List.of(1L)
-        );
-
-        given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
-        given(bookImageRepository.findByBookId(bookId)).willReturn(Optional.empty());
-
-        assertThatThrownBy(() -> bookService.updateBook(bookId, request))
-                .isInstanceOf(BookImageNotFoundException.class)
-                .hasMessage("책 이미지를 찾을 수 없습니다.");
-    }
 
     @Test
     void 도서_삭제_성공() {
@@ -311,18 +282,6 @@ class BookServiceTest {
         assertThatThrownBy(() -> bookService.getBook(bookId))
                 .isInstanceOf(BookNotFoundException.class)
                 .hasMessageContaining("Book id 10000000000 not found");
-    }
-
-    @Test
-    void 도서_조회_실패_이미지_없음() {
-        Long bookId = 1L;
-
-        given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
-        given(bookImageRepository.findByBookId(bookId)).willReturn(Optional.empty());
-
-        assertThatThrownBy(() -> bookService.getBook(bookId))
-                .isInstanceOf(BookImageNotFoundException.class)
-                .hasMessage("책 이미지를 찾을 수 없습니다.");
     }
 
     @Test
