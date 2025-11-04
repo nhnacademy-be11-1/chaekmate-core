@@ -20,7 +20,6 @@ import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
-import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.exception.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
@@ -31,7 +30,6 @@ import shop.chaekmate.core.external.aladin.AladinSearchType;
 import shop.chaekmate.core.external.aladin.dto.request.AladinBookRegisterRequest;
 import shop.chaekmate.core.external.aladin.dto.response.AladinApiResponse;
 import shop.chaekmate.core.external.aladin.dto.response.BookSearchResponse;
-import shop.chaekmate.core.member.repository.AdminRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,9 +57,6 @@ class BookServiceTest {
 
     @Mock
     private BookImageRepository bookImageRepository;
-
-    @Mock
-    private AdminRepository adminRepository;
 
     @Mock
     private BookCategoryRepository bookCategoryRepository;
@@ -390,7 +385,7 @@ class BookServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).title()).contains("자바");
+        assertThat(result.getContent().getFirst().title()).contains("자바");
         then(bookRepository).should().searchBooks(any(BookSearchCondition.class), any(Pageable.class));
     }
 
@@ -418,7 +413,7 @@ class BookServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isZero();
         then(bookRepository).should().searchBooks(any(BookSearchCondition.class), any(Pageable.class));
     }
 
@@ -476,7 +471,7 @@ class BookServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isZero();
     }
 
     @Test
@@ -496,7 +491,7 @@ class BookServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isZero();
     }
 
     @Test
