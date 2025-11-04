@@ -1,19 +1,21 @@
 package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.request.CreateTagRequest;
-import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.CreateTagResponse;
 import shop.chaekmate.core.book.dto.response.TagResponse;
+import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
 import shop.chaekmate.core.book.entity.Tag;
 import shop.chaekmate.core.book.exception.DuplicateTagNameException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
 import shop.chaekmate.core.book.repository.TagRepository;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class TagService {
 
         // soft delete 적용 됨
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(() -> new TagNotFoundException("Target tag not found"));
+                .orElseThrow(TagNotFoundException::new);
         return new TagResponse(targetTag.getId(), targetTag.getName());
     }
 
@@ -52,11 +54,15 @@ public class TagService {
                 .toList();
     }
 
+    public Page<TagResponse> readAllTagsByPage(Pageable pageable) {
+        return tagRepository.findAll(pageable).map(tag -> new TagResponse(tag.getId(), tag.getName()));
+    }
+
     @Transactional
     public UpdateTagResponse updateTag(Long targetId, UpdateTagRequest request) {
 
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(() -> new TagNotFoundException("Target tag not found"));
+                .orElseThrow(TagNotFoundException::new);
         targetTag.updateName(request.name());
         tagRepository.save(targetTag);
 
@@ -67,7 +73,7 @@ public class TagService {
     public void deleteTagById(Long targetId) {
 
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(() -> new TagNotFoundException("Target tag not found"));
+                .orElseThrow(TagNotFoundException::new);
         tagRepository.delete(targetTag);
 
     }
