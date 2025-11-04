@@ -46,10 +46,10 @@ class CategoryControllerTest {
         // when & then
         mockMvc.perform(get("/categories?page=0&size=2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.content[0].hierarchy").value("Parent"))
-                .andExpect(jsonPath("$.content[1].hierarchy").value("Parent > Child"));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andExpect(jsonPath("$.data.content[0].hierarchy").value("Parent"))
+                .andExpect(jsonPath("$.data.content[1].hierarchy").value("Parent > Child"));
     }
 
     @Test

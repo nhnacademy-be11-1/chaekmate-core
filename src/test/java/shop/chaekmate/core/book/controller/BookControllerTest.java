@@ -234,18 +234,18 @@ class BookControllerTest {
         mockMvc.perform(get("/books/{bookId}", book.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(book.getId()))
-                .andExpect(jsonPath("$.title").value("테스트 책"))
-                .andExpect(jsonPath("$.author").value("저자"))
-                .andExpect(jsonPath("$.publisher").value("출판사"))
-                .andExpect(jsonPath("$.isbn").value("9781234567890"))
-                .andExpect(jsonPath("$.price").value(10000))
-                .andExpect(jsonPath("$.salesPrice").value(9000))
-                .andExpect(jsonPath("$.imageUrl").value("https://example.com/image.jpg"))
-                .andExpect(jsonPath("$.categoryIds").isArray())
-                .andExpect(jsonPath("$.categoryIds", hasSize(1)))
-                .andExpect(jsonPath("$.tagIds").isArray())
-                .andExpect(jsonPath("$.tagIds", hasSize(1)));
+                .andExpect(jsonPath("$.data.id").value(book.getId()))
+                .andExpect(jsonPath("$.data.title").value("테스트 책"))
+                .andExpect(jsonPath("$.data.author").value("저자"))
+                .andExpect(jsonPath("$.data.publisher").value("출판사"))
+                .andExpect(jsonPath("$.data.isbn").value("9781234567890"))
+                .andExpect(jsonPath("$.data.price").value(10000))
+                .andExpect(jsonPath("$.data.salesPrice").value(9000))
+                .andExpect(jsonPath("$.data.imageUrl").value("https://example.com/image.jpg"))
+                .andExpect(jsonPath("$.data.categoryIds").isArray())
+                .andExpect(jsonPath("$.data.categoryIds", hasSize(1)))
+                .andExpect(jsonPath("$.data.tagIds").isArray())
+                .andExpect(jsonPath("$.data.tagIds", hasSize(1)));
     }
 
     @Test
@@ -261,12 +261,12 @@ class BookControllerTest {
                         .param("size", "10"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
-                .andExpect(jsonPath("$.content[0].title").value("테스트 책"))
-                .andExpect(jsonPath("$.totalElements").value(greaterThanOrEqualTo(1)))
-                .andExpect(jsonPath("$.size").value(10))
-                .andExpect(jsonPath("$.number").value(0));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$.data.content[0].title").value("테스트 책"))
+                .andExpect(jsonPath("$.data.totalElements").value(greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data.size").value(10))
+                .andExpect(jsonPath("$.data.number").value(0));
     }
 
     @Test
@@ -277,8 +277,8 @@ class BookControllerTest {
                         .param("size", "10"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content", hasSize(greaterThanOrEqualTo(1))));
     }
 
     @Test
@@ -289,9 +289,9 @@ class BookControllerTest {
                         .param("size", "10"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
-                .andExpect(jsonPath("$.content[0].title").value(containsString("테스트")));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$.data.content[0].title").value(containsString("테스트")));
     }
 
     @Test
@@ -335,9 +335,9 @@ class BookControllerTest {
                         .param("size", "1"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.totalElements").value(greaterThanOrEqualTo(2)))
-                .andExpect(jsonPath("$.totalPages").value(greaterThanOrEqualTo(2)))
-                .andExpect(jsonPath("$.size").value(1));
+                .andExpect(jsonPath("$.data.content", hasSize(1)))
+                .andExpect(jsonPath("$.data.totalElements").value(greaterThanOrEqualTo(2)))
+                .andExpect(jsonPath("$.data.totalPages").value(greaterThanOrEqualTo(2)))
+                .andExpect(jsonPath("$.data.size").value(1));
     }
 }

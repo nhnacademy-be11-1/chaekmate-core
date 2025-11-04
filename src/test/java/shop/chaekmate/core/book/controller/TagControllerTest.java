@@ -45,9 +45,9 @@ class TagControllerTest {
         // when & then
         mockMvc.perform(get("/tags?page=0&size=1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(1))
-                .andExpect(jsonPath("$.content[0].name").value("Tag1"));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(1))
+                .andExpect(jsonPath("$.data.content[0].name").value("Tag1"));
     }
 
     @Test

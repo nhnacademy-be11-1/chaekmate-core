@@ -52,9 +52,9 @@ class PointPolicyControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.pointEarnedType").value("WELCOME"))
-                .andExpect(jsonPath("$.point").value(5000));
+                .andExpect(jsonPath("$.data.id").isNumber())
+                .andExpect(jsonPath("$.data.pointEarnedType").value("WELCOME"))
+                .andExpect(jsonPath("$.data.point").value(5000));
     }
 
     @Test
@@ -63,9 +63,9 @@ class PointPolicyControllerTest {
 
         mockMvc.perform(get("/point-policies/{type}", "ORDER"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(policy.getId()))
-                .andExpect(jsonPath("$.earnType").value("ORDER"))
-                .andExpect(jsonPath("$.point").value(100));
+                .andExpect(jsonPath("$.data.id").value(policy.getId()))
+                .andExpect(jsonPath("$.data.earnType").value("ORDER"))
+                .andExpect(jsonPath("$.data.point").value(100));
     }
 
     @Test
@@ -74,9 +74,9 @@ class PointPolicyControllerTest {
 
         mockMvc.perform(get("/admin/point-policies/{type}", "REVIEW"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(policy.getId()))
-                .andExpect(jsonPath("$.earnType").value("REVIEW"))
-                .andExpect(jsonPath("$.point").value(500));
+                .andExpect(jsonPath("$.data.id").value(policy.getId()))
+                .andExpect(jsonPath("$.data.earnType").value("REVIEW"))
+                .andExpect(jsonPath("$.data.point").value(500));
     }
 
     @Test
@@ -88,9 +88,9 @@ class PointPolicyControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(policy.getId()))
-                .andExpect(jsonPath("$.earnedType").value("ORDER"))
-                .andExpect(jsonPath("$.point").value(500));
+                .andExpect(jsonPath("$.data.id").value(policy.getId()))
+                .andExpect(jsonPath("$.data.earnedType").value("ORDER"))
+                .andExpect(jsonPath("$.data.point").value(500));
 
         PointPolicy updated = pointPolicyRepository.findByType(PointEarnedType.ORDER).orElseThrow();
         assertThat(updated.getPoint()).isEqualTo(500);
