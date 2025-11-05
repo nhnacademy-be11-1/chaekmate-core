@@ -2,6 +2,8 @@ package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.request.CreateTagRequest;
 import shop.chaekmate.core.book.dto.response.CreateTagResponse;
@@ -9,6 +11,8 @@ import shop.chaekmate.core.book.dto.response.TagResponse;
 import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
 import shop.chaekmate.core.book.entity.Tag;
+import shop.chaekmate.core.book.exception.DuplicateTagNameException;
+import shop.chaekmate.core.book.exception.tag.TagNotFoundException;
 import shop.chaekmate.core.book.repository.TagRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +29,7 @@ public class TagService {
         // Find by 는 (soft delete가 적용 되지만, exists 는 count 쿼리라서 적용안됨)
         // Tag name Unique 취급
         if (tagRepository.findByName(request.name()).isPresent()) {
-            throw new RuntimeException(" 이미 존재하는 Tag 입니다.");
+            throw new DuplicateTagNameException();
         }
 
         Tag tag = new Tag(request.name());
@@ -39,7 +43,7 @@ public class TagService {
 
         // soft delete 적용 됨
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(() -> new RuntimeException("해당하는 Id 의 Tag 를 찾을 수 없습니다."));
+                .orElseThrow(TagNotFoundException::new);
         return new TagResponse(targetTag.getId(), targetTag.getName());
     }
 
@@ -50,11 +54,15 @@ public class TagService {
                 .toList();
     }
 
+    public Page<TagResponse> readAllTagsByPage(Pageable pageable) {
+        return tagRepository.findAll(pageable).map(tag -> new TagResponse(tag.getId(), tag.getName()));
+    }
+
     @Transactional
     public UpdateTagResponse updateTag(Long targetId, UpdateTagRequest request) {
 
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(() -> new RuntimeException("해당하는 Id 의 Tag 를 찾을 수 없습니다."));
+                .orElseThrow(TagNotFoundException::new);
         targetTag.updateName(request.name());
         tagRepository.save(targetTag);
 
@@ -65,7 +73,7 @@ public class TagService {
     public void deleteTagById(Long targetId) {
 
         Tag targetTag = tagRepository.findById(targetId)
-                .orElseThrow(() -> new RuntimeException("해당하는 Id의 Tag를 찾을 수 없습니다."));
+                .orElseThrow(TagNotFoundException::new);
         tagRepository.delete(targetTag);
 
     }

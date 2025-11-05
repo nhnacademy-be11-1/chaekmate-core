@@ -19,17 +19,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import shop.chaekmate.core.book.dto.request.CreateLikeRequest;
-import shop.chaekmate.core.book.dto.request.DeleteLikeRequest;
+
 import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.Like;
+import shop.chaekmate.core.book.exception.LikeNotFoundException;
 import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.book.repository.LikeRepository;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
 @ActiveProfiles("test")
+@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 class LikeServiceTest {
 
@@ -51,7 +52,6 @@ class LikeServiceTest {
         long bookId = 1L;
         long memberId = 1L;
         long likeId = 1L;
-        var request = new CreateLikeRequest(memberId);
         var book = mock(Book.class);
         var member = mock(Member.class);
 
@@ -70,7 +70,7 @@ class LikeServiceTest {
         when(member.getId()).thenReturn(memberId);
 
         // when
-        var response = likeService.createLike(bookId, request);
+        var response = likeService.createLike(bookId, memberId);
 
         // then
         assertThat(response).isNotNull();
@@ -113,7 +113,7 @@ class LikeServiceTest {
         when(likeRepository.findById(likeId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(RuntimeException.class, () -> likeService.readLikeById(likeId));
+        assertThrows(LikeNotFoundException.class, () -> likeService.readLikeById(likeId));
     }
 
     @Test
@@ -139,8 +139,8 @@ class LikeServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).id()).isEqualTo(1L);
-        assertThat(responses.get(0).bookId()).isEqualTo(bookId);
+        assertThat(responses.getFirst().id()).isEqualTo(1L);
+        assertThat(responses.getFirst().bookId()).isEqualTo(bookId);
     }
 
     @Test
@@ -166,7 +166,7 @@ class LikeServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).memberId()).isEqualTo(memberId);
+        assertThat(responses.getFirst().memberId()).isEqualTo(memberId);
     }
 
     @Test
@@ -189,14 +189,13 @@ class LikeServiceTest {
         // given
         long bookId = 1L;
         long memberId = 1L;
-        var request = new DeleteLikeRequest(memberId);
         var like = mock(Like.class);
 
         when(likeRepository.findByBook_IdAndMember_Id(bookId, memberId)).thenReturn(Optional.of(like));
         doNothing().when(likeRepository).delete(like);
 
         // when
-        likeService.deleteLikeByBookIdAndMemberId(bookId, request);
+        likeService.deleteLikeByBookIdAndMemberId(bookId, memberId);
 
         // then
         verify(likeRepository, times(1)).delete(like);

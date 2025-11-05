@@ -1,27 +1,22 @@
 package shop.chaekmate.core.book.entity;
 
-import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PROTECTED;
+
+@Entity
 @Getter
 @Table(name = "book_tag")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE book_tag SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@Entity
 public class BookTag extends BaseEntity {
 
     @Id
@@ -35,4 +30,9 @@ public class BookTag extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
+
+    public BookTag(Book book, Tag tag) {
+        this.book = book;
+        this.tag = tag;
+    }
 }

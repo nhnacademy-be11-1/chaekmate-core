@@ -2,6 +2,13 @@ spring:
   application:
     name: chaekmate-core
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
 eureka:
   client:
     register-with-eureka: true
@@ -10,6 +17,10 @@ eureka:
   instance:
     prefer-ip-address: true
 
+aladin:
+  api:
+    base-url: http://www.aladin.co.kr/ttb/api
+    key: ttbgudcjf15411308001
 
 management:
   endpoints:
