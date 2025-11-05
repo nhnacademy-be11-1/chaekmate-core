@@ -2,7 +2,6 @@ package shop.chaekmate.core.book.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -47,7 +46,7 @@ public class TagController implements TagControllerDocs {
     }
 
     @GetMapping("/tags/paged")
-    public ResponseEntity<PageResponse<TagResponse>> readAllTagsByPage(@PageableDefault(page = 0, size = 10) Pageable pageable) {
+    public ResponseEntity<PageResponse<TagResponse>> readAllTagsByPage(@PageableDefault Pageable pageable) {
         return ResponseEntity.ok(PageResponse.from(tagService.readAllTagsByPage(pageable)));
     }
 
