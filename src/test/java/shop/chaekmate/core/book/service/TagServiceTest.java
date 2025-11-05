@@ -1,6 +1,8 @@
 package shop.chaekmate.core.book.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -23,9 +25,17 @@ import shop.chaekmate.core.book.dto.request.CreateTagRequest;
 import shop.chaekmate.core.book.dto.response.TagResponse;
 import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.entity.Tag;
+import shop.chaekmate.core.book.exception.DuplicateTagNameException;
+import shop.chaekmate.core.book.exception.tag.TagNotFoundException;
 import shop.chaekmate.core.book.repository.TagRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 @ActiveProfiles("test")
+@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -36,6 +46,27 @@ class TagServiceTest {
 
     @InjectMocks
     private TagService tagService;
+
+    @Test
+    void 페이지네이션으로_태그_조회_성공() {
+        Tag tag1 = new Tag("Tag1");
+        Tag tag2 = new Tag("Tag2");
+
+        List<Tag> tags = List.of(tag1, tag2);
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<Tag> tagPage = new PageImpl<>(List.of(tag1), pageable, tags.size());
+
+        when(tagRepository.findAll(pageable)).thenReturn(tagPage);
+
+        Page<TagResponse> responsePage = tagService.readAllTagsByPage(pageable);
+
+        assertAll(
+                () -> assertNotNull(responsePage),
+                () -> assertThat(responsePage.getTotalElements()).isEqualTo(tags.size()),
+                () -> assertThat(responsePage.getContent()).hasSize(1),
+                () -> assertThat(responsePage.getContent().getFirst().name()).isEqualTo("Tag1")
+        );
+    }
 
     @Test
     void 태그_생성_성공() {
@@ -62,7 +93,7 @@ class TagServiceTest {
         when(tagRepository.findByName("Existing Tag")).thenReturn(Optional.of(new Tag("Existing Tag")));
 
         // when & then
-        assertThrows(RuntimeException.class, () -> tagService.createTag(request));
+        assertThrows(DuplicateTagNameException.class, () -> tagService.createTag(request));
     }
 
     @Test
@@ -89,7 +120,7 @@ class TagServiceTest {
         when(tagRepository.findById(tagId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(RuntimeException.class, () -> tagService.readTagById(tagId));
+        assertThrows(TagNotFoundException.class, () -> tagService.readTagById(tagId));
     }
 
     @Test
@@ -103,7 +134,7 @@ class TagServiceTest {
 
         // then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).name()).isEqualTo("Test Tag");
+        assertThat(responses.getFirst().name()).isEqualTo("Test Tag");
     }
 
     @Test

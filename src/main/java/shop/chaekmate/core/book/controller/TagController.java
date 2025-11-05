@@ -2,6 +2,8 @@ package shop.chaekmate.core.book.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.chaekmate.core.book.controller.docs.TagControllerDocs;
 import shop.chaekmate.core.book.dto.request.CreateTagRequest;
 import shop.chaekmate.core.book.dto.response.CreateTagResponse;
+import shop.chaekmate.core.book.dto.response.PageResponse;
 import shop.chaekmate.core.book.dto.response.TagResponse;
 import shop.chaekmate.core.book.dto.request.UpdateTagRequest;
 import shop.chaekmate.core.book.dto.response.UpdateTagResponse;
@@ -40,6 +43,11 @@ public class TagController implements TagControllerDocs {
     @GetMapping("/tags")
     public ResponseEntity<List<TagResponse>> readAllTags() {
         return ResponseEntity.ok(tagService.readAllTags());
+    }
+
+    @GetMapping(value = "/tags", params = {"page", "size"})
+    public ResponseEntity<PageResponse<TagResponse>> readAllTagsByPage(Pageable pageable) {
+        return ResponseEntity.ok(PageResponse.from(tagService.readAllTagsByPage(pageable)));
     }
 
     @PutMapping("/admin/tags/{id}")

@@ -1,11 +1,23 @@
 package shop.chaekmate.core.common.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.info.Info;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@OpenAPIDefinition(
+        info = @io.swagger.v3.oas.annotations.info.Info(title = "chaekmate core API", version = "v1", description = "chaekmate core 서버 API 문서")
+)
+@SecurityScheme(
+        name = "bearerAuth",               // 사용할 인증 이름
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SwaggerConfig {
 
     //wrapper
@@ -36,7 +48,6 @@ public class SwaggerConfig {
                 .build();
     }
 
-    //tag 추가 ↓
     @Bean
     public GroupedOpenApi tagApi() {
         return GroupedOpenApi.builder()
@@ -44,7 +55,7 @@ public class SwaggerConfig {
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
                                 .title("태그 관련 API")
-                                .description("태그 추가, 수정, 삭제, 조회 기능")
+                                .description("태그 추가, 조회, 수정, 삭제 기능")
                                 .version("v1.0")))
                 .pathsToMatch("/admin/tags/**", "/tags/**")
                 .build();
@@ -57,12 +68,11 @@ public class SwaggerConfig {
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
                                 .title("카테고리 관련 API")
-                                .description("카테고리 추가, 수정, 삭제 , 조회기능")
+                                .description("카테고리 추가, 조회, 수정, 삭제 기능")
                                 .version("v1.0")))
                 .pathsToMatch("/admin/categories/**", "/categories/**")
                 .build();
     }
-
 
     @Bean
     public GroupedOpenApi likeApi() {
@@ -70,7 +80,7 @@ public class SwaggerConfig {
                 .group("Like API")
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
-                                .title("좋아요 관리 API")
+                                .title("좋아요 관련 API")
                                 .description("좋아요 생성, 삭제, 조회 기능")
                                 .version("v1.0")))
                 .pathsToMatch("/books/**/likes", "/likes/**", "/members/**/likes")
@@ -83,10 +93,23 @@ public class SwaggerConfig {
                 .group("Book API")
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
-                                .title("북 관련 API")
-                                .description("북 생성, 수정, 삭제, 조회 기능")
+                                .title("도서 관리 API")
+                                .description("도서 생성, 수정, 삭제, 조회 기능")
                                 .version("v1.0")))
-                .pathsToMatch("/books/**", "/admin/books/**")
+                .pathsToMatch("/books/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi pointPolicyApi() {
+        return GroupedOpenApi.builder()
+                .group("Point Policy API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("포인트 정책 API")
+                                .description("포인트 정책 조회 및 관리 API")
+                                .version("v1.0")))
+                .pathsToMatch("/admin/point-policies/**", "/point-policies/**")
                 .build();
     }
 }

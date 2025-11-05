@@ -45,9 +45,9 @@ class WrapperControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.name").value(request.name()))
-                .andExpect(jsonPath("$.price").value(request.price()));
+                .andExpect(jsonPath("$.data.id").isNumber())
+                .andExpect(jsonPath("$.data.name").value(request.name()))
+                .andExpect(jsonPath("$.data.price").value(request.price()));
     }
 
     @Test
@@ -59,8 +59,8 @@ class WrapperControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(request.name()))
-                .andExpect(jsonPath("$.price").value(request.price()));
+                .andExpect(jsonPath("$.data.name").value(request.name()))
+                .andExpect(jsonPath("$.data.price").value(request.price()));
     }
 
     @Test
@@ -80,9 +80,9 @@ class WrapperControllerTest {
 
         mockMvc.perform(get("/wrappers/{id}", wrapper.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(wrapper.getId()))
-                .andExpect(jsonPath("$.name").value(wrapper.getName()))
-                .andExpect(jsonPath("$.price").value(wrapper.getPrice()));
+                .andExpect(jsonPath("$.data.id").value(wrapper.getId()))
+                .andExpect(jsonPath("$.data.name").value(wrapper.getName()))
+                .andExpect(jsonPath("$.data.price").value(wrapper.getPrice()));
     }
 
     @Test
@@ -92,10 +92,11 @@ class WrapperControllerTest {
 
         mockMvc.perform(get("/wrappers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[*].name").value(
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[*].name").value(
                         org.hamcrest.Matchers.containsInAnyOrder(wrapper1.getName(), wrapper2.getName())))
-                .andExpect(jsonPath("$[*].price").value(org.hamcrest.Matchers.containsInAnyOrder(wrapper1.getPrice(),
-                        wrapper2.getPrice())));
+                .andExpect(
+                        jsonPath("$.data[*].price").value(org.hamcrest.Matchers.containsInAnyOrder(wrapper1.getPrice(),
+                                wrapper2.getPrice())));
     }
 }

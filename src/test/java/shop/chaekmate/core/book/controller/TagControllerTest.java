@@ -9,8 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,7 +27,6 @@ import shop.chaekmate.core.book.repository.TagRepository;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @SuppressWarnings("NonAsciiCharacters")
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class TagControllerTest {
 
     @Autowired
@@ -40,6 +37,20 @@ class TagControllerTest {
     private TagRepository tagRepository;
 
     @Test
+    void 페이지네이션으로_태그_조회_요청_성공() throws Exception {
+        // given
+        tagRepository.save(new Tag("Tag1"));
+        tagRepository.save(new Tag("Tag2"));
+
+        // when & then
+        mockMvc.perform(get("/tags?page=0&size=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(1))
+                .andExpect(jsonPath("$.data.content[0].name").value("Tag1"));
+    }
+
+    @Test
     void 태그_생성_요청_성공() throws Exception {
         CreateTagRequest request = new CreateTagRequest("New Tag");
 
@@ -47,7 +58,7 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("New Tag"));
+                .andExpect(jsonPath("$.data.name").value("New Tag"));
     }
 
     @Test
@@ -56,8 +67,8 @@ class TagControllerTest {
 
         mockMvc.perform(get("/tags/{id}", tag.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(tag.getId()))
-                .andExpect(jsonPath("$.name").value("Test Tag"));
+                .andExpect(jsonPath("$.data.id").value(tag.getId()))
+                .andExpect(jsonPath("$.data.name").value("Test Tag"));
     }
 
     @Test
@@ -66,7 +77,7 @@ class TagControllerTest {
 
         mockMvc.perform(get("/tags"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Test Tag"));
+                .andExpect(jsonPath("$.data[0].name").value("Test Tag"));
     }
 
     @Test
@@ -78,8 +89,8 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(tag.getId()))
-                .andExpect(jsonPath("$.name").value("Updated Tag"));
+                .andExpect(jsonPath("$.data.id").value(tag.getId()))
+                .andExpect(jsonPath("$.data.name").value("Updated Tag"));
     }
 
     @Test

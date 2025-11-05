@@ -21,7 +21,6 @@ public record BookUpdateRequest(
         @Size(min = 1, max = 100, message = "출판사는 1자이상 100자 이하여야 합니다.")
         String publisher,
 
-        @NotNull(message = "출판일시를 등록은 필수입니다.")
         LocalDateTime publishedAt,
 
         @NotNull(message = "isbn은 등록은 필수입니다.")
