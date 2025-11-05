@@ -30,20 +30,20 @@ public class PointHistory extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name = "amount", nullable = false)
-    private Long point;
-
     @Enumerated(STRING)
     @Column(name = "type", nullable = false, length = 10)
     private PointSpendType type;
 
+    @Column(name = "amount", nullable = false)
+    private int point;
+
     @Column(name = "source", nullable = false, length = 200)
     private String source;
 
-    public PointHistory(Member member, Long point, PointSpendType type, String source) {
+    public PointHistory(Member member, PointSpendType type, int point, String source) {
         this.member = member;
-        this.point = point;
         this.type = type;
+        this.point = point;
         this.source = source;
     }
 }
