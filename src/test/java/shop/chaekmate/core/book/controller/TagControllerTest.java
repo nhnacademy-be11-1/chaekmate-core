@@ -43,7 +43,7 @@ class TagControllerTest {
         tagRepository.save(new Tag("Tag2"));
 
         // when & then
-        mockMvc.perform(get("/tags?page=0&size=1"))
+        mockMvc.perform(get("/tags/paged?page=0&size=1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content").isArray())
                 .andExpect(jsonPath("$.data.content.length()").value(1))
