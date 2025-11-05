@@ -60,7 +60,7 @@ class PointPolicyServiceTest {
 
         // when
         CreatePointPolicyResponse response = pointService.createPointPolicyRequest(request);
-
+        
         // then
         assertNotNull(response);
         assertAll(
