@@ -5,9 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.response.CategoryHierarchyResponse;
 import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
 import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
 import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
@@ -16,7 +21,7 @@ import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
 import shop.chaekmate.core.book.entity.Category;
 import shop.chaekmate.core.book.exception.CategoryHasBookException;
 import shop.chaekmate.core.book.exception.CategoryHasChildException;
-import shop.chaekmate.core.book.exception.CategoryNotFoundException;
+import shop.chaekmate.core.book.exception.category.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
 import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
@@ -130,5 +135,36 @@ public class CategoryService {
         }
 
         return roots;
+    }
+
+    @Transactional
+    public Page<CategoryHierarchyResponse> readAllCategoriesByPage(Pageable pageable) {
+        Page<Category> categoriesPage = categoryRepository.findAll(pageable);
+        List<Category> allCategories = categoryRepository.findAll();
+        Map<Long, String> categoryHierarchyMap = new HashMap<>();
+
+        for (Category category : allCategories) {
+            categoryHierarchyMap.put(category.getId(), buildCategoryHierarchy(category, allCategories));
+        }
+
+        List<CategoryHierarchyResponse> responses = categoriesPage.getContent().stream()
+                .map(category -> new CategoryHierarchyResponse(category.getId(),
+                        categoryHierarchyMap.get(category.getId())))
+                .toList();
+
+        return new PageImpl<>(responses, pageable, categoriesPage.getTotalElements());
+    }
+
+    private String buildCategoryHierarchy(Category category, List<Category> allCategories) {
+        StringBuilder hierarchy = new StringBuilder(category.getName());
+        Category current = category;
+        while (Objects.requireNonNull(current).getParentCategory() != null) {
+            Long parentId = current.getParentCategory().getId();
+            current = allCategories.stream().filter(c -> c.getId().equals(parentId)).findFirst().orElse(null);
+            if (current != null) {
+                hierarchy.insert(0, current.getName() + " > ");
+            }
+        }
+        return hierarchy.toString();
     }
 }
