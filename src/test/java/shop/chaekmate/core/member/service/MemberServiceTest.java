@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -24,7 +23,6 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 import shop.chaekmate.core.member.exception.DuplicatedEmailException;
 import shop.chaekmate.core.member.exception.DuplicatedLoginIdException;
-import shop.chaekmate.core.member.exception.InvalidMemberRequestException;
 import shop.chaekmate.core.member.exception.MemberNotFoundException;
 import shop.chaekmate.core.member.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
