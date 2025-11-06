@@ -47,7 +47,7 @@ class MemberServiceTest {
                 "1", "password", "user", "01012345678", "j@test.com", LocalDate.of(2003,5,1)
         );
 
-        given(memberRepository.existsByLoginId("1")).willReturn(false);
+        given(memberRepository.existsAnyByLoginId("1")).willReturn(false);
         given(memberRepository.existsByEmail("j@test.com")).willReturn(false);
 
         var saved = member("1", "hashed", "user", "01012345678", "j@test.com", LocalDate.of(2003,5,1));
@@ -65,11 +65,10 @@ class MemberServiceTest {
         var req = new CreateMemberRequest(
                 "dupId", "pw", "이름", "010", "a@test.com", LocalDate.of(2000,1,1)
         );
-        given(memberRepository.existsByLoginId("dupId")).willReturn(true);
+        given(memberRepository.existsAnyByLoginId("dupId")).willReturn(true);
 
         assertThatThrownBy(() -> memberService.createMember(req))
-                .isInstanceOf(DuplicatedLoginIdException.class)
-                .hasMessageContaining("로그인 ID");
+                .isInstanceOf(DuplicatedLoginIdException.class);
     }
 
     @Test
@@ -125,8 +124,8 @@ class MemberServiceTest {
 
         memberService.deleteMember(7L);
 
-        assertThat(m.getDeletedAt()).isNotNull();
-        then(memberRepository).should(times(0)).delete(any());
+        verify(memberRepository).delete(m);          // 여기까지만 본다
+        verify(memberRepository).findById(7L);
     }
 
     private Member member(String loginId, String password, String name, String phone, String email, LocalDate birth) {

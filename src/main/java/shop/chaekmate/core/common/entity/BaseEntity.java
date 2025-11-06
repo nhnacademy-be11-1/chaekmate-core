@@ -25,7 +25,6 @@ public abstract class BaseEntity {
     @Column(columnDefinition = "datetime(6)", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Setter(AccessLevel.PROTECTED)
     @Column(columnDefinition = "datetime(6)")
     private LocalDateTime deletedAt;
 }

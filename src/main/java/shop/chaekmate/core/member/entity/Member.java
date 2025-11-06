@@ -74,8 +74,4 @@ public class Member extends BaseEntity {
         this.email = email;
         this.phone = phone;
     }
-
-    public void markAsDeleted() {
-        this.setDeletedAt(LocalDateTime.now());
-    }
 }

@@ -20,13 +20,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberService {
-
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Transactional
     public MemberResponse createMember(CreateMemberRequest request) {
-        if (memberRepository.existsByLoginId(request.loginId())) {
+        if (memberRepository.existsAnyByLoginId(request.loginId())) {
             throw new DuplicatedLoginIdException();
         }
         if (memberRepository.existsByEmail(request.email())) {
@@ -70,14 +69,12 @@ public class MemberService {
         return toResponse(member);
     }
 
-
     @Transactional
     public void deleteMember(Long id) {
-        Member m = memberRepository.findById(id)
+        Member member = memberRepository.findById(id)
                 .orElseThrow(MemberNotFoundException::new);
-        m.markAsDeleted(); // deletedAt = now()
+        memberRepository.delete(member);
     }
-
 
     private Member findMember(Long id) {
         return memberRepository.findById(id)
