@@ -49,9 +49,9 @@ class DeliveryPolicyControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.freeStandardAmount").value(request.freeStandardAmount()))
-                .andExpect(jsonPath("$.deliveryFee").value(request.deliveryFee()));
+                .andExpect(jsonPath("$.data.id").isNumber())
+                .andExpect(jsonPath("$.data.freeStandardAmount").value(request.freeStandardAmount()))
+                .andExpect(jsonPath("$.data.deliveryFee").value(request.deliveryFee()));
     }
 
     @Test
@@ -68,9 +68,9 @@ class DeliveryPolicyControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request2)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.freeStandardAmount").value(request2.freeStandardAmount()))
-                .andExpect(jsonPath("$.deliveryFee").value(request2.deliveryFee()));
+                .andExpect(jsonPath("$.data.id").isNumber())
+                .andExpect(jsonPath("$.data.freeStandardAmount").value(request2.freeStandardAmount()))
+                .andExpect(jsonPath("$.data.deliveryFee").value(request2.deliveryFee()));
 
         List<DeliveryPolicy> policies =
                 deliveryPolicyRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -93,11 +93,11 @@ class DeliveryPolicyControllerTest {
                         .param("size", "20")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.size").value(20))
-                .andExpect(jsonPath("$.totalElements").value(3))
-                .andExpect(jsonPath("$.content[0].freeStandardAmount").value(50000))
-                .andExpect(jsonPath("$.content[1].deliveryFee").value(4000));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.size").value(20))
+                .andExpect(jsonPath("$.data.totalElements").value(3))
+                .andExpect(jsonPath("$.data.content[0].freeStandardAmount").value(50000))
+                .andExpect(jsonPath("$.data.content[1].deliveryFee").value(4000));
     }
 
     @Test
@@ -106,8 +106,8 @@ class DeliveryPolicyControllerTest {
 
         mockMvc.perform(get("/delivery-policy"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(deliveryPolicy.getId()))
-                .andExpect(jsonPath("$.freeStandardAmount").value(deliveryPolicy.getFreeStandardAmount()))
-                .andExpect(jsonPath("$.deliveryFee").value(deliveryPolicy.getDeliveryFee()));
+                .andExpect(jsonPath("$.data.id").value(deliveryPolicy.getId()))
+                .andExpect(jsonPath("$.data.freeStandardAmount").value(deliveryPolicy.getFreeStandardAmount()))
+                .andExpect(jsonPath("$.data.deliveryFee").value(deliveryPolicy.getDeliveryFee()));
     }
 }

@@ -26,7 +26,7 @@ spring:
   jpa:
     hibernate:
       # create , update 금지
-      ddl-auto: none # validate 로 수정 (전체 entity  수정 후)
+      ddl-auto: validate # validate 로 수정 (전체 entity  수정 후)
     show-sql: true
     properties:
       hibernate:
@@ -57,10 +57,3 @@ management:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY:chaekmatedummykeychaekmatedummykeychaekmatedummykey}
-
-toss:
-  api:
-    url: https://api.tosspayments.com/v1
-  secret-key: test_sk_GjLJoQ1aVZbyBBQ2EYKPVw6KYe2R
-  success-url: http://localhost:9100/payments/success
-  fail-url: http://localhost:9100/payments/fail

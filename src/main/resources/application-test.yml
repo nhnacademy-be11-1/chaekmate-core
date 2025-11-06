@@ -19,12 +19,5 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
 
-#toss:
-#  api:
-#    url: https://api.tosspayments.com/v1
-#  secret-key: test_sk_GjLJoQ1aVZbyBBQ2EYKPVw6KYe2R
-#  success-url: http://localhost:8080/payments/success
-#  fail-url: http://localhost:8080/payments/fail
-
 jwt:
   secret-key: chaekmatedummykeychaekmatedummykeychaekmatedummykey
