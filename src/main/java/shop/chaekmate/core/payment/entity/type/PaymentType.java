@@ -1,6 +1,6 @@
 package shop.chaekmate.core.payment.entity.type;
 
-public enum PaymentMethod {
+public enum PaymentType {
 
     POINT,
     TOSS,

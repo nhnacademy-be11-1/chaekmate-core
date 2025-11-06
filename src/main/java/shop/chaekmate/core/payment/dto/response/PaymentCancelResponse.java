@@ -1,6 +1,7 @@
 package shop.chaekmate.core.payment.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 
 @Schema(description = "결제 취소 응답 DTO")
 public record PaymentCancelResponse(
@@ -18,6 +19,6 @@ public record PaymentCancelResponse(
         String status,
 
         @Schema(description = "취소 완료 시각", example = "2025-11-03T22:35:40")
-        String canceledAt
+        LocalDateTime canceledAt
 ) {}
 

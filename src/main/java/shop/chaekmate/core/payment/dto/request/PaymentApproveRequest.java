@@ -3,9 +3,14 @@ package shop.chaekmate.core.payment.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import shop.chaekmate.core.payment.entity.type.PaymentType;
 
 @Schema(description = "결제 승인 요청")
 public record PaymentApproveRequest(
+
+        @Schema(description = "결제 수단", example = "TOSS")
+        @NotBlank(message = "결제 수단 선택은 필수 값입니다.")
+        PaymentType paymentType,
 
         @Schema(description = "결제 키 (결제사에서 전달받은 고유 키)", example = "test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R")
         @NotBlank(message = "결제 키는 필수 값입니다.")

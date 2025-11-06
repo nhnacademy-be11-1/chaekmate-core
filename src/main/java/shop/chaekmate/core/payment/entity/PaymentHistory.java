@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.chaekmate.core.payment.entity.type.PaymentMethod;
+import shop.chaekmate.core.payment.entity.type.PaymentType;
 import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
 
 @Getter
@@ -29,17 +29,17 @@ public class PaymentHistory {
     @Column(name = "order_number", nullable = false, length = 21)
     private String orderNumber;
 
-    @Enumerated(STRING)
-    @Column(name = "payment_method", nullable = false, length = 30)
-    private PaymentMethod paymentMethod;
+//    @Enumerated(STRING)
+    @Column(name = "payment_type", nullable = false, length = 30)
+    private String paymentType;
 
     @Column(name = "payment_key", length = 200)
     private String paymentKey;
 
-    private long pointUsed;
+    private int pointUsed;
 
     @Column(nullable = false)
-    private long paymentPrice;
+    private long totalAmount;
 
     @Enumerated(STRING)
     @Column(name = "payment_status", nullable = false, length = 30)
@@ -52,4 +52,47 @@ public class PaymentHistory {
     private LocalDateTime failedAt;
 
     private String reason;
+
+    // 성공
+    public static PaymentHistory createApproved(String orderNumber, String paymentType, String paymentKey,
+                                                long totalAmount, LocalDateTime approvedAt) {
+
+        PaymentHistory history = new PaymentHistory();
+        history.orderNumber = orderNumber;
+        history.paymentType = paymentType;
+        history.paymentKey = paymentKey;
+        history.totalAmount = totalAmount;
+        history.paymentStatus = PaymentStatusType.APPROVED;
+        history.approvedAt = approvedAt;
+        return history;
+    }
+
+    // 실패
+    public static PaymentHistory createFailed(String orderNumber, String paymentType,
+                                              long totalAmount, LocalDateTime failedAt, String reason) {
+
+        PaymentHistory history = new PaymentHistory();
+        history.orderNumber = orderNumber;
+        history.paymentType = paymentType;
+        history.totalAmount = totalAmount;
+        history.paymentStatus = PaymentStatusType.FAILED;
+        history.failedAt = failedAt;
+        history.reason = reason;
+        return history;
+    }
+
+    // 취소
+    public static PaymentHistory createCanceled(String orderNumber, String paymentType, String paymentKey,
+                                                long totalAmount, LocalDateTime canceledAt, String reason) {
+
+        PaymentHistory history = new PaymentHistory();
+        history.orderNumber = orderNumber;
+        history.paymentType = paymentType;
+        history.paymentKey = paymentKey;
+        history.totalAmount = totalAmount;
+        history.paymentStatus = PaymentStatusType.CANCELED;
+        history.canceledAt = canceledAt;
+        history.reason = reason;
+        return history;
+    }
 }

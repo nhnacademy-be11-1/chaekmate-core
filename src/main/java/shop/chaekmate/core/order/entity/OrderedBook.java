@@ -46,7 +46,7 @@ public class OrderedBook extends BaseEntity {
     private Wrapper wrapper;
 
     @Column(nullable = false)
-    private long quantity;
+    private int quantity;
 
     @Column(nullable = false)
     private int bookPrice;
@@ -55,10 +55,10 @@ public class OrderedBook extends BaseEntity {
 
     private int couponDiscount;
 
-    private long pointUsed;
+    private int pointUsed;
 
     @Column(nullable = false)
-    private long finalUnitPrice;
+    private int finalUnitPrice;
 
     @Column(nullable = false)
     private long totalPrice;

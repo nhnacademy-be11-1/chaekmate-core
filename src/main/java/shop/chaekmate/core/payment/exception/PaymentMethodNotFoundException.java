@@ -1,7 +1,10 @@
 package shop.chaekmate.core.payment.exception;
 
-public class PaymentMethodNotFoundException extends RuntimeException {
+import shop.chaekmate.core.common.exception.CoreException;
+import shop.chaekmate.core.payment.exception.PaymentErrorCode;
+
+public class PaymentMethodNotFoundException extends CoreException {
     public PaymentMethodNotFoundException() {
-        super();
+        super(PaymentErrorCode.NOT_FOUND);
     }
 }
