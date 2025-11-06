@@ -43,11 +43,11 @@ class TagControllerTest {
         tagRepository.save(new Tag("Tag2"));
 
         // when & then
-        mockMvc.perform(get("/tags?page=0&size=1"))
+        mockMvc.perform(get("/tags/paged?page=0&size=1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(1))
-                .andExpect(jsonPath("$.content[0].name").value("Tag1"));
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content.length()").value(1))
+                .andExpect(jsonPath("$.data.content[0].name").value("Tag1"));
     }
 
     @Test
@@ -58,7 +58,7 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("New Tag"));
+                .andExpect(jsonPath("$.data.name").value("New Tag"));
     }
 
     @Test
@@ -67,8 +67,8 @@ class TagControllerTest {
 
         mockMvc.perform(get("/tags/{id}", tag.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(tag.getId()))
-                .andExpect(jsonPath("$.name").value("Test Tag"));
+                .andExpect(jsonPath("$.data.id").value(tag.getId()))
+                .andExpect(jsonPath("$.data.name").value("Test Tag"));
     }
 
     @Test
@@ -77,7 +77,7 @@ class TagControllerTest {
 
         mockMvc.perform(get("/tags"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Test Tag"));
+                .andExpect(jsonPath("$.data[0].name").value("Test Tag"));
     }
 
     @Test
@@ -89,8 +89,8 @@ class TagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(tag.getId()))
-                .andExpect(jsonPath("$.name").value("Updated Tag"));
+                .andExpect(jsonPath("$.data.id").value(tag.getId()))
+                .andExpect(jsonPath("$.data.name").value("Updated Tag"));
     }
 
     @Test
