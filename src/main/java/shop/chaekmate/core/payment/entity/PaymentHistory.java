@@ -6,6 +6,7 @@ import static lombok.AccessLevel.PROTECTED;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.chaekmate.core.payment.entity.type.PaymentType;
@@ -45,17 +46,17 @@ public class PaymentHistory {
     @Column(name = "payment_status", nullable = false, length = 30)
     private PaymentStatusType paymentStatus;
 
-    private LocalDateTime approvedAt;
+    private OffsetDateTime approvedAt;
 
-    private LocalDateTime canceledAt;
+    private OffsetDateTime canceledAt;
 
-    private LocalDateTime failedAt;
+    private OffsetDateTime failedAt;
 
     private String reason;
 
     // 성공
     public static PaymentHistory createApproved(String orderNumber, String paymentType, String paymentKey,
-                                                long totalAmount, LocalDateTime approvedAt) {
+                                                long totalAmount, OffsetDateTime approvedAt) {
 
         PaymentHistory history = new PaymentHistory();
         history.orderNumber = orderNumber;
@@ -69,7 +70,7 @@ public class PaymentHistory {
 
     // 실패
     public static PaymentHistory createFailed(String orderNumber, String paymentType,
-                                              long totalAmount, LocalDateTime failedAt, String reason) {
+                                              long totalAmount, OffsetDateTime failedAt, String reason) {
 
         PaymentHistory history = new PaymentHistory();
         history.orderNumber = orderNumber;
@@ -83,7 +84,7 @@ public class PaymentHistory {
 
     // 취소
     public static PaymentHistory createCanceled(String orderNumber, String paymentType, String paymentKey,
-                                                long totalAmount, LocalDateTime canceledAt, String reason) {
+                                                long totalAmount, OffsetDateTime canceledAt, String reason) {
 
         PaymentHistory history = new PaymentHistory();
         history.orderNumber = orderNumber;

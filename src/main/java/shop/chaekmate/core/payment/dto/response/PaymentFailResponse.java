@@ -3,13 +3,14 @@ package shop.chaekmate.core.payment.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Schema(description = "결제 실패 응답 DTO")
 public record PaymentFailResponse(
 
-        @JsonProperty("orderId")
+//        @JsonProperty("orderId")
         @Schema(description = "주문 번호", example = "test-V1StGXR8_Z5jdHi6B")
-        String orderNumber,
+        String orderId,
 
         @Schema(description = "실패 사유", example = "잔액 부족으로 인한 실패")
         String message,
@@ -21,7 +22,7 @@ public record PaymentFailResponse(
         String status,
 
         @Schema(description = "결제 실패 시각", example = "2025-11-03T22:35:40")
-        LocalDateTime failedAt
+        OffsetDateTime failedAt
 ) {}
 
 /*

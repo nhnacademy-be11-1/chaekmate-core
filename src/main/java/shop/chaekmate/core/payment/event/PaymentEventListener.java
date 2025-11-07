@@ -18,7 +18,7 @@ public class PaymentEventListener {
     @EventListener
     public void handlePaymentApproved(PaymentApprovedEvent event) {
         PaymentApproveResponse res = event.getApproveResponse();
-        log.info("[EVENT] 결제 승인 수신 - 주문ID: {}", res.orderNumber());
+        log.info("[EVENT] 결제 승인 수신 - 주문ID: {}", res.orderId());
 
         orderService.saveOrder(res);
     }
@@ -26,6 +26,6 @@ public class PaymentEventListener {
     @EventListener
     public void handlePaymentFailed(PaymentFailedEvent event) {
         PaymentFailResponse res = event.getFailResponse();
-        log.warn("[EVENT] 결제 실패 수신 - 주문ID: {}, 사유: {}", res.orderNumber(), res.message());
+        log.warn("[EVENT] 결제 실패 수신 - 주문ID: {}, 사유: {}", res.orderId(), res.message());
     }
 }

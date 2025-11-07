@@ -1,11 +1,9 @@
 package shop.chaekmate.core.payment.provider.impl;
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,16 +14,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
 import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
-import shop.chaekmate.core.payment.dto.request.PaymentReadyRequest;
 import shop.chaekmate.core.payment.dto.response.PaymentApproveResponse;
 import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
-import shop.chaekmate.core.payment.dto.response.PaymentReadyResponse;
 import shop.chaekmate.core.payment.entity.type.PaymentType;
 import shop.chaekmate.core.payment.provider.PaymentProvider;
 
 @Component
 @Slf4j
-@Transactional
 @RequiredArgsConstructor
 public class TossPaymentProvider implements PaymentProvider {
 
@@ -37,64 +32,18 @@ public class TossPaymentProvider implements PaymentProvider {
     @Value("${toss.secret-key}")
     private String tossSecretKey;
 
-    @Value("${toss.success-url}")
-    private String successUrl;
-
-    @Value("${toss.fail-url}")
-    private String failUrl;
-
-    private String getAuthorization() {
-        return "Basic " + Base64.getEncoder().encodeToString((tossSecretKey + ":").getBytes());
-    }
-
     @Override
     public PaymentType getType() {
         return PaymentType.TOSS;
     }
 
-    @Override
-    public PaymentReadyResponse ready(PaymentReadyRequest request) {
-        log.info("[TOSS] 결제 준비 요청 - 금액: {}", request.amount());
-
-        String orderNumber = NanoIdUtils.randomNanoId();
-
-        Map<String, Object> body = Map.of(
-                "orderId", orderNumber,
-                "amount", request.amount(),
-                "successUrl", successUrl,
-                "failUrl", failUrl
-        );
-
-        try {
-            var response = webClient.post()
-                    .uri(tossBaseUrl + "/payments")
-                    .header("Authorization", getAuthorization())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(body)
-                    .retrieve()
-                    .bodyToMono(JsonNode.class)
-                    .block();
-
-            String checkoutUrl = Objects.requireNonNull(response).path("checkout").path("url").asText();
-
-            log.info("[TOSS] 결제 준비 완료 - 주문번호: {}, 결제창 URL: {}", orderNumber, checkoutUrl);
-            return new PaymentReadyResponse(orderNumber, checkoutUrl);
-
-        } catch (WebClientResponseException e) {
-            String errorMessage = parseErrorMessage(e);
-            log.error("[TOSS] 결제 호출 실패 - 주문번호: {}, 사유: {}", orderNumber, errorMessage);
-            throw new IllegalStateException(errorMessage);
-        }
-    }
-
-
+    @Transactional
     @Override
     public PaymentApproveResponse approve(PaymentApproveRequest request) {
-        log.info("[TOSS] 결제 승인 요청 - 주문번호: {}", request.orderNumber());
-
+        log.info("[TOSS] 결제 승인 요청 - 주문번호: {}", request.orderId());
         Map<String, Object> body = Map.of(
                 "paymentKey", request.paymentKey(),
-                "orderId", request.orderNumber(),
+                "orderId", request.orderId(),
                 "amount", request.amount()
         );
 
@@ -108,18 +57,22 @@ public class TossPaymentProvider implements PaymentProvider {
                     .bodyToMono(PaymentApproveResponse.class)
                     .block();
 
-            log.info("[TOSS] 결제 승인 완료 - 주문번호: {}", request.orderNumber());
+            log.info("{} {} {} {} {}",response.orderId(), response.paymentKey(), response.approvedAt(), response.totalAmount(), response.status());
+            log.info("[TOSS] 결제 승인 완료 - 주문번호: {}", request.orderId());
             return response;
 
         } catch (WebClientResponseException e) {
             String errorMessage = parseErrorMessage(e);
-            log.error("[TOSS] 결제 승인 실패 - 주문번호: {}, 사유: {}", request.orderNumber(), errorMessage);
+            log.error("오류메시지 {}",e.getMessage());
+            log.error("[TOSS] 결제 승인 실패 - 주문번호: {}, 사유: {}", request.orderId(), errorMessage);
             throw new IllegalStateException(errorMessage);
         }
     }
 
+    @Transactional
     @Override
     public PaymentCancelResponse cancel(PaymentCancelRequest request) {
+//        // 나중에 구현
 //        log.info("[TOSS] 결제 취소 요청 - 주문번호: {}", request.orderNumber());
 //
 //        Map<String, Object> body = Map.of("cancelReason", request.cancelReason());
@@ -145,7 +98,8 @@ public class TossPaymentProvider implements PaymentProvider {
 //        }
         return null;
     }
-
+/*
+    /// 에러 파싱 v1
     private String parseErrorMessage(WebClientResponseException e) {
         String errorMessage = e.getMessage();
 
@@ -161,9 +115,9 @@ public class TossPaymentProvider implements PaymentProvider {
 
         return errorMessage;
     }
+*/
 
     /// 에러 파싱 v2
-    /*
     private String parseErrorMessage(WebClientResponseException e) {
     String errorMessage = "결제 요청 중 오류가 발생했습니다.";
     try {
@@ -179,6 +133,8 @@ public class TossPaymentProvider implements PaymentProvider {
     }
     return errorMessage;
     }
-     */
 
+    private String getAuthorization() {
+        return "Basic " + Base64.getEncoder().encodeToString((tossSecretKey + ":").getBytes());
+    }
 }

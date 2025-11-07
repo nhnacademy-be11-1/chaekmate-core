@@ -10,7 +10,7 @@ public class OrderService {
 
     public void saveOrder(PaymentApproveResponse paymentApproveResponse) {
         log.info("[ORDER] 결제 승인으로 주문 생성 - orderId={}, amount={}",
-                paymentApproveResponse.orderNumber(), paymentApproveResponse.totalAmount());
+                paymentApproveResponse.orderId(), paymentApproveResponse.totalAmount());
 
         // 실제로는 Order 엔티티 생성 + 저장
     }

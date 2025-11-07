@@ -1,25 +1,22 @@
 package shop.chaekmate.core.payment.service;
 
 import jakarta.transaction.Transactional;
-import java.util.UUID;
+import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
-import shop.chaekmate.core.payment.dto.request.PaymentReadyRequest;
+import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
 import shop.chaekmate.core.payment.dto.response.*;
 import shop.chaekmate.core.payment.entity.PaymentHistory;
-import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
-import shop.chaekmate.core.payment.entity.type.PaymentType;
 import shop.chaekmate.core.payment.event.PaymentEventPublisher;
 import shop.chaekmate.core.payment.provider.PaymentProvider;
 import shop.chaekmate.core.payment.provider.PaymentProviderFactory;
 import shop.chaekmate.core.payment.repository.PaymentHistoryRepository;
 
-import java.time.LocalDateTime;
 
-@Slf4j
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PaymentService {
 
@@ -27,11 +24,6 @@ public class PaymentService {
     private final PaymentEventPublisher eventPublisher;
     private final PaymentHistoryRepository paymentHistoryRepository;
 
-    @Transactional
-    public PaymentReadyResponse ready(PaymentReadyRequest request) {
-        PaymentProvider provider = providerFactory.getProvider(request.paymentType());
-        return provider.ready(request);
-    }
 
     public PaymentApproveResponse approve(PaymentApproveRequest request) {
         PaymentProvider provider = providerFactory.getProvider(request.paymentType());
@@ -49,11 +41,11 @@ public class PaymentService {
             saveFailedPayment(request, e.getMessage());
 
             var failResponse = new PaymentFailResponse(
-                    request.orderNumber(),
+                    request.orderId(),
                     e.getMessage(),
                     request.amount(),
                     "FAILED",
-                    LocalDateTime.now()
+                    OffsetDateTime.now()
             );
             eventPublisher.publishPaymentFailed(failResponse);
 
@@ -64,11 +56,11 @@ public class PaymentService {
     @Transactional
     protected void saveApprovedPayment(PaymentApproveRequest request, PaymentApproveResponse response) {
         PaymentHistory approved = PaymentHistory.createApproved(
-                request.orderNumber(),
+                response.orderId(),
                 request.paymentType().name(),
-                response.key(),
+                response.paymentKey(),
                 response.totalAmount(),
-                LocalDateTime.now()
+                OffsetDateTime.now()
         );
         log.info("payment history 승인 저장 완료 {} {} {} {} {}",
                 approved.getOrderNumber(),
@@ -87,14 +79,14 @@ public class PaymentService {
     @Transactional
     protected void saveFailedPayment(PaymentApproveRequest request, String reason) {
         PaymentHistory failed = PaymentHistory.createFailed(
-                request.orderNumber(),
+                request.orderId(),
                 request.paymentType().name(),
                 request.amount(),
-                LocalDateTime.now(),
+                OffsetDateTime.now(),
                 reason
         );
 
-        log.info("payment history 승인 저장 완료 {} {} {} {} {}",
+        log.info("payment history 실패 저장 완료 {} {} {} {} {}",
                 failed.getOrderNumber(),
                 failed.getPaymentType(),
                 failed.getTotalAmount(),
@@ -103,5 +95,9 @@ public class PaymentService {
                 failed.getReason());
 
 //        paymentHistoryRepository.save(failed);
+    }
+
+    public PaymentCancelResponse cancel(PaymentCancelRequest request) {
+        return null;
     }
 }

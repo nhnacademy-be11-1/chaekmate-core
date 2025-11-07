@@ -18,7 +18,7 @@ public record PaymentApproveRequest(
 
         @Schema(description = "주문 번호", example = "test-V1StGXR8_Z5jdHi6B")
         @NotBlank(message = "주문 번호는 필수 입력 값입니다.")
-        String orderNumber,
+        String orderId,
 
         @Schema(description = "승인 금액", example = "29800")
         @Positive(message = "승인 금액은 0보다 커야 합니다.")
