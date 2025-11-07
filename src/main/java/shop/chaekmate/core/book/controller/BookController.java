@@ -58,7 +58,7 @@ public class BookController implements BookControllerDocs {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long tagId,
             @RequestParam(required = false) String keyword,
-            @PageableDefault(size = 10, page = 0) Pageable pageable) {
+            @PageableDefault(size = 12, page = 0) Pageable pageable) {
 
         validateSearchParameters(categoryId, tagId, keyword);
 
