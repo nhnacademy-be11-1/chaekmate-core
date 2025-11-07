@@ -2,6 +2,8 @@ package shop.chaekmate.core.book.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import shop.chaekmate.core.book.controller.docs.CategoryControllerDocs;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.response.CategoryHierarchyResponse;
 import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
+import shop.chaekmate.core.book.dto.response.PageResponse;
 import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
 import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
@@ -38,6 +42,11 @@ public class CategoryController implements CategoryControllerDocs {
     @GetMapping("/categories")
     public ResponseEntity<List<ReadAllCategoriesResponse>> readAllCategories() {
         return ResponseEntity.ok(categoryService.readAllCategories());
+    }
+
+    @GetMapping("/categories/paged")
+    public ResponseEntity<PageResponse<CategoryHierarchyResponse>> readAllCategoriesByPage(@PageableDefault Pageable pageable) {
+        return ResponseEntity.ok(PageResponse.from(categoryService.readAllCategoriesByPage(pageable)));
     }
 
     @GetMapping("/categories/{id}")

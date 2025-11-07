@@ -6,10 +6,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
+import shop.chaekmate.core.book.dto.response.CategoryHierarchyResponse;
 import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
+import shop.chaekmate.core.book.dto.response.PageResponse;
 import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
 import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
@@ -28,6 +31,10 @@ public interface CategoryControllerDocs {
     @Operation(summary = "카테고리 전체 조회", description = "모든 카테고리를 계층 구조로 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     ResponseEntity<List<ReadAllCategoriesResponse>> readAllCategories();
+
+    @Operation(summary = "카테고리 전체 조회 페이지네이션", description = "모든 카테고리를 페이지네이션 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "페이지네이션 조회 성공")
+    ResponseEntity<PageResponse<CategoryHierarchyResponse>> readAllCategoriesByPage(Pageable pageable);
 
     @Operation(summary = "카테고리 단건 조회", description = "ID로 카테고리를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")

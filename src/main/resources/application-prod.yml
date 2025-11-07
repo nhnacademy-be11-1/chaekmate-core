@@ -1,3 +1,16 @@
+# Core/Eureka Server Port (prod) : "배포설명" 확인
+
+# Core Server Port
+server:
+  port: ${PORT_NUMBER}
+
+# Eureka Server URL
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL_PROD}
+
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -5,17 +18,49 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+    # DBCP2 설정 (커넥션 풀)
+    type: org.apache.commons.dbcp2.BasicDataSource
+    dbcp2:
+      max-total: 10
+      min-idle: 2
+      validation-query: SELECT 1
+      test-on-borrow: true
+
   jpa:
     hibernate:
-      ddl-auto: validate
+      # create , update 금지 , prod 에선 None 고려
+      ddl-auto: validate # validate 로 수정 (전체 entity  수정 후)
+    show-sql: true
     properties:
       hibernate:
         format_sql: false
         use_sql_comments: false
         highlight_sql: false
     open-in-view: false
+    database-platform: org.hibernate.dialect.MySQLDialect
 
 logging:
   level:
     org.hibernate.SQL: warn
     org.hibernate.orm.jdbc.bind: off
+    root: info
+
+# Spring Boot Actuator 서버 상태(헬스) 모니터링
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    db:
+      enabled: true
+    redis:
+      enabled: false
+    rabbit:
+      enabled: false
+  info:
+    env:
+      enabled: true
+
+jwt: # 추 후 안 쓰게 될거지만 돌아가게 하기위해 적어놓음
+  secret-key: ${JWT_SECRET_KEY:chaekmatedummykeychaekmatedummykeychaekmatedummykey}
