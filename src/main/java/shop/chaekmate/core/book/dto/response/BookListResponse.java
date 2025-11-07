@@ -7,7 +7,9 @@ public record BookListResponse(
         String title,
         String author,
         String publisher,
-        int salesPrice
+        int price,
+        int salesPrice,
+        String imageUrl
 ) {
     @QueryProjection
     public BookListResponse {}
