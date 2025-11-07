@@ -98,4 +98,16 @@ jobs:
           script: |
             export DOMAIN="${{ env.DOMAIN }}"
             export PORT_NUMBER="${{ env.PORT_NUMBER }}"
+            export DB_HOST="${{ secrets.DB_HOST }}"
+            export DB_PORT="${{ secrets.DB_PORT }}"
+            export DB_NAME="${{ secrets.DB_NAME }}"
+            export DB_USERNAME="${{ secrets.DB_USERNAME }}"
+            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            export REDIS_HOST="${{ secrets.REDIS_HOST }}"
+            export REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
+            export REDIS_PORT="${{ secrets.REDIS_PORT }}"
+            export RABBITMQ_HOST="${{ secrets.RABBITMQ_HOST }}"
+            export RABBITMQ_USERNAME="${{ secrets.RABBITMQ_USERNAME }}"
+            export RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}"
+            export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
             bash -lc ./startup.sh
