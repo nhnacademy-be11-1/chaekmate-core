@@ -41,8 +41,8 @@ class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(body)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.loginId").value("test"))
-                .andExpect(jsonPath("$.email").value("j@test.com"));
+                .andExpect(jsonPath("$.data.loginId").value("test"))
+                .andExpect(jsonPath("$.data.email").value("j@test.com"));
     }
 
     @Test
@@ -73,8 +73,8 @@ class MemberControllerTest {
 
         mvc.perform(get("/members/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.loginId").value("user1"))
-                .andExpect(jsonPath("$.email").value("user1@test.com"));
+                .andExpect(jsonPath("$.data.loginId").value("user1"))
+                .andExpect(jsonPath("$.data.email").value("user1@test.com"));
     }
 
     @Test
@@ -90,7 +90,7 @@ class MemberControllerTest {
 
         mvc.perform(get("/members"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].loginId").exists());
+                .andExpect(jsonPath("$.data[0].loginId").exists());
     }
 
     @Test
@@ -105,8 +105,8 @@ class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(update)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("김수정"))
-                .andExpect(jsonPath("$.email").value("new2@test.com"));
+                .andExpect(jsonPath("$.data.name").value("김수정"))
+                .andExpect(jsonPath("$.data.email").value("new2@test.com"));
     }
 
     @Test
@@ -136,6 +136,6 @@ class MemberControllerTest {
                 .andReturn();
 
         JsonNode node = om.readTree(res.getResponse().getContentAsString());
-        return node.get("id").asLong();
+        return node.get("data").get("id").asLong();
     }
 }
