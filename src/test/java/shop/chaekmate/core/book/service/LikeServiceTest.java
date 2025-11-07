@@ -32,7 +32,6 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
 @ActiveProfiles("test")
-@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)

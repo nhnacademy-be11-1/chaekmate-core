@@ -39,6 +39,6 @@ class AdminBookControllerTest {
 
         mockMvc.perform(get("/admin/books/recent?limit=1"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].title").value("test title"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.[0].title").value("test title"));
     }
 }

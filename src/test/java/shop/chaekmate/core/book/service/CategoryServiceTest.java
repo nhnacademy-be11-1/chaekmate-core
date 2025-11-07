@@ -42,7 +42,6 @@ import org.springframework.data.domain.Pageable;
 import shop.chaekmate.core.book.dto.response.CategoryHierarchyResponse;
 
 @ActiveProfiles("test")
-@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
