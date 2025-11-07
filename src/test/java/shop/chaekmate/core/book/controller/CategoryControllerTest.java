@@ -44,7 +44,7 @@ class CategoryControllerTest {
         categoryRepository.save(new Category(childCategory, "Grandchild"));
 
         // when & then
-        mockMvc.perform(get("/categories?page=0&size=2"))
+        mockMvc.perform(get("/categories/paged?page=0&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content").isArray())
                 .andExpect(jsonPath("$.data.content.length()").value(2))
