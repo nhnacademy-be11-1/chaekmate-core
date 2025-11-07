@@ -168,7 +168,7 @@ Date:   Tue Nov 4 10:51:33 2025 +0900
  import shop.chaekmate.core.point.dto.request.DeletePointPolicyRequest;[m
  import shop.chaekmate.core.point.dto.request.UpdatePointPolicyRequest;[m
  import shop.chaekmate.core.point.dto.response.CreatePointPolicyResponse;[m
-[32m+[m[32mimport shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;[m[41m
+[32m+[m[32mimport shop.chaekmate.core.point.dto.response.PointPolicyResponse;[m[41m
 [m
  import shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;[m
 [32m+[m[32mimport shop.chaekmate.core.point.entity.type.PointEarnedType;[m[41m
@@ -265,7 +265,7 @@ Date:   Tue Nov 4 10:51:33 2025 +0900
 [m
 [32m+[m[32mimport shop.chaekmate.core.point.dto.response.CreatePointPolicyResponse;[m[41m
 [m
-[32m+[m[32mimport shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;[m[41m
+[32m+[m[32mimport shop.chaekmate.core.point.dto.response.PointPolicyResponse;[m[41m
 [m
 [32m+[m[32mimport shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;[m[41m
 [m
@@ -582,7 +582,7 @@ Date:   Tue Nov 4 10:51:33 2025 +0900
  import shop.chaekmate.core.point.dto.request.UpdatePointPolicyRequest;[m
  import shop.chaekmate.core.point.dto.response.CreatePointPolicyResponse;[m
  import shop.chaekmate.core.point.dto.response.DeletePointPolicyResponse;[m
-[32m+[m[32mimport shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;[m[41m
+[32m+[m[32mimport shop.chaekmate.core.point.dto.response.PointPolicyResponse;[m[41m
 [m
  import shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;[m
  import shop.chaekmate.core.point.entity.PointPolicy;[m

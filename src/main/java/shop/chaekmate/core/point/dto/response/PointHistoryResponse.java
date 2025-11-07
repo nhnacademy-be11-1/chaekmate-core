@@ -1,10 +1,11 @@
 package shop.chaekmate.core.point.dto.response;
 
+import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.point.entity.type.PointSpendType;
 
-public record CreatePointHistoryResponse (
+public record PointHistoryResponse(
         Long id,
-        Long member,
+        Member member,
         PointSpendType type,
         int point,
         String source

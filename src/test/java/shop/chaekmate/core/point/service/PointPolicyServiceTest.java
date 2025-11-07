@@ -6,7 +6,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +22,7 @@ import shop.chaekmate.core.point.dto.request.CreatePointPolicyRequest;
 import shop.chaekmate.core.point.dto.request.DeletePointPolicyRequest;
 import shop.chaekmate.core.point.dto.request.UpdatePointPolicyRequest;
 import shop.chaekmate.core.point.dto.response.CreatePointPolicyResponse;
-import shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;
+import shop.chaekmate.core.point.dto.response.PointPolicyResponse;
 import shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;
 import shop.chaekmate.core.point.entity.PointPolicy;
 import shop.chaekmate.core.point.entity.type.PointEarnedType;
@@ -123,7 +122,7 @@ class PointPolicyServiceTest {
         when(pointPolicyRepository.findByType(PointEarnedType.WELCOME)).thenReturn(Optional.of(pointPolicy));
 
         // when
-        ReadPointPolicyResponse response = pointService.getPolicyByType(PointEarnedType.WELCOME);
+        PointPolicyResponse response = pointService.getPolicyByType(PointEarnedType.WELCOME);
 
         // then
         assertNotNull(response);

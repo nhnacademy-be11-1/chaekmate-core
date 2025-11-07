@@ -112,4 +112,17 @@ public class SwaggerConfig {
                 .pathsToMatch("/admin/point-policies/**", "/point-policies/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi pointHistoryApi() {
+        return GroupedOpenApi.builder()
+                .group("Point History API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("포인트 History API")
+                                .description("포인트 History 조회 API")
+                                .version("v1.0")))
+                .pathsToMatch("/admin/point-history/**", "/point-history/**")
+                .build();
+    }
 }
