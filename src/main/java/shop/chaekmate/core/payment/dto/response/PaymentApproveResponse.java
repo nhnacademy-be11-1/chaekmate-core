@@ -1,18 +1,20 @@
 package shop.chaekmate.core.payment.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 
 @Schema(description = "결제 승인 응답")
 public record PaymentApproveResponse(
 
-        @Schema(description = "주문 번호", example = "test-V1StGXR8_Z5jdHi6B")
-        String orderId,
+        @Schema(description = "주문 번호")
+        @JsonProperty("orderId")
+        String orderNumber,
 
-        @Schema(description = "결제 키", example = "test_sk_GjLJoQ1aVZbyBBQ2EYKPVw6KYe2R")
+        @Schema(description = "결제 키")
         String paymentKey,
 
-        @Schema(description = "승인된 금액", example = "29800")
+        @Schema(description = "승인된 금액")
         long totalAmount,
 
         @Schema(description = "결제 상태", example = "DONE")

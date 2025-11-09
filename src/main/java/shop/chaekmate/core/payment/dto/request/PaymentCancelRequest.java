@@ -1,5 +1,6 @@
 package shop.chaekmate.core.payment.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -13,6 +14,7 @@ public record PaymentCancelRequest(
 
         @Schema(description = "주문 번호", example = "test-V1StGXR8_Z5jdHi6B")
         @NotBlank(message = "주문 번호는 필수 입력 값입니다.")
+        @JsonProperty("orderId")
         String orderNumber,
 
         @Schema(description = "취소 사유", example = "파손으로 인한 환불")

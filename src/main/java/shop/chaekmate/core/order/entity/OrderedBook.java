@@ -55,7 +55,7 @@ public class OrderedBook extends BaseEntity {
 
     private int couponDiscount;
 
-    private int pointUsed;
+    private Integer pointUsed;
 
     @Column(nullable = false)
     private int finalUnitPrice;
