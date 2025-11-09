@@ -20,7 +20,7 @@ eureka:
 aladin:
   api:
     base-url: http://www.aladin.co.kr/ttb/api
-    key: ttbgudcjf15411308001
+    key: ${ALADIN_API_KEY}
 
 management:
   endpoints:
