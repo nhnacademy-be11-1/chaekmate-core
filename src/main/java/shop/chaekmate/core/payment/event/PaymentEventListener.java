@@ -2,8 +2,9 @@ package shop.chaekmate.core.payment.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import shop.chaekmate.core.order.service.OrderService;
 import shop.chaekmate.core.payment.dto.response.PaymentApproveResponse;
 import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
@@ -15,7 +16,7 @@ public class PaymentEventListener {
 
     private final OrderService orderService;
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentApproved(PaymentApprovedEvent event) {
         PaymentApproveResponse res = event.getApproveResponse();
         log.info("[EVENT] 결제 승인 수신 - 주문ID: {}", res.orderNumber());
@@ -24,7 +25,7 @@ public class PaymentEventListener {
         orderService.saveOrder(res);
     }
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentFailed(PaymentCanceledEvent event) {
         PaymentCancelResponse res = event.getCancelResponse();
         log.info("[EVENT] 결제 취소 수신 - 주문ID: {}", res.orderNumber());
