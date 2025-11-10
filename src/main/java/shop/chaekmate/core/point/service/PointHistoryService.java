@@ -22,7 +22,6 @@ import java.util.List;
 public class PointHistoryService {
     private final PointHistoryRepository pointHistoryRepository;
     private final MemberRepository memberRepository;
-    private final PointService pointService;
 
     //회원 포인트 적립
     @Transactional
