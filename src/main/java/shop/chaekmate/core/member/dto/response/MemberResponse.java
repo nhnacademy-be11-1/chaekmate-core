@@ -1,7 +1,6 @@
 package shop.chaekmate.core.member.dto.response;
 
 
-import lombok.Getter;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

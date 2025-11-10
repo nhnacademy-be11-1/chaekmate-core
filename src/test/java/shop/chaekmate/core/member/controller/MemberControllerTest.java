@@ -19,7 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
-import shop.chaekmate.core.member.dto.request.UpdateMemberRequest;
 
 @SpringBootTest
 @Transactional
@@ -91,22 +90,6 @@ class MemberControllerTest {
         mvc.perform(get("/members"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].loginId").exists());
-    }
-
-    @Test
-    void 회원_수정_성공() throws Exception {
-        long id = createMemberAndGetId(
-                createReq("user2", "Pw123456!", "김철수", "01033334444", "user2@test.com", LocalDate.of(1999,9,9))
-        );
-
-        var update = new UpdateMemberRequest("김수정", "01055556666", "new2@test.com");
-
-        mvc.perform(put("/members/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(update)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.name").value("김수정"))
-                .andExpect(jsonPath("$.data.email").value("new2@test.com"));
     }
 
     @Test

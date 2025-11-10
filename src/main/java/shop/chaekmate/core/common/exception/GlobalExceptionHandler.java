@@ -10,6 +10,10 @@ import shop.chaekmate.core.common.dto.ErrorResponse;
 
 
 import io.jsonwebtoken.JwtException;
+import shop.chaekmate.core.member.exception.DuplicatedLoginIdException;
+
+import java.util.Collection;
+import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
@@ -44,5 +48,12 @@ public class GlobalExceptionHandler {
         log.error("[Unexpected Exception]", e);
         BaseErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode));
+    }
+
+    @ExceptionHandler(DuplicatedLoginIdException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicatedLoginIdException(DuplicatedLoginIdException e) {
+        log.warn("[DuplicatedLoginIdException] {}", e.getMessage());
+        return ResponseEntity.status(e.getErrorCode().getStatus()).body(Map.of("field", "loginId", "message", e.getMessage()));
+
     }
 }
