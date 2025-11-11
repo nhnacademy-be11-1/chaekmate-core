@@ -7,7 +7,9 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 import shop.chaekmate.core.member.entity.Member;
+import shop.chaekmate.core.point.entity.type.PointSpendType;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -16,7 +18,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "point_history")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE tag SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE point_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
 public class PointHistory extends BaseEntity {
 
@@ -28,13 +30,20 @@ public class PointHistory extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(nullable = false)
-    private Long amount;
+    @Enumerated(STRING)
+    @Column(name = "type", nullable = false, length = 10)
+    private PointSpendType type;
 
-    @Column(nullable = false, length = 10)
-    private String type;
+    @Column(name = "amount", nullable = false)
+    private int point;
 
-    @Column(nullable = false, length = 200)
+    @Column(name = "source", nullable = false, length = 200)
     private String source;
 
+    public PointHistory(Member member, PointSpendType type, int point, String source) {
+        this.member = member;
+        this.type = type;
+        this.point = point;
+        this.source = source;
+    }
 }
