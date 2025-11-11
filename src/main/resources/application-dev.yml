@@ -55,5 +55,3 @@ management:
     rabbit:
       enabled: false
 
-jwt:
-  secret-key: ${JWT_SECRET_KEY:chaekmatedummykeychaekmatedummykeychaekmatedummykey}
