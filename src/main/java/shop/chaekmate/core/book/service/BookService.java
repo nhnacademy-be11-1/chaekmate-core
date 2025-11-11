@@ -23,7 +23,6 @@ import shop.chaekmate.core.external.aladin.AladinSearchType;
 import shop.chaekmate.core.external.aladin.dto.request.AladinBookRegisterRequest;
 import shop.chaekmate.core.external.aladin.dto.response.AladinApiResponse;
 import shop.chaekmate.core.external.aladin.dto.response.BookSearchResponse;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -120,6 +119,12 @@ public class BookService {
                 .orElseThrow(BookNotFoundException::new);
 
         bookRepository.delete(book);
+
+        // 북 속성 엔티티들 삭제
+        bookCategoryRepository.deleteAll(bookCategoryRepository.findByBook(book));
+        bookImageRepository.deleteAll(bookImageRepository.findByBook(book));
+        bookTagRepository.deleteAll(bookTagRepository.findByBook(book));
+
     }
 
     public BookResponse getBook(Long bookId) {
