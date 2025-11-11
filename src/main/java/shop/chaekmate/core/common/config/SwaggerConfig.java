@@ -96,7 +96,7 @@ public class SwaggerConfig {
                                 .title("도서 관리 API")
                                 .description("도서 생성, 수정, 삭제, 조회 기능")
                                 .version("v1.0")))
-                .pathsToMatch("/books/**")
+                .pathsToMatch("/books/**", "/admin/books/**")
                 .build();
     }
 

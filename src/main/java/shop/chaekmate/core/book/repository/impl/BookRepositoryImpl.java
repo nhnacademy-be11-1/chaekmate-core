@@ -1,6 +1,8 @@
 package shop.chaekmate.core.book.repository.impl;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,7 @@ import java.util.List;
 
 import static shop.chaekmate.core.book.entity.QBook.book;
 import static shop.chaekmate.core.book.entity.QBookCategory.bookCategory;
+import static shop.chaekmate.core.book.entity.QBookImage.bookImage;
 import static shop.chaekmate.core.book.entity.QBookTag.bookTag;
 
 @Repository
@@ -28,17 +31,27 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
     @Override
     public Page<BookListResponse> searchBooks(BookSearchCondition condition, Pageable pageable) {
 
+        JPQLQuery<String> imageUrlSubQuery = JPAExpressions
+                .select(bookImage.imageUrl)
+                .from(bookImage)
+                .where(bookImage.book.id.eq(book.id))
+                .orderBy(bookImage.id.asc())
+                .limit(1);
+
         List<BookListResponse> content = queryFactory
                 .select(new QBookListResponse(
                         book.id,
                         book.title,
                         book.author,
                         book.publisher,
-                        book.salesPrice
+                        book.price,
+                        book.salesPrice,
+                        imageUrlSubQuery
                 ))
                 .from(book)
                 .leftJoin(bookCategory).on(bookCategory.book.eq(book))
                 .leftJoin(bookTag).on(bookTag.book.eq(book))
+                .leftJoin(bookImage).on(bookImage.book.eq(book))
                 .where(
                         categoryIdEq(condition.categoryId()),
                         tagIdEq(condition.tagId()),
