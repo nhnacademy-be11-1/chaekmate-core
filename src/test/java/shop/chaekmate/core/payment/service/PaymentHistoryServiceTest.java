@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -47,13 +48,15 @@ class PaymentHistoryServiceTest {
         start = LocalDateTime.of(2025, 11, 1, 0, 0);
         end = LocalDateTime.of(2025, 11, 10, 23, 59);
 
+        var offset = java.time.ZoneOffset.ofHours(9);
+
         tossApproved = new PaymentHistoryDto(
                 "ORDER_NUMBER1",
                 PaymentMethodType.TOSS,
                 PaymentStatusType.APPROVED,
                 12000L,
                 null,
-                LocalDateTime.of(2025, 11, 3, 10, 0)
+                OffsetDateTime.of(2025, 11, 3, 10, 0, 0, 0, offset)
         );
         tossCanceled = new PaymentHistoryDto(
                 "ORDER_NUMBER2",
@@ -61,7 +64,7 @@ class PaymentHistoryServiceTest {
                 PaymentStatusType.CANCELED,
                 15000L,
                 "사용자 취소",
-                LocalDateTime.of(2025, 11, 6, 15, 0)
+                java.time.OffsetDateTime.of(2025, 11, 6, 15, 0, 0, 0, offset)
         );
         pointApproved = new PaymentHistoryDto(
                 "ORDER_NUMBER3",
@@ -69,7 +72,7 @@ class PaymentHistoryServiceTest {
                 PaymentStatusType.APPROVED,
                 20000L,
                 null,
-                LocalDateTime.of(2025, 11, 4, 18, 0)
+                java.time.OffsetDateTime.of(2025, 11, 4, 18, 0, 0, 0, offset)
         );
     }
 
@@ -132,8 +135,8 @@ class PaymentHistoryServiceTest {
                         .extracting(PaymentHistoryDto::paymentType)
                         .containsExactlyInAnyOrder(PaymentMethodType.TOSS, PaymentMethodType.POINT),
                 () -> assertThat(result.getContent())
-                        .allMatch(dto -> dto.occurredAt().isAfter(start.minusSeconds(1)) &&
-                                dto.occurredAt().isBefore(end.plusSeconds(1)))
+                        .allMatch(dto -> dto.occurredAt().toLocalDateTime().isAfter(start.minusSeconds(1)) &&
+                                dto.occurredAt().toLocalDateTime().isBefore(end.plusSeconds(1)))
         );
 
         verify(paymentHistoryRepository, times(1))
@@ -154,8 +157,8 @@ class PaymentHistoryServiceTest {
                 () -> assertThat(result.getContent())
                         .allMatch(dto -> dto.paymentType() == PaymentMethodType.TOSS),
                 () -> assertThat(result.getContent())
-                        .allMatch(dto -> dto.occurredAt().isAfter(start.minusSeconds(1)) &&
-                                dto.occurredAt().isBefore(end.plusSeconds(1)))
+                        .allMatch(dto -> dto.occurredAt().toLocalDateTime().isAfter(start.minusSeconds(1)) &&
+                                dto.occurredAt().toLocalDateTime().isBefore(end.plusSeconds(1)))
         );
 
         verify(paymentHistoryRepository, times(1))

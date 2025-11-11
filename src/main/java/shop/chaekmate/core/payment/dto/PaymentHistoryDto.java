@@ -1,6 +1,6 @@
 package shop.chaekmate.core.payment.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import shop.chaekmate.core.payment.entity.PaymentHistory;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
 import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
@@ -11,7 +11,7 @@ public record PaymentHistoryDto(
         PaymentStatusType paymentStatus,
         long totalAmount,
         String reason,
-        LocalDateTime occurredAt
+        OffsetDateTime occurredAt
 ) {
     public static PaymentHistoryDto from(PaymentHistory history) {
         return new PaymentHistoryDto(
@@ -20,7 +20,7 @@ public record PaymentHistoryDto(
                 history.getPaymentStatus(),
                 history.getTotalAmount(),
                 history.getReason(),
-                history.getOccurredAt().toLocalDateTime()
+                history.getOccurredAt()
         );
     }
 }

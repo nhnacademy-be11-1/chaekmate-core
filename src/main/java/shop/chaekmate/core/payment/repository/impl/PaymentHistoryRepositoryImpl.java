@@ -1,6 +1,5 @@
 package shop.chaekmate.core.payment.repository.impl;
 
-
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
