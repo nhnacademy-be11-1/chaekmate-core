@@ -13,8 +13,8 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: prod
-      DOMAIN: ${{ secrets.DOMAIN_NAME }}
-      PORT: ${{ secrets.PORT_NUMBER }}
+      DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+      PORT_NUMBER: ${{ secrets.PORT_NUMBER }}
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_PORT: ${{ secrets.DB_PORT }}
       DB_NAME: ${{ secrets.DB_NAME }}
@@ -23,10 +23,15 @@ jobs:
       REDIS_HOST: ${{ secrets.REDIS_HOST }}
       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       REDIS_PORT: ${{ secrets.REDIS_PORT }}
+      REDIS_RANGE: ${{ secrets.REDIS_RANGE }}
       RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
       RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
       RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+      ALADIN_API_KEY: ${{ secrets.ALADIN_API_KEY }}
       EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
+      TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+
 
     steps:
       # Step.1 코드 체크아웃
@@ -70,7 +75,7 @@ jobs:
       - name: Rename JAR File
         run: |
           TIMESTAMP=$(TZ="Asia/Seoul" date +%Y%m%d-%H%M%S)
-          NEW_JAR_NAME="${DOMAIN}-${TIMESTAMP}.jar"
+          NEW_JAR_NAME="${DOMAIN_NAME}-${TIMESTAMP}.jar"
           mv target/*.jar target/$NEW_JAR_NAME
           echo "NEW_JAR_NAME=$NEW_JAR_NAME" >> $GITHUB_ENV
 
@@ -83,7 +88,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           source: "target/${{ env.NEW_JAR_NAME }}"
-          target: "/home/backend/be11-team1/${{ env.DOMAIN }}/"
+          target: "/home/backend/be11-team1/${{ secrets.DOMAIN_NAME }}/"
           strip_components: 1 # 폴더 구조 무시하고 파일만 업로드
           rm: false # 기존 파일 (중복 파일) 존재 시 덮어쓰기
 
@@ -96,6 +101,23 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            export DOMAIN="${{ env.DOMAIN }}"
-            export PORT="${{ env.PORT }}"
+            export DOMAIN_NAME="${{ secrets.DOMAIN_NAME }}"
+            export PORT_NUMBER="${{ secrets.PORT_NUMBER }}"
+            export DB_HOST="${{ secrets.DB_HOST }}"
+            export DB_PORT="${{ secrets.DB_PORT }}"
+            export DB_NAME="${{ secrets.DB_NAME }}"
+            export DB_USERNAME="${{ secrets.DB_USERNAME }}"
+            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            export REDIS_HOST="${{ secrets.REDIS_HOST }}"
+            export REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
+            export REDIS_PORT="${{ secrets.REDIS_PORT }}"
+            export REDIS_RANGE="${{ secrets.REDIS_RANGE }}"
+            export RABBITMQ_HOST="${{ secrets.RABBITMQ_HOST }}"
+            export RABBITMQ_USERNAME="${{ secrets.RABBITMQ_USERNAME }}"
+            export RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}"
+            export ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}"
+            export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
+            export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
+            export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
+            
             bash -lc ./startup.sh

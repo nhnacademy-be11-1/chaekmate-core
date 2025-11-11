@@ -108,14 +108,12 @@ public class CategoryService {
             throw new CategoryHasChildException();
         }
 
-        // TODO: 해당 카테고리에 해당하는 쿠폰 정책이 있을때 삭제불가
-
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
     }
 
     @Transactional
     public List<ReadAllCategoriesResponse> readAllCategories() {
-        List<Category> allCategories = categoryRepository.findAll(); // 또는 부모 없는 것만
+        List<Category> allCategories = categoryRepository.findAll();
         Map<Long, ReadAllCategoriesResponse> dtoMap = new HashMap<>();
 
         // 모든 카테고리를 DTO로 변환

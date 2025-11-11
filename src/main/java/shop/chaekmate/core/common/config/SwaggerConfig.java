@@ -96,7 +96,7 @@ public class SwaggerConfig {
                                 .title("도서 관리 API")
                                 .description("도서 생성, 수정, 삭제, 조회 기능")
                                 .version("v1.0")))
-                .pathsToMatch("/books/**")
+                .pathsToMatch("/books/**", "/admin/books/**")
                 .build();
     }
 
@@ -110,6 +110,19 @@ public class SwaggerConfig {
                                 .description("포인트 정책 조회 및 관리 API")
                                 .version("v1.0")))
                 .pathsToMatch("/admin/point-policies/**", "/point-policies/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi pointHistoryApi() {
+        return GroupedOpenApi.builder()
+                .group("Point History API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("포인트 History API")
+                                .description("포인트 History 조회 API")
+                                .version("v1.0")))
+                .pathsToMatch("/admin/point-history/**", "/point-history/**")
                 .build();
     }
 
