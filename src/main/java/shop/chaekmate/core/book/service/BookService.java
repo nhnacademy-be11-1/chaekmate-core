@@ -23,7 +23,6 @@ import shop.chaekmate.core.external.aladin.AladinSearchType;
 import shop.chaekmate.core.external.aladin.dto.request.AladinBookRegisterRequest;
 import shop.chaekmate.core.external.aladin.dto.response.AladinApiResponse;
 import shop.chaekmate.core.external.aladin.dto.response.BookSearchResponse;
-import shop.chaekmate.core.member.repository.AdminRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final BookImageRepository bookImageRepository;
-    private final AdminRepository adminRepository;
     private final BookCategoryRepository bookCategoryRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
@@ -103,12 +101,7 @@ public class BookService {
 
         book.update(request);
 
-        BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElse(null);
-
-        if (bookImage != null) {
-            bookImage.updateUrl(request.imageUrl());
-        }
+        bookImageRepository.findByBookId(bookId).ifPresent(bookImage -> bookImage.updateUrl(request.imageUrl()));
 
         // 책 카테고리 업데이트
         if (request.categoryIds() != null) {
