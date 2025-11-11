@@ -28,27 +28,27 @@ public class PointPolicyController implements PointPolicyCotrollerDocs {
     private final PointService pointService;
 
     //단일 정책 불러오기
-    @GetMapping("/admin/point-policy/{type}")
+    @GetMapping({"/point-policies/{type}","/admin/point-policies/{type}"})
     public ResponseEntity<PointPolicyResponse> getPolicy(@PathVariable("type") PointEarnedType type) {
         var dto = pointService.getPolicyByType(type);
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/admin/point-policy")
+    @GetMapping("/admin/point-policies")
     public ResponseEntity<List<PointPolicyResponse>> getAllPolicies() {
         List<PointPolicyResponse> response = pointService.getAllPolicies();
         return ResponseEntity.ok(response);
     }
 
     //정책 생성
-    @PostMapping("/admin/point-policy")
+    @PostMapping("/admin/point-policies")
     public ResponseEntity<CreatePointPolicyResponse> createPointPolicy(@Valid @RequestBody CreatePointPolicyRequest req) {
         var created = pointService.createPointPolicyRequest(req);
         return ResponseEntity.status(201).body(created);
     }
 
     //정책 수정
-    @PutMapping("/admin/point-policy/{type}")
+    @PutMapping("/admin/point-policies/{type}")
     public ResponseEntity<UpdatePointPolicyResponse> updatePointPolicy(@PathVariable("type") PointEarnedType type,
                                                               @Valid @RequestBody UpdatePointPolicyRequest req) {
         log.info("Point Policy updated." + type);
@@ -57,7 +57,7 @@ public class PointPolicyController implements PointPolicyCotrollerDocs {
     }
 
     //정책 삭제
-    @DeleteMapping("/admin/point-policy/{type}")
+    @DeleteMapping("/admin/point-policies/{type}")
     public ResponseEntity<Void> delete(@PathVariable("type") PointEarnedType type) {
         log.info("Point Policy Deleted.");
         pointService.deletePointPolicyResponse(new DeletePointPolicyRequest(type));
