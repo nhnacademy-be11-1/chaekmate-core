@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
 import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.dto.request.ThumbnailUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
@@ -41,6 +42,7 @@ public class BookService {
     private final BookTagRepository bookTagRepository;
 
     private final AladinClient aladinClient;
+    private final BookImageService bookImageService;
 
     @Value("${aladin.api.key}")
     private String aladinApiKey;
@@ -100,7 +102,10 @@ public class BookService {
 
         book.update(request);
 
-        bookImageRepository.findByBookId(bookId).ifPresent(bookImage -> bookImage.updateUrl(request.imageUrl()));
+        // 이미지 URL 이 존재할경우 섬네일 수정으로 변경
+        if(request.imageUrl() != null) {
+            bookImageService.updateThumbnail(bookId, new ThumbnailUpdateRequest(request.imageUrl()));
+        }
 
         // 책 카테고리 업데이트
         if (request.categoryIds() != null) {
