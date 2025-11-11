@@ -165,7 +165,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.createBook(request))
                 .isInstanceOf(CategoryNotFoundException.class)
-                .hasMessage("일부 카테고리 ID를 찾을 수 없습니다.");
+                .hasMessage("해당 카테고리를 찾을 수 없습니다.");
     }
 
     @Test
@@ -194,7 +194,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.createBook(request))
                 .isInstanceOf(TagNotFoundException.class)
-                .hasMessage("일부 태그 ID를 찾을 수 없습니다.");
+                .hasMessage("해당 태그를 찾을 수 없습니다.");
     }
 
     @Test
@@ -223,7 +223,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.updateBook(bookId, request))
                 .isInstanceOf(BookNotFoundException.class)
-                .hasMessageContaining("Book id 10000000000 not found");
+                .hasMessage("해당 도서를 찾을 수 없습니다.");
     }
 
 
@@ -248,7 +248,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.deleteBook(bookId))
                 .isInstanceOf(BookNotFoundException.class)
-                .hasMessageContaining("삭제할 책을 찾을 수 없습니다");
+                .hasMessage("해당 도서를 찾을 수 없습니다.");
     }
 
     @Test
@@ -277,7 +277,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.getBook(bookId))
                 .isInstanceOf(BookNotFoundException.class)
-                .hasMessageContaining("Book id 10000000000 not found");
+                .hasMessage("해당 도서를 찾을 수 없습니다.");
     }
 
     @Test

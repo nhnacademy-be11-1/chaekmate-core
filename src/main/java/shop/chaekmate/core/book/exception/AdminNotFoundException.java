@@ -1,7 +1,9 @@
 package shop.chaekmate.core.book.exception;
 
-public class AdminNotFoundException extends RuntimeException {
-    public AdminNotFoundException(String message) {
-        super(message);
+import shop.chaekmate.core.common.exception.CoreException;
+
+public class AdminNotFoundException extends CoreException {
+    public AdminNotFoundException() {
+        super(BookErrorCode.ADMIN_NOT_FOUND);
     }
 }

@@ -89,15 +89,11 @@ public class BookController implements BookControllerDocs {
         }
 
         if (paramCount == 0) {
-            throw new InvalidSearchConditionException(
-                    "검색 조건이 필요합니다. categoryId, tagId, keyword 중 하나를 입력해주세요."
-            );
+            throw new InvalidSearchConditionException();
         }
 
         if (paramCount > 1) {
-            throw new InvalidSearchConditionException(
-                    "검색 조건은 1개만 사용할 수 있습니다. categoryId, tagId, keyword 중 하나만 입력해주세요."
-            );
+            throw new InvalidSearchConditionException();
         }
     }
 }

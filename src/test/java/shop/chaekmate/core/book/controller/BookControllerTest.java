@@ -215,7 +215,28 @@ class BookControllerTest {
 
     @Test
     void 도서_수정_실패_책_없음() throws Exception {
-        // GlobalException 적용 후 수정
+        mockMvc.perform(put("/books/{bookId}", 999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new BookUpdateRequest(
+                                "수정된 책 제목",
+                                "수정된 목차",
+                                "수정된 설명",
+                                "수정된 저자",
+                                "수정된 출판사",
+                                LocalDateTime.of(2024, 2, 1, 0, 0, 0),
+                                "9780134685991",
+                                12000,
+                                10000,
+                                "https://example.com/new-image.jpg",
+                                false,
+                                true,
+                                50,
+                                List.of(category.getId()),
+                                List.of(tag.getId())
+                        ))))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("해당 도서를 찾을 수 없습니다."));
     }
 
     @Test
@@ -227,7 +248,10 @@ class BookControllerTest {
 
     @Test
     void 도서_삭제_실패_책_없음() throws Exception {
-        // GlobalException 적용 후 수정
+        mockMvc.perform(delete("/books/{bookId}", 999L))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("해당 도서를 찾을 수 없습니다."));
     }
 
     @Test
@@ -251,7 +275,10 @@ class BookControllerTest {
 
     @Test
     void 도서_조회_실패_책_없음() throws Exception {
-        // GlobalException 적용 후 수정
+        mockMvc.perform(get("/books/{bookId}", 999L))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("해당 도서를 찾을 수 없습니다."));
     }
 
     @Test
@@ -297,12 +324,20 @@ class BookControllerTest {
 
     @Test
     void 도서_목록_조회_실패_검색조건_없음() throws Exception {
-        // GlobalException 적용 후 수정
+        mockMvc.perform(get("/books"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("검색 조건이 유효하지 않습니다."));
     }
 
     @Test
     void 도서_목록_조회_실패_검색조건_2개_이상() throws Exception {
-        // GlobalException 적용 후 수정
+        mockMvc.perform(get("/books")
+                        .param("categoryId", category.getId().toString())
+                        .param("keyword", "테스트"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("검색 조건이 유효하지 않습니다."));
     }
 
     @Test
