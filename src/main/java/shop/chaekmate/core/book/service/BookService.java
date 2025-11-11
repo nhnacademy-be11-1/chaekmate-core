@@ -23,8 +23,6 @@ import shop.chaekmate.core.external.aladin.AladinSearchType;
 import shop.chaekmate.core.external.aladin.dto.request.AladinBookRegisterRequest;
 import shop.chaekmate.core.external.aladin.dto.response.AladinApiResponse;
 import shop.chaekmate.core.external.aladin.dto.response.BookSearchResponse;
-import shop.chaekmate.core.member.repository.AdminRepository;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,7 +35,6 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final BookImageRepository bookImageRepository;
-    private final AdminRepository adminRepository;
     private final BookCategoryRepository bookCategoryRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
@@ -103,12 +100,7 @@ public class BookService {
 
         book.update(request);
 
-        BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElse(null);
-
-        if (bookImage != null) {
-            bookImage.updateUrl(request.imageUrl());
-        }
+        bookImageRepository.findByBookId(bookId).ifPresent(bookImage -> bookImage.updateUrl(request.imageUrl()));
 
         // 책 카테고리 업데이트
         if (request.categoryIds() != null) {
@@ -127,6 +119,12 @@ public class BookService {
                 .orElseThrow(() -> new BookNotFoundException(String.format("삭제할 책을 찾을 수 없습니다. Book id : %d", bookId)));
 
         bookRepository.delete(book);
+
+        // 북 속성 엔티티들 삭제
+        bookCategoryRepository.deleteAll(bookCategoryRepository.findByBook(book));
+        bookImageRepository.deleteAll(bookImageRepository.findByBook(book));
+        bookTagRepository.deleteAll(bookTagRepository.findByBook(book));
+
     }
 
     public BookResponse getBook(Long bookId) {
