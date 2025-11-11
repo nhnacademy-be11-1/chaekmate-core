@@ -23,7 +23,6 @@ public class AdminBookService {
                         imageUrl = bookImageService.findThumbnail(book.getId()).imageUrl();
                     } catch (BookImageNotFoundException e) {
                         // 썸네일 이미지가 없는 경우 null 처리
-                        imageUrl = null;
                     }
                     return AdminBookResponse.of(book, imageUrl);
                 })
