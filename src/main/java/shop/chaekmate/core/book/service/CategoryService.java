@@ -108,8 +108,6 @@ public class CategoryService {
             throw new CategoryHasChildException();
         }
 
-        // TODO: 해당 카테고리에 해당하는 쿠폰 정책이 있을때 삭제불가
-
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
     }
 
