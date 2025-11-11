@@ -4,6 +4,6 @@ import shop.chaekmate.core.common.exception.CoreException;
 
 public class DuplicatePointPolicyException extends CoreException {
     public DuplicatePointPolicyException() {
-        super(PointPolicyErrorCode.DUPLICATED_POLICY);
+        super(PointErrorCode.DUPLICATED_POLICY);
     }
 }
