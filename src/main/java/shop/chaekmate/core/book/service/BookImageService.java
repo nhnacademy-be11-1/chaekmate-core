@@ -33,7 +33,7 @@ public class BookImageService {
         newBookImage = bookImageRepository.save(newBookImage);
 
         List<BookImage> images = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
-        boolean isThumbnail = images.size() == 1 && images.get(0).getId().equals(newBookImage.getId());
+        boolean isThumbnail = images.size() == 1 && images.getFirst().getId().equals(newBookImage.getId());
 
         return BookImageResponse.builder()
                 .bookImageId(newBookImage.getId())

@@ -1,5 +1,6 @@
 package shop.chaekmate.core.book.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -135,8 +136,14 @@ class BookImageServiceTest {
         // then
         assertAll(
                 () -> assertThat(responses).hasSize(2),
-                () -> assertThat(responses.get(0).imageUrl()).isEqualTo("detail1.jpg"),
-                () -> assertThat(responses.get(1).imageUrl()).isEqualTo("detail2.jpg")
+                () -> {
+                    Assertions.assertNotNull(responses);
+                    assertThat(responses.getFirst().imageUrl()).isEqualTo("detail1.jpg");
+                },
+                () -> {
+                    Assertions.assertNotNull(responses);
+                    assertThat(responses.get(1).imageUrl()).isEqualTo("detail2.jpg");
+                }
         );
     }
 
