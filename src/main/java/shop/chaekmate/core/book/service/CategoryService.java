@@ -63,12 +63,12 @@ public class CategoryService {
         Category targetCategory = categoryRepository.findById(targetCategoryId)
                 .orElseThrow(CategoryNotFoundException::new);
 
-        String parentCategoryName = "null";
+        Long parentCategoryId = null;
         if (targetCategory.getParentCategory() != null) {
-            parentCategoryName = targetCategory.getParentCategory().getName();
+            parentCategoryId = targetCategory.getParentCategory().getId();
         }
 
-        return new ReadCategoryResponse(targetCategory.getId(), parentCategoryName, targetCategory.getName());
+        return new ReadCategoryResponse(targetCategory.getId(), parentCategoryId, targetCategory.getName());
     }
 
     @Transactional
@@ -107,8 +107,6 @@ public class CategoryService {
         if (categoryRepository.existsByParentCategory(targetCategory)) {
             throw new CategoryHasChildException();
         }
-
-        // TODO: 해당 카테고리에 해당하는 쿠폰 정책이 있을때 삭제불가
 
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
     }
