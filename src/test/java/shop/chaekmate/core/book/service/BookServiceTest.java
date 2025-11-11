@@ -295,7 +295,9 @@ class BookServiceTest {
                 "테스트 책",
                 "테스트 저자",
                 "테스트 출판사",
-                9000
+                10000,
+                9000,
+                "https://example.com/test-book.jpg"
         );
 
         Page<BookListResponse> expectedPage = new PageImpl<>(
@@ -316,6 +318,7 @@ class BookServiceTest {
         assertThat(result.getContent().getFirst().author()).isEqualTo("테스트 저자");
         assertThat(result.getContent().getFirst().publisher()).isEqualTo("테스트 출판사");
         assertThat(result.getContent().getFirst().salesPrice()).isEqualTo(9000);
+        assertThat(result.getContent().getFirst().imageUrl()).isEqualTo("https://example.com/test-book.jpg");
 
         then(bookRepository).should().searchBooks(any(BookSearchCondition.class), any(Pageable.class));
     }
@@ -335,7 +338,9 @@ class BookServiceTest {
                 "테스트 책",
                 "테스트 저자",
                 "테스트 출판사",
-                9000
+                10000,
+                9000,
+                "https://example.com/test-book.jpg"
         );
 
         Page<BookListResponse> expectedPage = new PageImpl<>(
@@ -369,7 +374,9 @@ class BookServiceTest {
                 "이펙티브 자바",
                 "조슈아 블로크",
                 "인사이트",
-                32400
+                10000,
+                32400,
+                "https://example.com/test-book.jpg"
         );
 
         Page<BookListResponse> expectedPage = new PageImpl<>(

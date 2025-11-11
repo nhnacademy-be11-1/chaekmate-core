@@ -115,7 +115,7 @@ public class CategoryService {
 
     @Transactional
     public List<ReadAllCategoriesResponse> readAllCategories() {
-        List<Category> allCategories = categoryRepository.findAll(); // 또는 부모 없는 것만
+        List<Category> allCategories = categoryRepository.findAll();
         Map<Long, ReadAllCategoriesResponse> dtoMap = new HashMap<>();
 
         // 모든 카테고리를 DTO로 변환
