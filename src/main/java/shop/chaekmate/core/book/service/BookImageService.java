@@ -16,7 +16,6 @@ import shop.chaekmate.core.book.repository.BookRepository;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -31,10 +30,10 @@ public class BookImageService {
     public BookImageResponse addImage(Long bookId, BookImageAddRequest request) {
         Book book = findBookById(bookId);
         BookImage newBookImage = new BookImage(book, request.getImageUrl());
-        bookImageRepository.save(newBookImage);
+        newBookImage = bookImageRepository.save(newBookImage);
 
         List<BookImage> images = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
-        boolean isThumbnail = images.size() == 1 && images.getFirst().getId().equals(newBookImage.getId());
+        boolean isThumbnail = images.size() == 1 && images.get(0).getId().equals(newBookImage.getId());
 
         return BookImageResponse.builder()
                 .bookImageId(newBookImage.getId())
@@ -53,7 +52,7 @@ public class BookImageService {
                         .imageUrl(image.getImageUrl())
                         .isThumbnail(true)
                         .build())
-                .orElseThrow(() -> new BookImageNotFoundException("썸네일 이미지를 찾을 수 없습니다."));
+                .orElseThrow(BookImageNotFoundException::new);
     }
 
     public List<BookImageResponse> findDetailImages(Long bookId) {
@@ -71,7 +70,7 @@ public class BookImageService {
                         .imageUrl(image.getImageUrl())
                         .isThumbnail(false)
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<BookImageResponse> findAllImages(Long bookId) {
@@ -87,7 +86,7 @@ public class BookImageService {
                             .isThumbnail(i == 0)
                             .build();
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
@@ -96,7 +95,7 @@ public class BookImageService {
         BookImage thumbnail = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new BookImageNotFoundException("수정할 썸네일 이미지를 찾을 수 없습니다."));
+                .orElseThrow(BookImageNotFoundException::new);
         thumbnail.updateUrl(request.getNewImageUrl());
     }
 
@@ -114,11 +113,11 @@ public class BookImageService {
 
     private Book findBookById(Long bookId) {
         return bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException("해당 도서를 찾을 수 없습니다."));
+                .orElseThrow(BookNotFoundException::new);
     }
 
     private BookImage findBookImageById(Long imageId) {
         return bookImageRepository.findById(imageId)
-                .orElseThrow(() -> new BookImageNotFoundException("해당 이미지를 찾을 수 없습니다."));
+                .orElseThrow(BookImageNotFoundException::new);
     }
 }
