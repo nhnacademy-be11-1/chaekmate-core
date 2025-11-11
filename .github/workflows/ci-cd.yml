@@ -30,6 +30,7 @@ jobs:
       ALADIN_API_KEY: ${{ secrets.ALADIN_API_KEY }}
       EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
       TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
 
 
     steps:
@@ -117,5 +118,6 @@ jobs:
             export ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}"
             export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
             export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
+            export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
             
             bash -lc ./startup.sh
