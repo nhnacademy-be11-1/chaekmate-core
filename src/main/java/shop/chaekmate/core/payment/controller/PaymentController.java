@@ -23,7 +23,7 @@ public class PaymentController {
     }
 
     @PostMapping("/cancel")
-    public ResponseEntity<PaymentCancelResponse> ready(@RequestBody PaymentCancelRequest request) {
+    public ResponseEntity<PaymentCancelResponse> cancel(@RequestBody PaymentCancelRequest request) {
         PaymentCancelResponse response = paymentService.cancel(request);
         return ResponseEntity.ok(response);
     }
