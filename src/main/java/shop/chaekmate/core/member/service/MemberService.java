@@ -31,7 +31,6 @@ public class MemberService {
 
     @Transactional
     public void createMember(CreateMemberRequest request) {
-        validateMember(request.loginId(), request.email());
         Member member = new Member(
                 request.loginId(),
                 encoder.encode(request.password()),
@@ -41,23 +40,16 @@ public class MemberService {
                 request.birthDate(),
                 PlatformType.LOCAL
         );
-
         memberRepository.save(member);
-    }
-
-    private void validateMember(String loginId, String email) {
-        int bool = memberRepository.existsAnyByLoginId(loginId);
-        if (bool == 1) {
-            throw new DuplicatedLoginIdException();
-        }
-        if (memberRepository.existsByEmail(email)) {
-            throw new DuplicatedEmailException();
-        }
     }
 
     public boolean isDuplicateLoginId(String loginId) {
         int bool = memberRepository.existsAnyByLoginId(loginId);
         return bool == 1;
+    }
+
+    public boolean isDuplicateEmail(String email) {
+        return memberRepository.existsByEmail(email);
     }
 
     @Transactional

@@ -10,7 +10,9 @@ import shop.chaekmate.core.common.dto.ErrorResponse;
 
 
 import io.jsonwebtoken.JwtException;
+import shop.chaekmate.core.member.exception.DuplicatedEmailException;
 import shop.chaekmate.core.member.exception.DuplicatedLoginIdException;
+import shop.chaekmate.core.member.exception.MemberErrorCode;
 
 import java.util.Collection;
 import java.util.Map;
@@ -51,9 +53,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DuplicatedLoginIdException.class)
-    public ResponseEntity<Map<String, String>> handleDuplicatedLoginIdException(DuplicatedLoginIdException e) {
+    public ResponseEntity<ErrorResponse> handleDuplicatedLoginIdException(DuplicatedLoginIdException e) {
         log.warn("[DuplicatedLoginIdException] {}", e.getMessage());
-        return ResponseEntity.status(e.getErrorCode().getStatus()).body(Map.of("field", "loginId", "message", e.getMessage()));
+        MemberErrorCode errorCode = MemberErrorCode.DUPLICATED_LOGIN_ID;
+        return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, e.getMessage()));
+    }
 
+    @ExceptionHandler(DuplicatedEmailException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicatedEmailException(DuplicatedEmailException e) {
+        log.warn("[DuplicatedEmailException] {}", e.getMessage());
+        MemberErrorCode errorCode = MemberErrorCode.DUPLICATED_EMAIL;
+        return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, e.getMessage()));
     }
 }

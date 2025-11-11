@@ -32,6 +32,12 @@ public class MemberController implements MemberControllerDocs {
         return ResponseEntity.ok(new AvailabilityResponse(!exists));
     }
 
+    @GetMapping("/check-email")
+    public ResponseEntity<AvailabilityResponse> checkEmail(@RequestParam("email") String email) {
+        return ResponseEntity.ok(new AvailabilityResponse(!memberService.isDuplicateEmail(email)));
+    }
+
+
     @GetMapping("/{memberId}/grades")
     @Override
     public ResponseEntity<MemberGradeResponse> getMemberGrade(@PathVariable Long memberId) {
