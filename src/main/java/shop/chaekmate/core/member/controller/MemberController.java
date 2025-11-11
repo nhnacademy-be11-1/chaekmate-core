@@ -6,10 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.chaekmate.core.member.controller.docs.MemberControllerDocs;
-import shop.chaekmate.core.member.dto.request.CreateAddressRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
-import shop.chaekmate.core.member.dto.response.MemberGradeResponse;
 import shop.chaekmate.core.member.service.MemberService;
 
 @RestController
@@ -37,30 +35,10 @@ public class MemberController implements MemberControllerDocs {
         return ResponseEntity.ok(new AvailabilityResponse(!memberService.isDuplicateEmail(email)));
     }
 
-
-    @GetMapping("/{memberId}/grades")
-    @Override
-    public ResponseEntity<MemberGradeResponse> getMemberGrade(@PathVariable Long memberId) {
-        return ResponseEntity.ok(memberService.getMemberGrade(memberId));
-    }
-
     @DeleteMapping("/{memberId}")
     @Override
     public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
         memberService.deleteMember(memberId);
         return ResponseEntity.noContent().build();
     }
-
-    @PostMapping("/{memberId}/address")
-    public ResponseEntity<Void> createMemberAddress(@PathVariable Long memberId, @RequestBody CreateAddressRequest request) {
-        memberService.createAddress(request, memberId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @DeleteMapping("/{addressId}")
-    public ResponseEntity<Void> deleteMemberAddress(@PathVariable Long addressId) {
-        memberService.deleteAddress(addressId);
-        return ResponseEntity.noContent().build();
-    }
-
 }
