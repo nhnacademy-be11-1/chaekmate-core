@@ -11,27 +11,39 @@ import org.springframework.http.ResponseEntity;
 import shop.chaekmate.core.point.dto.request.CreatePointPolicyRequest;
 import shop.chaekmate.core.point.dto.request.UpdatePointPolicyRequest;
 import shop.chaekmate.core.point.dto.response.CreatePointPolicyResponse;
-import shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;
+import shop.chaekmate.core.point.dto.response.PointPolicyResponse;
 import shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;
 import shop.chaekmate.core.point.entity.type.PointEarnedType;
 import shop.chaekmate.core.common.dto.ErrorResponse;
+
+import java.util.List;
 
 @Tag(name = "포인트 관리 API", description = "포인트 정책 조회 및 관리 API")
 public interface PointPolicyCotrollerDocs {
 
     @Operation(
-            summary = "포인트 정책 조회",
+            summary = "포인트 정책 단건 조회",
             description = "주어진 타입의 포인트 정책을 조회합니다. (관리자/회원용 동일 응답)",
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공",
-                            content = @Content(schema = @Schema(implementation = ReadPointPolicyResponse.class))),
+                            content = @Content(schema = @Schema(implementation = PointPolicyResponse.class))),
                     @ApiResponse(responseCode = "404", description = "정책을 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    ResponseEntity<ReadPointPolicyResponse> getPolicy(
+    ResponseEntity<PointPolicyResponse> getPolicy(
             @Parameter(description = "포인트 적립 타입", required = true, schema = @Schema(implementation = PointEarnedType.class))
             PointEarnedType type
     );
+
+    @Operation(
+            summary = "포인트 정책 전체 조회",
+            description = "모든 포인트 정책을 조회합니다. (WELCOME, ORDER, REVIEW)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공",
+                            content = @Content(schema = @Schema(implementation = PointPolicyResponse.class)))
+            }
+    )
+    ResponseEntity<List<PointPolicyResponse>> getAllPolicies();
 
     @Operation(
             summary = "포인트 정책 등록",
