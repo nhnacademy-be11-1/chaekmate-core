@@ -12,10 +12,10 @@ public class PaymentEventPublisher {
     private final ApplicationEventPublisher publisher;
 
     public void publishPaymentApproved(PaymentApproveResponse response) {
-        publisher.publishEvent(new PaymentApprovedEvent(this, response));
+        publisher.publishEvent(new PaymentApprovedEvent(response));
     }
 
     public void publishPaymentCanceled(PaymentCancelResponse response) {
-        publisher.publishEvent(new PaymentCanceledEvent(this, response));
+        publisher.publishEvent(new PaymentCanceledEvent(response));
     }
 }

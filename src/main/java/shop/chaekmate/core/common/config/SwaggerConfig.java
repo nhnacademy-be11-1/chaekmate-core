@@ -112,4 +112,18 @@ public class SwaggerConfig {
                 .pathsToMatch("/admin/point-policies/**", "/point-policies/**")
                 .build();
     }
+
+    // payment, paymentHistory
+    @Bean
+    public GroupedOpenApi paymentApi() {
+        return GroupedOpenApi.builder()
+                .group("Payment API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("결제 관련 API")
+                                .description("결제 승인, 취소 맟 (관리자)결제내역 조회 기능")
+                                .version("v1.0")))
+                .pathsToMatch("/payments/**", "/admin/payments/histories/**")
+                .build();
+    }
 }

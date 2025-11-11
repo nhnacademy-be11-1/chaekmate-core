@@ -20,6 +20,6 @@ public record PaymentApproveResponse(
         @Schema(description = "결제 상태", example = "DONE")
         String status,
 
-        @Schema(description = "결제 승인 시각", example = "2025-11-03T22:32:22")
+        @Schema(description = "결제 승인 시각")
         OffsetDateTime approvedAt
 ) {}

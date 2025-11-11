@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 
-@Schema(description = "결제 취소 응답 DTO")
+@Schema(description = "결제 취소 응답")
 public record PaymentCancelResponse(
 
         @Schema(description = "주문 번호")
@@ -20,7 +20,7 @@ public record PaymentCancelResponse(
         @Schema(description = "결제 상태", example = "CANCELED")
         String status,
 
-        @Schema(description = "취소 완료 시각", example = "2025-11-03T22:35:40")
+        @Schema(description = "취소 완료 시각")
         OffsetDateTime canceledAt
 ) {}
 

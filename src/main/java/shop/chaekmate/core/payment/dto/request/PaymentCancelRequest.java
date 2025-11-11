@@ -8,11 +8,11 @@ import jakarta.validation.constraints.Positive;
 @Schema(description = "결제 취소 요청")
 public record PaymentCancelRequest(
 
-        @Schema(description = "결제 고유키 (Toss PaymentKey)", example = "test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R")
+        @Schema(description = "결제 키 (결제사에서 전달받은 고유 키)")
         @NotBlank(message = "결제 키는 필수 값입니다.")
         String paymentKey,
 
-        @Schema(description = "주문 번호", example = "test-V1StGXR8_Z5jdHi6B")
+        @Schema(description = "주문 번호")
         @NotBlank(message = "주문 번호는 필수 입력 값입니다.")
         @JsonProperty("orderId")
         String orderNumber,

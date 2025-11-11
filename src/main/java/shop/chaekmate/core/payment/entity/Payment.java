@@ -50,15 +50,14 @@ public class Payment extends BaseEntity {
     private Integer pointUsed;
 
     public static Payment createApproved(String orderNumber, String paymentKey, PaymentMethodType type,
-                                         long totalAmount,
-                                         Integer pointUsed) {
+                                         long totalAmount, Integer pointUsed) {
         Payment payment = new Payment();
         payment.orderNumber = orderNumber;
         payment.paymentKey = paymentKey;
         payment.paymentType = type;
         payment.totalAmount = totalAmount;
         payment.paymentStatus = PaymentStatusType.APPROVED;
-        payment.pointUsed = pointUsed;
+        payment.pointUsed = (pointUsed == null) ? 0 : pointUsed;
         return payment;
     }
 

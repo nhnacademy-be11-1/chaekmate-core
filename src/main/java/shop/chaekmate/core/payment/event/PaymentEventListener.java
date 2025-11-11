@@ -18,7 +18,7 @@ public class PaymentEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentApproved(PaymentApprovedEvent event) {
-        PaymentApproveResponse res = event.getApproveResponse();
+        PaymentApproveResponse res = event.approveResponse();
         log.info("[EVENT] 결제 승인 수신 - 주문ID: {}", res.orderNumber());
         
         //주문 로직 작성
@@ -27,7 +27,7 @@ public class PaymentEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentFailed(PaymentCanceledEvent event) {
-        PaymentCancelResponse res = event.getCancelResponse();
+        PaymentCancelResponse res = event.cancelResponse();
         log.info("[EVENT] 결제 취소 수신 - 주문ID: {}", res.orderNumber());
         // 주문 상태 변경
     }

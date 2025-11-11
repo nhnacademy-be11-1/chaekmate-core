@@ -28,8 +28,6 @@ public class TossPaymentProvider implements PaymentProvider {
 
     private final WebClient webClient;
 
-    private final OrderRepository orderRepository;
-
     @Value("${toss.api.url}")
     private String tossBaseUrl;
 
@@ -77,7 +75,6 @@ public class TossPaymentProvider implements PaymentProvider {
     @Transactional
     @Override
     public PaymentCancelResponse cancel(PaymentCancelRequest request) {
-        // TODO # 1. 주문 번호 존재 하는지 검증
         log.info("[TOSS] 결제 취소 요청 - 주문번호: {}", request.orderNumber());
 
         Map<String, Object> body = new HashMap<>(Map.of("cancelReason", request.cancelReason()));
