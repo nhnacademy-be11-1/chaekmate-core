@@ -13,6 +13,8 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,8 +32,9 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
 @ActiveProfiles("test")
-@SuppressWarnings("NonAsciiCharacters")
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("NonAsciiCharacters")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class LikeServiceTest {
 
     @Mock
