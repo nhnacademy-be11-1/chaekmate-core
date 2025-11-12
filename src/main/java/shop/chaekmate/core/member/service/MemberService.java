@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.member.dto.request.CreateAddressRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.response.AddressResponse;
 import shop.chaekmate.core.member.dto.response.MemberGradeResponse;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.MemberAddress;
@@ -16,6 +17,7 @@ import shop.chaekmate.core.member.repository.MemberAddressRepository;
 import shop.chaekmate.core.member.repository.MemberGradeHistoryRepository;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
+import java.util.List;
 
 
 @Service
@@ -102,6 +104,9 @@ public class MemberService {
     @Transactional
     public void deleteAddress(Long id) {
         memberAddressRepository.findById(id).orElseThrow(AddressNotFoundException::new);
+    }
 
+    public List<AddressResponse> getAddresses(Long memberId) {
+        return memberAddressRepository.findAllByMemberId(memberId).stream().map(AddressResponse::from).toList();
     }
 }

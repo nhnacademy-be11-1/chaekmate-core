@@ -25,10 +25,10 @@ public class AddressController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<AddressResponse>> list(@PathVariable Long memberId) {
-//        return ResponseEntity.ok(memberService.getAddresses(memberId));
-//    }
+    @GetMapping
+    public ResponseEntity<List<AddressResponse>> list(@PathVariable Long memberId) {
+        return ResponseEntity.ok(memberService.getAddresses(memberId));
+    }
 
     @DeleteMapping("/{addressId}")
     public ResponseEntity<Void> delete(@PathVariable Long memberId,
