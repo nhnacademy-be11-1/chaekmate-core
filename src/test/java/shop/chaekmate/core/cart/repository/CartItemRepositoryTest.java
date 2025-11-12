@@ -23,12 +23,12 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
+@DataJpaTest
 @ActiveProfiles("test")
 @Import({QueryDslConfig.class, JpaAuditingConfig.class})
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@DataJpaTest
-public class CartItemRepositoryTest {
+class CartItemRepositoryTest {
 
     @Autowired
     private CartItemRepository cartItemRepository;

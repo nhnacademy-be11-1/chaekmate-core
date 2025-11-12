@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 import shop.chaekmate.core.common.entity.BaseEntity;
 import shop.chaekmate.core.member.entity.Member;
 
+@Entity
 @Getter
 @Table(name = "cart")
 @NoArgsConstructor(access = PROTECTED)
-@Entity
 public class Cart extends BaseEntity {
 
     @Id

@@ -7,7 +7,7 @@ import shop.chaekmate.core.common.exception.BaseErrorCode;
 @Getter
 public enum CartItemErrorCode implements BaseErrorCode {
 
-    INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "CARTITEM-400", "유효하지 않은 장바구니 아이템 수량입니다.");
+    INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "CART-ITEM-400", "유효하지 않은 장바구니 아이템 수량입니다.");
 
     private final HttpStatus status;
     private final String code;

@@ -14,13 +14,12 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.chaekmate.core.book.entity.Book;
-import shop.chaekmate.core.cart.exception.cartitem.InvalidCartItemQuantityException;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
+@Entity
 @Getter
 @Table(name = "cart_item")
 @NoArgsConstructor(access = PROTECTED)
-@Entity
 public class CartItem extends BaseEntity {
 
     @Id
@@ -45,10 +44,6 @@ public class CartItem extends BaseEntity {
     }
 
     public void updateQuantity(int quantity) {
-        if (quantity <= 0) {
-            throw new InvalidCartItemQuantityException();
-        }
-
         this.quantity = quantity;
     }
 

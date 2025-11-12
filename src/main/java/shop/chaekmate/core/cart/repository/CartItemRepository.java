@@ -1,12 +1,15 @@
 package shop.chaekmate.core.cart.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import shop.chaekmate.core.cart.entity.Cart;
 import shop.chaekmate.core.cart.entity.CartItem;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long>, CartItemRepositoryCustom {
     // 조회
     boolean existsByCartIdAndBookId(Long cartId, Long bookId);
+    Optional<CartItem> findByCartIdAndBookId(Long cartId, Long bookId);
 
     // 정렬
     List<CartItem> findAllByCartIdOrderByCreatedAtAsc (Long cartId);

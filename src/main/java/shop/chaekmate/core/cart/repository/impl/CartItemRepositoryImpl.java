@@ -9,8 +9,8 @@ import shop.chaekmate.core.cart.entity.CartItem;
 import shop.chaekmate.core.cart.entity.QCartItem;
 import shop.chaekmate.core.cart.repository.CartItemRepositoryCustom;
 
-@RequiredArgsConstructor
 @Repository
+@RequiredArgsConstructor
 public class CartItemRepositoryImpl implements CartItemRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
