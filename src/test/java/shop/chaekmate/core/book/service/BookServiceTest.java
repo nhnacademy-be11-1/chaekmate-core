@@ -103,8 +103,6 @@ class BookServiceTest {
 
         tag = new Tag("베스트셀러");
         ReflectionTestUtils.setField(tag, "id", 1L);
-
-        bookImage = new BookImage(book, "https://example.com/image.jpg");
     }
 
     @Test
