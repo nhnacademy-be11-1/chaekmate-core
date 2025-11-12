@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
 import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
-import shop.chaekmate.core.book.dto.request.ThumbnailUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
@@ -70,9 +69,6 @@ public class BookService {
                 .build();
 
         bookRepository.save(book);
-
-        BookImage bookImage = new BookImage(book, request.imageUrl());
-        bookImageRepository.save(bookImage);
 
         List<Category> categories = categoryRepository.findAllById(request.categoryIds());
 
