@@ -29,7 +29,7 @@ public class Review extends BaseEntity {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member_id;
+    private Member memberId;
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "ordered_book_id", nullable = false)
@@ -40,6 +40,18 @@ public class Review extends BaseEntity {
 
     @Column(name = "rating", nullable = false)
     @Min(value = 1, message = "별점은 최소 1점이어야 합니다.")
-    @Max(value = 1, message = "별점은 최대 5점이어야 합니다.")
+    @Max(value = 5, message = "별점은 최대 5점이어야 합니다.")
     private int rating;
+
+    public Review(Member memberId, OrderedBook orderedBookId, String comment, int rating) {
+        this.memberId = memberId;
+        this.orderedBookId = orderedBookId;
+        this.comment = comment;
+        this.rating = rating;
+    }
+
+    public void updateReview(String comment, int rating) {
+        this.comment = comment;
+        this.rating = rating;
+    }
 }
