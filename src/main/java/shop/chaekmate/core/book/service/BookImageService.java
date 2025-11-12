@@ -91,12 +91,19 @@ public class BookImageService {
 
     @Transactional
     public void updateThumbnail(Long bookId, ThumbnailUpdateRequest request) {
-        findBookById(bookId); // Check if book exists
+        Book book = findBookById(bookId); // Check if book exists
         BookImage thumbnail = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)
                 .stream()
                 .findFirst()
-                .orElseThrow(BookImageNotFoundException::new);
-        thumbnail.updateUrl(request.getNewImageUrl());
+                .orElse(null);
+
+        // 섬네일이 없으면 추가
+        if(thumbnail == null){
+            BookImage newBookImage = new BookImage(book, request.getNewImageUrl());
+            bookImageRepository.save(newBookImage);
+        } else {
+            thumbnail.updateUrl(request.getNewImageUrl());
+        }
     }
 
     @Transactional
