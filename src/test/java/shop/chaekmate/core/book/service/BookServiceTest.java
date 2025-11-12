@@ -74,7 +74,6 @@ class BookServiceTest {
     private AladinClient aladinClient;
 
     private Book book;
-    private BookImage bookImage;
     private Category category;
     private Tag tag;
 
@@ -120,7 +119,6 @@ class BookServiceTest {
                 "9781234567890",
                 10000,
                 9000,
-                "https://example.com/image.jpg",
                 true,
                 false,
                 100,
@@ -135,7 +133,6 @@ class BookServiceTest {
         bookService.createBook(request);
 
         then(bookRepository).should().save(any(Book.class));
-        then(bookImageRepository).should().save(any(BookImage.class));
         then(bookCategoryRepository).should().save(any(BookCategory.class));
         then(bookTagRepository).should().save(any(BookTag.class));
     }
@@ -152,7 +149,6 @@ class BookServiceTest {
                 "9781234567890",
                 10000,
                 9000,
-                "https://example.com/image.jpg",
                 true,
                 false,
                 100,
@@ -180,7 +176,6 @@ class BookServiceTest {
                 "9781234567890",
                 10000,
                 9000,
-                "https://example.com/image.jpg",
                 true,
                 false,
                 100,
