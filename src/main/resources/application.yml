@@ -22,9 +22,6 @@ aladin:
     base-url: http://www.aladin.co.kr/ttb/api
     key: ${ALADIN_API_KEY}
 
-jwt:
-  secret-key: ${JWT_SECRET_KEY}
-
 toss:
   api:
     url: https://api.tosspayments.com/v1
