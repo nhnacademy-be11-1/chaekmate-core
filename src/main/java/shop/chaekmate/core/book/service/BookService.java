@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
 import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
@@ -47,7 +48,7 @@ public class BookService {
     private String aladinApiKey;
 
     @Transactional
-    public void createBook(BookCreateRequest request) {
+    public BookCreateResponse createBook(BookCreateRequest request) {
         if (bookRepository.existsByIsbn(request.isbn())) {
             throw new IllegalArgumentException("이미 등록된 ISBN입니다: " + request.isbn());
         }
@@ -89,6 +90,8 @@ public class BookService {
         for (Tag tag : tags) {
             bookTagRepository.save(new BookTag(book, tag));
         }
+
+        return new BookCreateResponse(book.getId());
     }
 
     @Transactional

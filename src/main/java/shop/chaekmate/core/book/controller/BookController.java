@@ -12,6 +12,7 @@ import shop.chaekmate.core.book.controller.docs.BookControllerDocs;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
 import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.exception.InvalidSearchConditionException;
@@ -25,10 +26,10 @@ public class BookController implements BookControllerDocs {
     private final BookService bookService;
 
     @PostMapping
-    public ResponseEntity<Void> createBook(@Valid @RequestBody BookCreateRequest request) {
-        bookService.createBook(request);
+    public ResponseEntity<BookCreateResponse> createBook(@Valid @RequestBody BookCreateRequest request) {
+        BookCreateResponse response = bookService.createBook(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{bookId}")
