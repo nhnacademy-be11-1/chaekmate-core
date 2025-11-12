@@ -33,8 +33,6 @@ public record BookUpdateRequest(
         @NotNull(message = "판매가 등록은 필수입니다.")
         Integer salesPrice,
 
-        String imageUrl,
-
         @NotNull(message = "포장 여부 선택은 필수입니다.")
         Boolean isWrappable,
 

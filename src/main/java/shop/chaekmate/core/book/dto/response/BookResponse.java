@@ -16,7 +16,6 @@ public record BookResponse(
         String isbn,
         Integer price,
         Integer salesPrice,
-        String imageUrl,
         Boolean isWrappable,
         Boolean isSaleEnd,
         Integer stock,
@@ -24,7 +23,7 @@ public record BookResponse(
         List<Long> categoryIds,
         List<Long> tagIds
 ) {
-    public static BookResponse from(Book book, String imageUrl, List<Long> categoryIds, List<Long> tagIds) {
+    public static BookResponse from(Book book, List<Long> categoryIds, List<Long> tagIds) {
         return new BookResponse(
                 book.getId(),
                 book.getTitle(),
@@ -36,7 +35,6 @@ public record BookResponse(
                 book.getIsbn(),
                 book.getPrice(),
                 book.getSalesPrice(),
-                imageUrl,
                 book.isWrappable(),
                 book.isSaleEnd(),
                 book.getStock(),

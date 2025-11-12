@@ -196,7 +196,6 @@ class BookControllerTest {
                 "9780134685991",
                 12000,
                 10000,
-                "https://example.com/new-image.jpg",
                 false,
                 true,
                 50,
@@ -227,7 +226,6 @@ class BookControllerTest {
                                 "9780134685991",
                                 12000,
                                 10000,
-                                "https://example.com/new-image.jpg",
                                 false,
                                 true,
                                 50,
@@ -264,7 +262,6 @@ class BookControllerTest {
                 .andExpect(jsonPath("$.data.isbn").value("9781234567890"))
                 .andExpect(jsonPath("$.data.price").value(10000))
                 .andExpect(jsonPath("$.data.salesPrice").value(9000))
-                .andExpect(jsonPath("$.data.imageUrl").value("https://example.com/image.jpg"))
                 .andExpect(jsonPath("$.data.categoryIds").isArray())
                 .andExpect(jsonPath("$.data.categoryIds", hasSize(1)))
                 .andExpect(jsonPath("$.data.tagIds").isArray())

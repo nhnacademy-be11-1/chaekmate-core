@@ -211,7 +211,6 @@ class BookServiceTest {
                 "9781234567890",
                 10000,
                 9000,
-                "https://example.com/image.jpg",
                 true,
                 false,
                 100,
@@ -256,7 +255,6 @@ class BookServiceTest {
         Long bookId = 1L;
 
         given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
-        given(bookImageRepository.findByBookId(bookId)).willReturn(Optional.of(bookImage));
         given(bookCategoryRepository.findByBook(book)).willReturn(List.of(new BookCategory(book, category)));
         given(bookTagRepository.findByBook(book)).willReturn(List.of(new BookTag(book, tag)));
 
@@ -264,7 +262,6 @@ class BookServiceTest {
 
         assertThat(response).isNotNull();
         assertThat(response.title()).isEqualTo("테스트 책");
-        assertThat(response.imageUrl()).isEqualTo("https://example.com/image.jpg");
         assertThat(response.categoryIds()).hasSize(1);
         assertThat(response.tagIds()).hasSize(1);
     }

@@ -102,11 +102,6 @@ public class BookService {
 
         book.update(request);
 
-        // 이미지 URL 이 존재할경우 섬네일 수정으로 변경
-        if(request.imageUrl() != null) {
-            bookImageService.updateThumbnail(bookId, new ThumbnailUpdateRequest(request.imageUrl()));
-        }
-
         // 책 카테고리 업데이트
         if (request.categoryIds() != null) {
             updateBookCategory(book, request.categoryIds());
@@ -136,9 +131,6 @@ public class BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(BookNotFoundException::new);
 
-        BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElse(null);
-
         List<BookCategory> bookCategories = bookCategoryRepository.findByBook(book);
         List<Long> categoryIds = new ArrayList<>();
         for (BookCategory bookCategory : bookCategories) {
@@ -151,9 +143,7 @@ public class BookService {
             tagIds.add(bookTag.getTag().getId());
         }
 
-        String imageUrl = (bookImage != null) ? bookImage.getImageUrl() : null;
-
-        return BookResponse.from(book, imageUrl, categoryIds, tagIds);
+        return BookResponse.from(book, categoryIds, tagIds);
     }
 
     public Page<BookListResponse> getBookList(BookSearchCondition condition, Pageable pageable) {
