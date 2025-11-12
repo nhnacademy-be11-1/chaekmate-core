@@ -42,7 +42,6 @@ public class BookService {
     private final BookTagRepository bookTagRepository;
 
     private final AladinClient aladinClient;
-    private final BookImageService bookImageService;
 
     @Value("${aladin.api.key}")
     private String aladinApiKey;
@@ -117,12 +116,13 @@ public class BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(BookNotFoundException::new);
 
-        bookRepository.delete(book);
-
         // 북 속성 엔티티들 삭제
         bookCategoryRepository.deleteAll(bookCategoryRepository.findByBook(book));
         bookImageRepository.deleteAll(bookImageRepository.findByBook(book));
         bookTagRepository.deleteAll(bookTagRepository.findByBook(book));
+
+        // 북 삭제
+        bookRepository.delete(book);
 
     }
 
