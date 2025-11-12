@@ -183,17 +183,21 @@ class BookImageServiceTest {
     }
 
     @Test
-    void 썸네일_수정_실패_썸네일_없음() {
+    void 썸네일_수정_썸네일_없을때() {
         // given
         long bookId = 1L;
         Book book = mock(Book.class);
         ThumbnailUpdateRequest request = new ThumbnailUpdateRequest("http://new.url/thumb.jpg");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(Collections.emptyList());
+        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId))
+                .thenReturn(Collections.emptyList());
 
-        // when & then
-        assertThrows(BookImageNotFoundException.class, () -> bookImageService.updateThumbnail(bookId, request));
+        // when
+        bookImageService.updateThumbnail(bookId, request);
+
+        // then
+        verify(bookImageRepository).save(any(BookImage.class)); // 저장이 호출되는지 확인
     }
 
     @Test
