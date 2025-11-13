@@ -36,11 +36,8 @@ public class CartService {
     // 장바구니 삭제
     @Transactional
     public void deleteCart(CartDto dto) {
-        Optional<Member> memberOptional = this.memberRepository.findById(dto.memberId());
-        if (memberOptional.isPresent()) {
-            Member member = memberOptional.get();
-            this.cartStore.deleteCart(member.getId());
-        }
+        this.memberRepository.findById(dto.memberId())
+                .ifPresent(member -> this.cartStore.deleteCart(member.getId()));
     }
 
     /* --------------------------- 장바구니 아이템 --------------------------- */
@@ -59,10 +56,11 @@ public class CartService {
         // 도서 재고 검증
         Book book = this.bookRepository.findById(dto.bookId())
                 .orElseThrow(BookNotFoundException::new);
+
         this.validateBookStock(book, dto.quantity());
 
         // 장바구니 아이템 생성
-        CartItem item = this.cartStore.addItem(cart.getId(), dto.bookId(), dto.quantity());
+        CartItem item = this.cartStore.saveOrUpdateItem(cart.getId(), dto.bookId(), dto.quantity());
 
         return new CartItemSingleResponse(
                 member.getId(),
@@ -90,7 +88,7 @@ public class CartService {
                 .orElseThrow(BookNotFoundException::new);
         this.validateBookStock(book, dto.quantity());
 
-        CartItem item = this.cartStore.addItem(cart.getId(), dto.bookId(), dto.quantity());
+        CartItem item = this.cartStore.saveOrUpdateItem(cart.getId(), dto.bookId(), dto.quantity());
 
         return new CartItemSingleResponse(
                 member.getId(),

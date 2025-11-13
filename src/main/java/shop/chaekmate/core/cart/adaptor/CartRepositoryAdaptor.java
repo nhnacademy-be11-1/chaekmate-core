@@ -27,7 +27,7 @@ public class CartRepositoryAdaptor implements CartStore {
     // 장바구니 조회
     @Override
     public Cart findCartByMemberId(Long memberId) {
-        return this.cartRepository.findByMemberId(memberId).orElse(null);
+        return this.cartRepository.findByMemberId(memberId).orElse(null);   // 추후 NPE 방지 위해 Optional 반환 수정 고려
     }
 
     // 장바구니 생성(저장)
@@ -55,7 +55,7 @@ public class CartRepositoryAdaptor implements CartStore {
 
     // 장바구니 아이템 추가
     @Override
-    public CartItem addItem(Long cartId, Long bookId, int quantity) {
+    public CartItem saveOrUpdateItem(Long cartId, Long bookId, int quantity) {
         Book book = this.bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(String.format("Book id %s not found", bookId)));
 

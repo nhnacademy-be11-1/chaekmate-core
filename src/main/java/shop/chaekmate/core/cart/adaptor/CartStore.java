@@ -10,7 +10,7 @@ public interface CartStore {
     Cart saveCart(Cart cart);
     void deleteCart(Long memberId);
     List<CartItem> findItemList(Long cartId, CartItemSortCriteria criteria);
-    CartItem addItem(Long cartId, Long bookId, int quantity);
+    CartItem saveOrUpdateItem(Long cartId, Long bookId, int quantity);
     void removeItem(Long cartId, Long bookId);
     void removeAllItem(Long cartId);
 }

@@ -143,7 +143,7 @@ class CartServiceTest {
 
         CartItem newItem = CartItem.create(newCart, this.bookA);
         newItem.updateQuantity(dto.quantity());
-        when(this.cartStore.addItem(newCart.getId(), dto.bookId(), dto.quantity())).thenReturn(newItem);
+        when(this.cartStore.saveOrUpdateItem(newCart.getId(), dto.bookId(), dto.quantity())).thenReturn(newItem);
 
         CartItemSingleResponse response = this.cartService.addCartItem(dto);
 
@@ -152,7 +152,7 @@ class CartServiceTest {
 
         // 핵심 호출 검증
         verify(this.cartStore, times(1)).saveCart(any(Cart.class));
-        verify(this.cartStore, times(1)).addItem(newCart.getId(), dto.bookId(), dto.quantity());
+        verify(this.cartStore, times(1)).saveOrUpdateItem(newCart.getId(), dto.bookId(), dto.quantity());
     }
 
     @Test
@@ -165,7 +165,7 @@ class CartServiceTest {
 
         CartItem newItem = CartItem.create(this.cart, this.bookA);
         newItem.updateQuantity(dto.quantity());
-        when(this.cartStore.addItem(this.cart.getId(), dto.bookId(), dto.quantity())).thenReturn(newItem);
+        when(this.cartStore.saveOrUpdateItem(this.cart.getId(), dto.bookId(), dto.quantity())).thenReturn(newItem);
 
         CartItemSingleResponse response = this.cartService.addCartItem(dto);
 
@@ -174,7 +174,7 @@ class CartServiceTest {
 
         // 핵심 호출 검증
         verify(this.cartStore, never()).saveCart(any(Cart.class));
-        verify(this.cartStore, times(1)).addItem(this.cart.getId(), dto.bookId(), dto.quantity());
+        verify(this.cartStore, times(1)).saveOrUpdateItem(this.cart.getId(), dto.bookId(), dto.quantity());
     }
 
     @Test
@@ -191,7 +191,7 @@ class CartServiceTest {
         // 핵심 호출 검증
         verify(this.cartStore, never()).findCartByMemberId(anyLong());
         verify(this.cartStore, never()).saveCart(any(Cart.class));
-        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+        verify(this.cartStore, never()).saveOrUpdateItem(anyLong(), anyLong(), anyInt());
     }
 
     @Test
@@ -208,7 +208,7 @@ class CartServiceTest {
         });
 
         // 핵심 호출 검증
-        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+        verify(this.cartStore, never()).saveOrUpdateItem(anyLong(), anyLong(), anyInt());
     }
 
     @Test
@@ -225,7 +225,7 @@ class CartServiceTest {
         });
 
         // 핵심 호출 검증
-        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+        verify(this.cartStore, never()).saveOrUpdateItem(anyLong(), anyLong(), anyInt());
     }
 
     // 장바구니 아이템 수량 업데이트
@@ -239,7 +239,7 @@ class CartServiceTest {
 
         CartItem newItem = CartItem.create(this.cart, this.bookA);
         newItem.updateQuantity(dto.quantity());
-        when(this.cartStore.addItem(this.cart.getId(), dto.bookId(), dto.quantity())).thenReturn(newItem);
+        when(this.cartStore.saveOrUpdateItem(this.cart.getId(), dto.bookId(), dto.quantity())).thenReturn(newItem);
 
         CartItemSingleResponse response = this.cartService.updateCartItem(dto);
 
@@ -247,7 +247,7 @@ class CartServiceTest {
         assertNotNull(response);
 
         // 핵심 호출 검증
-        verify(this.cartStore, times(1)).addItem(this.cart.getId(), dto.bookId(), dto.quantity());
+        verify(this.cartStore, times(1)).saveOrUpdateItem(this.cart.getId(), dto.bookId(), dto.quantity());
     }
 
     @Test
@@ -263,7 +263,7 @@ class CartServiceTest {
 
         // 핵심 호출 검증
         verify(this.cartStore, never()).findCartByMemberId(anyLong());
-        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+        verify(this.cartStore, never()).saveOrUpdateItem(anyLong(), anyLong(), anyInt());
     }
 
     @Test
@@ -279,7 +279,7 @@ class CartServiceTest {
         });
 
         // 핵심 호출 검증
-        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+        verify(this.cartStore, never()).saveOrUpdateItem(anyLong(), anyLong(), anyInt());
     }
 
     @Test
@@ -294,7 +294,7 @@ class CartServiceTest {
         });
 
         // 핵심 호출 검증
-        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+        verify(this.cartStore, never()).saveOrUpdateItem(anyLong(), anyLong(), anyInt());
     }
 
     @Test
@@ -310,7 +310,7 @@ class CartServiceTest {
         });
 
         // 핵심 호출 검증
-        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+        verify(this.cartStore, never()).saveOrUpdateItem(anyLong(), anyLong(), anyInt());
     }
 
     // 장바구니 아이템 삭제 - 단일 아이템 삭제
