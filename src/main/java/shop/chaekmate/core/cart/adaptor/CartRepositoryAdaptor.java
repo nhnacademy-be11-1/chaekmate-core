@@ -38,8 +38,8 @@ public class CartRepositoryAdaptor implements CartStore {
 
     // 장바구니 삭제
     @Override
-    public void deleteCart(Cart cart) {
-        this.cartRepository.delete(cart);
+    public void deleteCart(Long memberId) {
+        this.cartRepository.deleteByMemberId(memberId);
     }
 
     // 장바구니 아이템 조회 - 정렬 조건에 따라 조회 (기본값: 최근순(생성일 내림차순))

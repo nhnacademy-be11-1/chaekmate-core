@@ -8,7 +8,7 @@ import shop.chaekmate.core.cart.model.CartItemSortCriteria;
 public interface CartStore {
     Cart findCartByMemberId(Long memberId);
     Cart saveCart(Cart cart);
-    void deleteCart(Cart cart);
+    void deleteCart(Long memberId);
     List<CartItem> findItemList(Long cartId, CartItemSortCriteria criteria);
     CartItem addItem(Long cartId, Long bookId, int quantity);
     void removeItem(Long cartId, Long bookId);

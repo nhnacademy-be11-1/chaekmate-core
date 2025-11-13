@@ -2,9 +2,11 @@ package shop.chaekmate.core.cart.service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.cart.adaptor.CartStore;
 import shop.chaekmate.core.cart.dto.request.CartDto;
@@ -16,6 +18,8 @@ import shop.chaekmate.core.cart.entity.Cart;
 import shop.chaekmate.core.cart.entity.CartItem;
 import shop.chaekmate.core.cart.exception.cart.CartNotFoundException;
 import shop.chaekmate.core.cart.exception.cart.MemberNotFoundException;
+import shop.chaekmate.core.cart.exception.cartitem.BookInsufficientStockException;
+import shop.chaekmate.core.cart.exception.cartitem.BookNotFoundException;
 import shop.chaekmate.core.cart.model.CartItemSortCriteria;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
@@ -25,19 +29,21 @@ import shop.chaekmate.core.member.repository.MemberRepository;
 public class CartService {
 
     private final MemberRepository memberRepository;
+    private final BookRepository bookRepository;
     private final CartStore cartStore;
 
-    /* 장바구니 */
+    /* ------------------------------ 장바구니 ------------------------------ */
     // 장바구니 삭제
     @Transactional
     public void deleteCart(CartDto dto) {
-        Cart cart = this.cartStore.findCartByMemberId(dto.memberId());
-        if (Objects.nonNull(cart)) {
-            this.cartStore.deleteCart(cart);
+        Optional<Member> memberOptional = this.memberRepository.findById(dto.memberId());
+        if (memberOptional.isPresent()) {
+            Member member = memberOptional.get();
+            this.cartStore.deleteCart(member.getId());
         }
     }
 
-    /* 장바구니 아이템 */
+    /* --------------------------- 장바구니 아이템 --------------------------- */
     // 장바구니 아이템 생성
     @Transactional
     public CartItemSingleResponse addCartItem(CartItemDto dto) {
@@ -49,6 +55,11 @@ public class CartService {
         if (Objects.isNull(cart)) {
             cart = this.cartStore.saveCart(Cart.create(member));
         }
+
+        // 도서 재고 검증
+        Book book = this.bookRepository.findById(dto.bookId())
+                .orElseThrow(BookNotFoundException::new);
+        this.validateBookStock(book, dto.quantity());
 
         // 장바구니 아이템 생성
         CartItem item = this.cartStore.addItem(cart.getId(), dto.bookId(), dto.quantity());
@@ -73,6 +84,11 @@ public class CartService {
         if (Objects.isNull(cart)) {
             throw new CartNotFoundException();
         }
+
+        // 도서 재고 검증
+        Book book = this.bookRepository.findById(dto.bookId())
+                .orElseThrow(BookNotFoundException::new);
+        this.validateBookStock(book, dto.quantity());
 
         CartItem item = this.cartStore.addItem(cart.getId(), dto.bookId(), dto.quantity());
 
@@ -130,5 +146,12 @@ public class CartService {
         return new CartItemListResponse(dto.memberId(), cart.getId(), itemResponseList);
     }
 
-    // TODO: 장바구니 아이템 조회 - 정렬 기준 추가 (도서명 오름/내림차순, 오래된순)
+    /* --------------------------- 내부 검증 로직 --------------------------- */
+    private void validateBookStock(Book book, int quantity) {
+        if (book.getStock() < quantity) {
+            throw new BookInsufficientStockException();
+        }
+    }
+
+    // 추후 추가: 장바구니 아이템 조회 - 정렬 기준 추가 (도서명 오름/내림차순, 오래된순)
 }

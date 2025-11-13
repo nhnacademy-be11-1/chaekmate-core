@@ -4,6 +4,6 @@ import shop.chaekmate.core.common.exception.CoreException;
 
 public class CartItemInvalidQuantityException extends CoreException {
   public CartItemInvalidQuantityException() {
-    super(CartItemErrorCode.INVALID_QUANTITY);
+    super(CartItemErrorCode.CART_ITEM_INVALID_QUANTITY);
   }
 }

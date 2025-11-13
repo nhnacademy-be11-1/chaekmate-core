@@ -8,7 +8,6 @@ import shop.chaekmate.core.cart.entity.CartItem;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long>, CartItemRepositoryCustom {
     // 조회
-    boolean existsByCartIdAndBookId(Long cartId, Long bookId);
     Optional<CartItem> findByCartIdAndBookId(Long cartId, Long bookId);
 
     // 정렬

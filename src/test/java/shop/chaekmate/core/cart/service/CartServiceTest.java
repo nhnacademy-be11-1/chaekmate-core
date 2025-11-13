@@ -32,9 +32,9 @@ import shop.chaekmate.core.cart.entity.Cart;
 import shop.chaekmate.core.cart.entity.CartItem;
 import shop.chaekmate.core.cart.exception.cart.CartNotFoundException;
 import shop.chaekmate.core.cart.exception.cart.MemberNotFoundException;
+import shop.chaekmate.core.cart.exception.cartitem.BookInsufficientStockException;
+import shop.chaekmate.core.cart.exception.cartitem.BookNotFoundException;
 import shop.chaekmate.core.cart.model.CartItemSortCriteria;
-import shop.chaekmate.core.cart.repository.CartItemRepository;
-import shop.chaekmate.core.cart.repository.CartRepository;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 import shop.chaekmate.core.member.repository.MemberRepository;
@@ -52,12 +52,6 @@ class CartServiceTest {
     private BookRepository bookRepository;
 
     @Mock
-    private CartRepository cartRepository;
-
-    @Mock
-    private CartItemRepository cartItemRepository;
-
-    @Mock
     private CartStore cartStore;
 
     @InjectMocks
@@ -65,6 +59,7 @@ class CartServiceTest {
 
     private Member member;
     private Book bookA;
+    private Book bookB;
 
     private Cart cart;
 
@@ -95,27 +90,43 @@ class CartServiceTest {
                 .stock(100)
                 .build();
 
+        this.bookB = Book.builder()
+                .title("B")
+                .index("목차")
+                .description("설명")
+                .author("테스트 저자")
+                .publisher("테스트 출판사")
+                .publishedAt(LocalDateTime.of(2024, 1, 1, 0, 0))
+                .isbn("9781234567890")
+                .price(10000)
+                .salesPrice(9000)
+                .isWrappable(true)
+                .views(0)
+                .isSaleEnd(false)
+                .stock(0)
+                .build();
+
         this.cart = Cart.create(this.member);
     }
 
     @Test
     void 장바구니_삭제_성공() {
         CartDto dto = new CartDto(this.member.getId());
-        when(this.cartStore.findCartByMemberId(dto.memberId())).thenReturn(this.cart);
+        when(this.memberRepository.findById(dto.memberId())).thenReturn(Optional.of(this.member));
 
         this.cartService.deleteCart(dto);
 
-        verify(this.cartStore, times(1)).deleteCart(this.cart);
+        verify(this.cartStore, times(1)).deleteCart(dto.memberId());
     }
 
     @Test
     void 장바구니_삭제_실패_존재하지않음() {
         CartDto dto = new CartDto(this.member.getId());
-        when(this.cartStore.findCartByMemberId(dto.memberId())).thenReturn(null);
+        when(this.memberRepository.findById(dto.memberId())).thenReturn(Optional.empty());
 
         this.cartService.deleteCart(dto);
 
-        verify(this.cartStore, never()).deleteCart(this.cart);
+        verify(this.cartStore, never()).deleteCart(dto.memberId());
     }
 
     @Test
@@ -127,6 +138,8 @@ class CartServiceTest {
 
         Cart newCart = Cart.create(this.member);
         when(this.cartStore.saveCart(any(Cart.class))).thenReturn(newCart);
+
+        when(this.bookRepository.findById(dto.bookId())).thenReturn(Optional.of(this.bookA));
 
         CartItem newItem = CartItem.create(newCart, this.bookA);
         newItem.updateQuantity(dto.quantity());
@@ -147,6 +160,8 @@ class CartServiceTest {
         CartItemDto dto = new CartItemDto(this.member.getId(), this.cart.getId(), this.bookA.getId(), 1);
         when(this.memberRepository.findById(dto.memberId())).thenReturn(Optional.of(this.member));
         when(this.cartStore.findCartByMemberId(dto.memberId())).thenReturn(this.cart);
+
+        when(this.bookRepository.findById(dto.bookId())).thenReturn(Optional.of(this.bookA));
 
         CartItem newItem = CartItem.create(this.cart, this.bookA);
         newItem.updateQuantity(dto.quantity());
@@ -179,12 +194,48 @@ class CartServiceTest {
         verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
     }
 
+    @Test
+    void 장바구니_아이템_추가_실패_도서_존재X() {
+        CartItemDto dto = new CartItemDto(this.member.getId(), this.cart.getId(), this.bookB.getId(), 1);
+        when(this.memberRepository.findById(dto.memberId())).thenReturn(Optional.of(this.member));
+        when(this.cartStore.findCartByMemberId(dto.memberId())).thenReturn(this.cart);
+
+        when(this.bookRepository.findById(dto.bookId())).thenReturn(Optional.empty());
+
+        // 예외 처리 검증
+        assertThrows(BookNotFoundException.class, () -> {
+            this.cartService.addCartItem(dto);
+        });
+
+        // 핵심 호출 검증
+        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+    }
+
+    @Test
+    void 장바구니_아이템_추가_실패_도서_재고_부족() {
+        CartItemDto dto = new CartItemDto(this.member.getId(), this.cart.getId(), this.bookB.getId(), 1);
+        when(this.memberRepository.findById(dto.memberId())).thenReturn(Optional.of(this.member));
+        when(this.cartStore.findCartByMemberId(dto.memberId())).thenReturn(this.cart);
+
+        when(this.bookRepository.findById(dto.bookId())).thenReturn(Optional.of(this.bookB));
+
+        // 예외 처리 검증
+        assertThrows(BookInsufficientStockException.class, () -> {
+            this.cartService.addCartItem(dto);
+        });
+
+        // 핵심 호출 검증
+        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+    }
+
     // 장바구니 아이템 수량 업데이트
     @Test
     void 장바구니_아이템_수량_업데이트_성공() {
         CartItemDto dto = new CartItemDto(this.member.getId(), this.cart.getId(), this.bookA.getId(), 3);
         when(this.memberRepository.findById(dto.memberId())).thenReturn(Optional.of(this.member));
         when(this.cartStore.findCartByMemberId(dto.memberId())).thenReturn(this.cart);
+
+        when(this.bookRepository.findById(dto.bookId())).thenReturn(Optional.of(this.bookA));
 
         CartItem newItem = CartItem.create(this.cart, this.bookA);
         newItem.updateQuantity(dto.quantity());
@@ -224,6 +275,37 @@ class CartServiceTest {
 
         // 예외 처리 검증
         assertThrows(CartNotFoundException.class, () -> {
+            this.cartService.updateCartItem(dto);
+        });
+
+        // 핵심 호출 검증
+        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+    }
+
+    @Test
+    void 장바구니_아이템_수량_업데이트_실패_도서_존재X() {
+        CartItemDto dto = new CartItemDto(this.member.getId(), this.cart.getId(), this.bookB.getId(), 3);
+        when(this.memberRepository.findById(dto.memberId())).thenReturn(Optional.of(this.member));
+        when(this.cartStore.findCartByMemberId(this.member.getId())).thenReturn(this.cart);
+
+        // 예외 처리 검증
+        assertThrows(BookNotFoundException.class, () -> {
+            this.cartService.updateCartItem(dto);
+        });
+
+        // 핵심 호출 검증
+        verify(this.cartStore, never()).addItem(anyLong(), anyLong(), anyInt());
+    }
+
+    @Test
+    void 장바구니_아이템_수량_업데이트_실패_도서_재고_부족() {
+        CartItemDto dto = new CartItemDto(this.member.getId(), this.cart.getId(), this.bookB.getId(), 3);
+        when(this.memberRepository.findById(dto.memberId())).thenReturn(Optional.of(this.member));
+        when(this.cartStore.findCartByMemberId(this.member.getId())).thenReturn(this.cart);
+        when(this.bookRepository.findById(dto.bookId())).thenReturn(Optional.of(this.bookB));
+
+        // 예외 처리 검증
+        assertThrows(BookInsufficientStockException.class, () -> {
             this.cartService.updateCartItem(dto);
         });
 
