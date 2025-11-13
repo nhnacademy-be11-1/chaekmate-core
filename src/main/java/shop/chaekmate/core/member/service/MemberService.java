@@ -4,20 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.chaekmate.core.member.dto.request.CreateAddressRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
-import shop.chaekmate.core.member.dto.response.AddressResponse;
 import shop.chaekmate.core.member.dto.response.MemberGradeResponse;
 import shop.chaekmate.core.member.entity.Member;
-import shop.chaekmate.core.member.entity.MemberAddress;
 import shop.chaekmate.core.member.entity.MemberGradeHistory;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 import shop.chaekmate.core.member.exception.*;
-import shop.chaekmate.core.member.repository.MemberAddressRepository;
 import shop.chaekmate.core.member.repository.MemberGradeHistoryRepository;
 import shop.chaekmate.core.member.repository.MemberRepository;
-
-import java.util.List;
 
 
 @Service
@@ -27,9 +21,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final MemberGradeHistoryRepository  memberGradeHistoryRepository;
-    private final MemberAddressRepository memberAddressRepository;
-
-    private static final int MAX_ADDRESS_COUNT = 10;
 
     @Transactional
     public void createMember(CreateMemberRequest request) {
@@ -81,32 +72,5 @@ public class MemberService {
 
     }
 
-    @Transactional
-    public void createAddress(CreateAddressRequest request, Long memberId) {
-        validateAddressCount(memberId);
-        MemberAddress memberAddress = new MemberAddress(
-                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new),
-                request.memo(),
-                request.streetName(),
-                request.detail(),
-                request.zipcode()
-        );
-        memberAddressRepository.save(memberAddress);
-    }
 
-    private void validateAddressCount(Long memberId) {
-        int count = memberAddressRepository.countByMemberId(memberId);
-        if (count >= MAX_ADDRESS_COUNT) {
-            throw new AddressLimitExceededException();
-        }
-    }
-
-    @Transactional
-    public void deleteAddress(Long id) {
-        memberAddressRepository.findById(id).orElseThrow(AddressNotFoundException::new);
-    }
-
-    public List<AddressResponse> getAddresses(Long memberId) {
-        return memberAddressRepository.findAllByMemberId(memberId).stream().map(AddressResponse::from).toList();
-    }
 }
