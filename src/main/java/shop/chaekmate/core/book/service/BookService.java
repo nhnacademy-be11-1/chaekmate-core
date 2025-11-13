@@ -2,6 +2,7 @@ package shop.chaekmate.core.book.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
+import shop.chaekmate.core.book.event.BookCreatedEvent;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.exception.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
@@ -40,8 +42,13 @@ public class BookService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final BookTagRepository bookTagRepository;
+    private final BookCategoryRepositoryImpl bookCategoryRepositoryImpl;
+    private final BookTagRepositoryImpl bookTagRepositoryImpl;
 
     private final AladinClient aladinClient;
+
+    // 트랜잭션 끝 난 뒤 서비스 호출 이벤트 발행
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${aladin.api.key}")
     private String aladinApiKey;
@@ -68,16 +75,12 @@ public class BookService {
                 .stock(request.stock())
                 .build();
 
-        bookRepository.save(book);
+        Book saved = bookRepository.save(book);
 
         List<Category> categories = categoryRepository.findAllById(request.categoryIds());
 
         if (categories.size() != request.categoryIds().size()) {
             throw new CategoryNotFoundException();
-        }
-
-        for (Category category : categories) {
-            bookCategoryRepository.save(new BookCategory(book, category));
         }
 
         List<Tag> tags = tagRepository.findAllById(request.tagIds());
@@ -86,9 +89,15 @@ public class BookService {
             throw new TagNotFoundException();
         }
 
-        for (Tag tag : tags) {
-            bookTagRepository.save(new BookTag(book, tag));
-        }
+        List<BookCategory> bookCategories = categories.stream().map(c -> new BookCategory(book,c)).toList();
+        bookCategoryRepository.saveAll(bookCategories);
+
+        List<BookTag> bookTags = tags.stream().map(t -> new BookTag(book, t)).toList();
+        bookTagRepository.saveAll(bookTags);
+
+
+        // RabbitMQ 이벤트 발행
+        eventPublisher.publishEvent(new BookCreatedEvent(saved));
 
         return new BookCreateResponse(book.getId());
     }
