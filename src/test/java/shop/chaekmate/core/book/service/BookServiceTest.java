@@ -74,7 +74,6 @@ class BookServiceTest {
     private AladinClient aladinClient;
 
     private Book book;
-    private BookImage bookImage;
     private Category category;
     private Tag tag;
 
@@ -104,8 +103,6 @@ class BookServiceTest {
 
         tag = new Tag("베스트셀러");
         ReflectionTestUtils.setField(tag, "id", 1L);
-
-        bookImage = new BookImage(book, "https://example.com/image.jpg");
     }
 
     @Test
@@ -120,7 +117,6 @@ class BookServiceTest {
                 "9781234567890",
                 10000,
                 9000,
-                "https://example.com/image.jpg",
                 true,
                 false,
                 100,
@@ -135,7 +131,6 @@ class BookServiceTest {
         bookService.createBook(request);
 
         then(bookRepository).should().save(any(Book.class));
-        then(bookImageRepository).should().save(any(BookImage.class));
         then(bookCategoryRepository).should().save(any(BookCategory.class));
         then(bookTagRepository).should().save(any(BookTag.class));
     }
@@ -152,7 +147,6 @@ class BookServiceTest {
                 "9781234567890",
                 10000,
                 9000,
-                "https://example.com/image.jpg",
                 true,
                 false,
                 100,
@@ -165,7 +159,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.createBook(request))
                 .isInstanceOf(CategoryNotFoundException.class)
-                .hasMessage("일부 카테고리 ID를 찾을 수 없습니다.");
+                .hasMessage("해당 카테고리를 찾을 수 없습니다.");
     }
 
     @Test
@@ -180,7 +174,6 @@ class BookServiceTest {
                 "9781234567890",
                 10000,
                 9000,
-                "https://example.com/image.jpg",
                 true,
                 false,
                 100,
@@ -194,7 +187,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.createBook(request))
                 .isInstanceOf(TagNotFoundException.class)
-                .hasMessage("일부 태그 ID를 찾을 수 없습니다.");
+                .hasMessage("해당 태그를 찾을 수 없습니다.");
     }
 
     @Test
@@ -211,7 +204,6 @@ class BookServiceTest {
                 "9781234567890",
                 10000,
                 9000,
-                "https://example.com/image.jpg",
                 true,
                 false,
                 100,
@@ -223,7 +215,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.updateBook(bookId, request))
                 .isInstanceOf(BookNotFoundException.class)
-                .hasMessageContaining("Book id 10000000000 not found");
+                .hasMessage("해당 도서를 찾을 수 없습니다.");
     }
 
 
@@ -248,7 +240,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.deleteBook(bookId))
                 .isInstanceOf(BookNotFoundException.class)
-                .hasMessageContaining("삭제할 책을 찾을 수 없습니다");
+                .hasMessage("해당 도서를 찾을 수 없습니다.");
     }
 
     @Test
@@ -256,7 +248,6 @@ class BookServiceTest {
         Long bookId = 1L;
 
         given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
-        given(bookImageRepository.findByBookId(bookId)).willReturn(Optional.of(bookImage));
         given(bookCategoryRepository.findByBook(book)).willReturn(List.of(new BookCategory(book, category)));
         given(bookTagRepository.findByBook(book)).willReturn(List.of(new BookTag(book, tag)));
 
@@ -264,7 +255,6 @@ class BookServiceTest {
 
         assertThat(response).isNotNull();
         assertThat(response.title()).isEqualTo("테스트 책");
-        assertThat(response.imageUrl()).isEqualTo("https://example.com/image.jpg");
         assertThat(response.categoryIds()).hasSize(1);
         assertThat(response.tagIds()).hasSize(1);
     }
@@ -277,7 +267,7 @@ class BookServiceTest {
 
         assertThatThrownBy(() -> bookService.getBook(bookId))
                 .isInstanceOf(BookNotFoundException.class)
-                .hasMessageContaining("Book id 10000000000 not found");
+                .hasMessage("해당 도서를 찾을 수 없습니다.");
     }
 
     @Test

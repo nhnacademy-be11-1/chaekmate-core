@@ -1,14 +1,14 @@
 package shop.chaekmate.core.point.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.point.dto.request.CreatePointPolicyRequest;
 import shop.chaekmate.core.point.dto.request.DeletePointPolicyRequest;
 import shop.chaekmate.core.point.dto.request.UpdatePointPolicyRequest;
 import shop.chaekmate.core.point.dto.response.CreatePointPolicyResponse;
-import shop.chaekmate.core.point.dto.response.ReadPointPolicyResponse;
+import shop.chaekmate.core.point.dto.response.PointPolicyResponse;
 import shop.chaekmate.core.point.dto.response.UpdatePointPolicyResponse;
 import shop.chaekmate.core.point.entity.PointPolicy;
 import shop.chaekmate.core.point.entity.type.PointEarnedType;
@@ -16,7 +16,7 @@ import shop.chaekmate.core.point.exception.DuplicatePointPolicyException;
 import shop.chaekmate.core.point.exception.PointPolicyNotFoundException;
 import shop.chaekmate.core.point.repository.PointPolicyRepository;
 
-import java.util.NoSuchElementException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -50,11 +50,25 @@ public class PointService {
         return new UpdatePointPolicyResponse(saved.getId(), saved.getType(), saved.getPoint());
     }
 
-    // 추가: 단건 조회
-    public ReadPointPolicyResponse getPolicyByType(PointEarnedType type) {
+    //정책 단건 조회
+    @Transactional
+    public PointPolicyResponse getPolicyByType(PointEarnedType type) {
         PointPolicy policy = pointPolicyRepository.findByType(type)
                 .orElseThrow(PointPolicyNotFoundException::new);
-        return new ReadPointPolicyResponse(policy.getId(), policy.getType(), policy.getPoint());
+        return new PointPolicyResponse(policy.getId(), policy.getType(), policy.getPoint());
+    }
+
+    //정책 전체 조회
+    @Transactional(readOnly = true)
+    public List<PointPolicyResponse> getAllPolicies() {
+        return pointPolicyRepository.findAll()
+                .stream()
+                .map(policy -> new PointPolicyResponse(
+                        policy.getId(),
+                        policy.getType(),
+                        policy.getPoint()
+                ))
+                .toList();
     }
 
     //삭제 기능
@@ -63,8 +77,6 @@ public class PointService {
         PointPolicy policy = pointPolicyRepository.findByType(request.pointEarnedType())
                 .orElseThrow(PointPolicyNotFoundException::new);
         pointPolicyRepository.delete(policy);
-
-
     }
     
 }

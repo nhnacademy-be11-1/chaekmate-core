@@ -64,6 +64,7 @@ class DeliveryPolicyServiceTest {
                 () -> assertEquals(5000, response.deliveryFee())
         );
 
+        verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
         verify(deliveryPolicyRepository, times(1)).save(any(DeliveryPolicy.class));
     }
 
@@ -72,13 +73,10 @@ class DeliveryPolicyServiceTest {
         when(deliveryPolicyRepository.findByDeletedAtIsNull()).thenReturn(Optional.of(deliveryPolicy));
 
         DeliveryPolicy newDeliveryPolicy = new DeliveryPolicy(30000, 5000);
-
         DeliveryPolicyDto dto = new DeliveryPolicyDto(newDeliveryPolicy.getFreeStandardAmount(),
                 newDeliveryPolicy.getDeliveryFee());
 
-        assertThrows(DuplicatedDeliveryPolicyException.class, () ->
-                deliveryPolicyService.createPolicy(dto)
-        );
+        assertThrows(DuplicatedDeliveryPolicyException.class, () -> deliveryPolicyService.createPolicy(dto));
 
         verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
     }
@@ -99,6 +97,7 @@ class DeliveryPolicyServiceTest {
                 () -> assertEquals(3000, response.deliveryFee())
         );
 
+        verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
         verify(deliveryPolicyRepository, times(1)).deleteById(deliveryPolicy.getId());
         verify(deliveryPolicyRepository, times(1)).save(any(DeliveryPolicy.class));
     }
