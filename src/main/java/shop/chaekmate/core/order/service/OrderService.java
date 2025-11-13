@@ -2,7 +2,7 @@ package shop.chaekmate.core.order.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import shop.chaekmate.core.payment.dto.response.PaymentApproveResponse;
+import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 
 @Slf4j
 @Service

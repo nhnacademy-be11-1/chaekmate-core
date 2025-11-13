@@ -80,11 +80,11 @@ class PaymentHistoryServiceTest {
     void 전체_결제_내역_조회() {
         Page<PaymentHistoryDto> mockPage =
                 new PageImpl<>(List.of(tossApproved, tossCanceled, pointApproved), pageable, 3);
-        when(paymentHistoryRepository.findHistoriesByFilter(null, null, null, pageable))
+        when(paymentHistoryRepository.findHistoriesByFilter(null, null, null, null, pageable))
                 .thenReturn(mockPage);
 
         Page<PaymentHistoryDto> result =
-                paymentHistoryService.findHistoriesByFilter(null, null, null, pageable);
+                paymentHistoryService.findHistoriesByFilter(null, null, null, null, pageable);
 
         assertAll(
                 () -> assertThat(result).isNotNull(),
@@ -99,18 +99,17 @@ class PaymentHistoryServiceTest {
         );
 
         verify(paymentHistoryRepository, times(1))
-                .findHistoriesByFilter(null, null, null, pageable);
+                .findHistoriesByFilter(null, null, null, null, pageable);
     }
-
 
     @Test
     void 결제수단별_전체_조회() {
         Page<PaymentHistoryDto> mockPage = new PageImpl<>(List.of(tossApproved, tossCanceled), pageable, 2);
-        when(paymentHistoryRepository.findHistoriesByFilter(PaymentMethodType.TOSS, null, null, pageable)).thenReturn(
-                mockPage);
+        when(paymentHistoryRepository.findHistoriesByFilter(PaymentMethodType.TOSS, null, null, null, pageable))
+                .thenReturn(mockPage);
 
         Page<PaymentHistoryDto> result =
-                paymentHistoryService.findHistoriesByFilter(PaymentMethodType.TOSS, null, null, pageable);
+                paymentHistoryService.findHistoriesByFilter(PaymentMethodType.TOSS, null, null, null, pageable);
 
         assertAll(
                 () -> assertThat(result.getContent()).hasSize(2),
@@ -119,15 +118,17 @@ class PaymentHistoryServiceTest {
         );
 
         verify(paymentHistoryRepository, times(1))
-                .findHistoriesByFilter(PaymentMethodType.TOSS, null, null, pageable);
+                .findHistoriesByFilter(PaymentMethodType.TOSS, null, null, null, pageable);
     }
 
     @Test
     void 모든_결제수단_기간별_조회() {
         Page<PaymentHistoryDto> mockPage = new PageImpl<>(List.of(tossApproved, pointApproved), pageable, 2);
-        when(paymentHistoryRepository.findHistoriesByFilter(null, start, end, pageable)).thenReturn(mockPage);
+        when(paymentHistoryRepository.findHistoriesByFilter(null, null, start, end, pageable))
+                .thenReturn(mockPage);
 
-        Page<PaymentHistoryDto> result = paymentHistoryService.findHistoriesByFilter(null, start, end, pageable);
+        Page<PaymentHistoryDto> result =
+                paymentHistoryService.findHistoriesByFilter(null, null, start, end, pageable);
 
         assertAll(
                 () -> assertThat(result.getContent()).hasSize(2),
@@ -135,33 +136,56 @@ class PaymentHistoryServiceTest {
                         .extracting(PaymentHistoryDto::paymentType)
                         .containsExactlyInAnyOrder(PaymentMethodType.TOSS, PaymentMethodType.POINT),
                 () -> assertThat(result.getContent())
-                        .allMatch(dto -> dto.occurredAt().toLocalDateTime().isAfter(start.minusSeconds(1)) &&
-                                dto.occurredAt().toLocalDateTime().isBefore(end.plusSeconds(1)))
+                        .allMatch(dto ->
+                                dto.occurredAt().toLocalDateTime().isAfter(start.minusSeconds(1)) &&
+                                        dto.occurredAt().toLocalDateTime().isBefore(end.plusSeconds(1))
+                        )
         );
 
         verify(paymentHistoryRepository, times(1))
-                .findHistoriesByFilter(null, start, end, pageable);
+                .findHistoriesByFilter(null, null, start, end, pageable);
     }
 
     @Test
     void 결제수단_기간별_조회() {
         Page<PaymentHistoryDto> mockPage = new PageImpl<>(List.of(tossApproved, tossCanceled), pageable, 2);
-        when(paymentHistoryRepository.findHistoriesByFilter(PaymentMethodType.TOSS, start, end, pageable))
+        when(paymentHistoryRepository.findHistoriesByFilter(PaymentMethodType.TOSS, null, start, end, pageable))
                 .thenReturn(mockPage);
 
         Page<PaymentHistoryDto> result =
-                paymentHistoryService.findHistoriesByFilter(PaymentMethodType.TOSS, start, end, pageable);
+                paymentHistoryService.findHistoriesByFilter(PaymentMethodType.TOSS, null, start, end, pageable);
 
         assertAll(
                 () -> assertThat(result.getContent()).hasSize(2),
                 () -> assertThat(result.getContent())
                         .allMatch(dto -> dto.paymentType() == PaymentMethodType.TOSS),
                 () -> assertThat(result.getContent())
-                        .allMatch(dto -> dto.occurredAt().toLocalDateTime().isAfter(start.minusSeconds(1)) &&
-                                dto.occurredAt().toLocalDateTime().isBefore(end.plusSeconds(1)))
+                        .allMatch(dto ->
+                                dto.occurredAt().toLocalDateTime().isAfter(start.minusSeconds(1)) &&
+                                        dto.occurredAt().toLocalDateTime().isBefore(end.plusSeconds(1))
+                        )
         );
 
         verify(paymentHistoryRepository, times(1))
-                .findHistoriesByFilter(PaymentMethodType.TOSS, start, end, pageable);
+                .findHistoriesByFilter(PaymentMethodType.TOSS, null, start, end, pageable);
+    }
+
+    @Test
+    void 결제상태별_조회() {
+        Page<PaymentHistoryDto> mockPage = new PageImpl<>(List.of(tossCanceled), pageable, 1);
+        when(paymentHistoryRepository.findHistoriesByFilter(null, PaymentStatusType.CANCELED, null, null, pageable))
+                .thenReturn(mockPage);
+
+        Page<PaymentHistoryDto> result =
+                paymentHistoryService.findHistoriesByFilter(null, PaymentStatusType.CANCELED, null, null, pageable);
+
+        assertAll(
+                () -> assertThat(result.getContent()).hasSize(1),
+                () -> assertThat(result.getContent())
+                        .allMatch(dto -> dto.paymentStatus() == PaymentStatusType.CANCELED)
+        );
+
+        verify(paymentHistoryRepository, times(1))
+                .findHistoriesByFilter(null, PaymentStatusType.CANCELED, null, null, pageable);
     }
 }

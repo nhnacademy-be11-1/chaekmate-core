@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import shop.chaekmate.core.payment.controller.docs.PaymentHistoryAdminControllerDocs;
 import shop.chaekmate.core.payment.dto.PaymentHistoryDto;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
+import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
 import shop.chaekmate.core.payment.service.PaymentHistoryService;
 
 @RestController
@@ -25,15 +26,25 @@ public class PaymentHistoryAdminController implements PaymentHistoryAdminControl
     @GetMapping
     public ResponseEntity<Page<PaymentHistoryDto>> getFilteredHistories(
             @RequestParam(required = false) PaymentMethodType paymentType,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end,
-            @PageableDefault(size = 20, sort = "occurredAt", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(required = false) PaymentStatusType paymentStatus,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end,
+            @PageableDefault(size = 20, sort = "occurredAt", direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
         LocalDateTime startAt = (start != null) ? start.atStartOfDay() : null;
         LocalDateTime endAt = (end != null) ? end.plusDays(1).atStartOfDay().minusNanos(1) : null;
 
-        Page<PaymentHistoryDto> page =
-                paymentHistoryService.findHistoriesByFilter(paymentType, startAt, endAt, pageable);
+        Page<PaymentHistoryDto> page = paymentHistoryService.findHistoriesByFilter(
+                paymentType,
+                paymentStatus,
+                startAt,
+                endAt,
+                pageable
+        );
+
         return ResponseEntity.ok(page);
     }
 }

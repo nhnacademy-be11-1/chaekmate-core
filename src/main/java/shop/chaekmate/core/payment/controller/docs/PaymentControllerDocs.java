@@ -10,7 +10,8 @@ import org.springframework.http.ResponseEntity;
 import shop.chaekmate.core.common.dto.ErrorResponse;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
 import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
-import shop.chaekmate.core.payment.dto.response.PaymentApproveResponse;
+import shop.chaekmate.core.payment.dto.response.base.PaymentResponse;
+import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
 
 @Tag(name = "결제 API", description = "결제 승인 및 취소 관련 API")
@@ -28,7 +29,7 @@ public interface PaymentControllerDocs {
                             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             }
     )
-    ResponseEntity<PaymentApproveResponse> approve(
+    ResponseEntity<PaymentResponse> approve(
             @RequestBody(
                     description = "결제 승인 요청 정보 (orderNumber, paymentKey, amount 등)",
                     required = true,

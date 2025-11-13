@@ -18,6 +18,7 @@ import shop.chaekmate.core.payment.dto.PaymentHistoryDto;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
 
 import java.time.LocalDate;
+import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
 
 @Tag(name = "결제 내역 API", description = "관리자 전체 결제 내역 조회 API")
 public interface PaymentHistoryAdminControllerDocs {
@@ -25,11 +26,11 @@ public interface PaymentHistoryAdminControllerDocs {
             summary = "결제 내역 조회 (관리자용)",
             description = """
                     관리자용 결제 내역 조회 API입니다.
-
-                    - 날짜를 지정하지 않으면 전체 기간을 조회합니다.
-                    - 1.결제 수단(PaymentMethodType)에 따라 필터링할 수 있습니다.
-                    - 2.날짜(start, end)는 yyyy-MM-dd 형식으로 전달합니다.
-
+                    
+                    - 결제 수단: TOSS, POINT
+                    - 결제 상태: APPROVED(승인), CANCELED(취소), PARTIAL_CANCELED(부분취소), ABORTED(실패)
+                    - 조회 기간: yyyy-MM-dd 형식 (둘 다 없으면 전체 기간)
+                    
                     - 기본값 (최근 결제부터)
                     - page: 0 (첫 페이지)
                     - size: 20 (한 페이지당 20건)
@@ -42,7 +43,7 @@ public interface PaymentHistoryAdminControllerDocs {
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "잘못된 요청 (예: 날짜 형식 오류 등)",
+                            description = "잘못된 요청",
                             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
                     )
             }
@@ -50,6 +51,9 @@ public interface PaymentHistoryAdminControllerDocs {
     ResponseEntity<Page<PaymentHistoryDto>> getFilteredHistories(
             @Parameter(description = "결제 수단 (예: TOSS, POINT, PAYCO 등)", example = "TOSS")
             @RequestParam(required = false) PaymentMethodType paymentType,
+
+            @Parameter(description = "결제 상태 (예: APPROVED, CANCELED, PARTIAL_CANCELED, ABORTED)", example = "CANCELED")
+            @RequestParam(required = false) PaymentStatusType paymentStatus,
 
             @Parameter(description = "조회 시작일 (yyyy-MM-dd 형식)", example = "2025-11-01")
             @RequestParam(required = false)
@@ -63,5 +67,4 @@ public interface PaymentHistoryAdminControllerDocs {
             @Parameter(description = "페이징 및 정렬 정보 (page=0, size=20, sort=occurredAt,desc 기본 적용)")
             Pageable pageable
     );
-
 }

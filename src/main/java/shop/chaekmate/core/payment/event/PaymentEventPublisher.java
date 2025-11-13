@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import shop.chaekmate.core.payment.dto.response.*;
+import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 
 @Component
 @RequiredArgsConstructor

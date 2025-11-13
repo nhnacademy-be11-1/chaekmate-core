@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.payment.dto.PaymentHistoryDto;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
+import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
 import shop.chaekmate.core.payment.repository.PaymentHistoryRepository;
 
 @Service
@@ -22,10 +23,11 @@ public class PaymentHistoryService {
     @Transactional(readOnly = true)
     public Page<PaymentHistoryDto> findHistoriesByFilter(
             PaymentMethodType paymentType,
+            PaymentStatusType paymentStatus,
             LocalDateTime start,
             LocalDateTime end,
             Pageable pageable
     ) {
-        return paymentHistoryRepository.findHistoriesByFilter(paymentType, start, end, pageable);
+        return paymentHistoryRepository.findHistoriesByFilter(paymentType, paymentStatus, start, end, pageable);
     }
 }

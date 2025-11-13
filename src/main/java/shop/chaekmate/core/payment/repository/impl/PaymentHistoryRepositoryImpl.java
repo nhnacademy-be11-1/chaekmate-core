@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,6 +17,7 @@ import shop.chaekmate.core.payment.dto.PaymentHistoryDto;
 import shop.chaekmate.core.payment.entity.QPayment;
 import shop.chaekmate.core.payment.entity.QPaymentHistory;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
+import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
 import shop.chaekmate.core.payment.repository.PaymentHistoryRepositoryCustom;
 
 @Repository
@@ -27,6 +29,7 @@ public class PaymentHistoryRepositoryImpl implements PaymentHistoryRepositoryCus
     @Override
     public Page<PaymentHistoryDto> findHistoriesByFilter(
             PaymentMethodType paymentType,
+            PaymentStatusType paymentStatus,
             LocalDateTime start,
             LocalDateTime end,
             Pageable pageable
@@ -40,11 +43,19 @@ public class PaymentHistoryRepositoryImpl implements PaymentHistoryRepositoryCus
             condition.and(p.paymentType.eq(paymentType));
         }
 
+        if (paymentStatus != null) {
+            condition.and(ph.paymentStatus.eq(paymentStatus));
+        }
+
+        ZoneOffset offset = OffsetDateTime.now().getOffset();
+
+
         if (start != null && end != null) {
-            ZoneOffset offset = ZoneOffset.ofHours(9);
-            OffsetDateTime startOffset = start.atOffset(offset);
-            OffsetDateTime endOffset = end.atOffset(offset);
-            condition.and(ph.occurredAt.between(startOffset, endOffset));
+            condition.and(ph.occurredAt.between(start.atOffset(offset), end.atOffset(offset)));
+        } else if (start != null) {
+            condition.and(ph.occurredAt.goe(start.atOffset(offset)));
+        } else if (end != null) {
+            condition.and(ph.occurredAt.loe(end.atOffset(offset)));
         }
 
         List<PaymentHistoryDto> results = queryFactory
@@ -65,12 +76,14 @@ public class PaymentHistoryRepositoryImpl implements PaymentHistoryRepositoryCus
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        long total = queryFactory
-                .select(ph.count())
-                .from(ph)
-                .join(ph.payment, p)
-                .where(condition)
-                .fetchOne();
+        long total = Optional.ofNullable(
+                queryFactory
+                        .select(ph.count())
+                        .from(ph)
+                        .join(ph.payment, p)
+                        .where(condition)
+                        .fetchOne()
+        ).orElse(0L);
 
         return new PageImpl<>(results, pageable, total);
     }
