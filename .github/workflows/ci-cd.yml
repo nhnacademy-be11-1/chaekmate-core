@@ -28,9 +28,9 @@ jobs:
       RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
       RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
       ALADIN_API_KEY: ${{ secrets.ALADIN_API_KEY }}
-      EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
       TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
 
 
     steps:
@@ -116,8 +116,8 @@ jobs:
             export RABBITMQ_USERNAME="${{ secrets.RABBITMQ_USERNAME }}"
             export RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}"
             export ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}"
-            export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
             export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
             export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
+            export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
             
             bash -lc ./startup.sh
