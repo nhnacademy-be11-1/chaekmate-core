@@ -16,6 +16,8 @@ import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
 import shop.chaekmate.core.book.event.BookCreatedEvent;
+import shop.chaekmate.core.book.event.BookDeletedEvent;
+import shop.chaekmate.core.book.event.BookUpdatedEvent;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.exception.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
@@ -42,8 +44,6 @@ public class BookService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final BookTagRepository bookTagRepository;
-    private final BookCategoryRepositoryImpl bookCategoryRepositoryImpl;
-    private final BookTagRepositoryImpl bookTagRepositoryImpl;
 
     private final AladinClient aladinClient;
 
@@ -118,6 +118,9 @@ public class BookService {
         if (request.tagIds() != null) {
             updateBookTag(book, request.tagIds());
         }
+
+        // 책 업데이트 이벤트 발행
+        eventPublisher.publishEvent(new BookUpdatedEvent(book));
     }
 
     @Transactional
@@ -132,6 +135,9 @@ public class BookService {
 
         // 북 삭제
         bookRepository.delete(book);
+
+        // 삭제 이벤트 발행 (검색서버 동기화)
+        eventPublisher.publishEvent(new BookDeletedEvent(bookId));
 
     }
 

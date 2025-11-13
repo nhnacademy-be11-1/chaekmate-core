@@ -6,7 +6,7 @@ import lombok.Builder;
 import shop.chaekmate.core.book.entity.Book;
 
 @Builder
-public record BookMqRequest (
+public record BookInfoMqRequest(
     String dtoType,
     long id,
     String title,
@@ -24,8 +24,8 @@ public record BookMqRequest (
     Integer reviewCnt
 ){
 
-    public static BookMqRequest of(Book book, String bookImages, List<String> categories, List<String> tags){
-        return BookMqRequest.builder()
+    public static BookInfoMqRequest of(Book book, String bookImages, List<String> categories, List<String> tags){
+        return BookInfoMqRequest.builder()
                 .dtoType("BOOK_INFO")
                 .id(book.getId())
                 .title(book.getTitle())
