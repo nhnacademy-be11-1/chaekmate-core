@@ -54,6 +54,7 @@ public class CartRepositoryAdaptor implements CartStore {
     }
 
     // 장바구니 아이템 추가
+    // 추후 리팩토링 필요 - 비즈니스 로직 분리 --> 서비스 계층
     @Override
     public CartItem saveOrUpdateItem(Long cartId, Long bookId, int quantity) {
         Book book = this.bookRepository.findById(bookId)
