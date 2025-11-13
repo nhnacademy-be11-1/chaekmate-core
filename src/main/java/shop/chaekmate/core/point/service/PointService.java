@@ -40,7 +40,7 @@ public class PointService {
     }
 
     //포인트 규정 수정 기능
-    @Transactional(readOnly = true)
+    @Transactional
     public UpdatePointPolicyResponse updatePointPolicy(UpdatePointPolicyRequest request) {
         PointPolicy policy = pointPolicyRepository.findByType(request.type())
                 .orElseThrow(PointPolicyNotFoundException::new);
@@ -72,11 +72,12 @@ public class PointService {
     }
 
     //삭제 기능
-    @Transactional(readOnly = true)
+    @Transactional
     public void deletePointPolicyResponse(DeletePointPolicyRequest request) {
         PointPolicy policy = pointPolicyRepository.findByType(request.pointEarnedType())
                 .orElseThrow(PointPolicyNotFoundException::new);
         pointPolicyRepository.delete(policy);
+
     }
     
 }
