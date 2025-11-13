@@ -7,9 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +44,6 @@ class LikeControllerTest {
 
     private Member member;
     private Book book;
-    private String token;
 
     @BeforeEach
     void setUp() {
@@ -58,18 +54,12 @@ class LikeControllerTest {
         Book newBook = new Book("Test Book", "index", "description", "author", "publisher", LocalDateTime.now(),
                 "1234567890123", 10000, 9000, true, 0, false, 10);
         book = bookRepository.save(newBook);
-
-        token = "Bearer " + Jwts.builder()
-                .claim("memberId", member.getId())
-                .signWith(Keys.hmacShaKeyFor(
-                        "chaekmatedummykeychaekmatedummykeychaekmatedummykey".getBytes(StandardCharsets.UTF_8)))
-                .compact();
     }
 
     @Test
     void 좋아요_생성_요청_성공() throws Exception {
         mockMvc.perform(post("/books/{bookId}/likes", book.getId())
-                        .header("Authorization", token)
+                        .header("X-USER-ID", member.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.bookId").value(book.getId()))
@@ -99,7 +89,7 @@ class LikeControllerTest {
         likeRepository.save(new Like(book, member));
 
         mockMvc.perform(get("/members/likes")
-                        .header("Authorization", token))
+                        .header("X-USER-ID", member.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].memberId").value(member.getId()));
     }
@@ -119,7 +109,7 @@ class LikeControllerTest {
         Like like = likeRepository.save(new Like(book, member));
 
         mockMvc.perform(delete("/books/{bookId}/likes", book.getId())
-                        .header("Authorization", token))
+                        .header("X-USER-ID", member.getId()))
                 .andExpect(status().isNoContent());
 
         assertThat(likeRepository.findById(like.getId())).isEmpty();

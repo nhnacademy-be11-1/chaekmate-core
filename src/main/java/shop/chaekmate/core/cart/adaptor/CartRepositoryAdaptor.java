@@ -57,7 +57,7 @@ public class CartRepositoryAdaptor implements CartStore {
     @Override
     public CartItem addItem(Long cartId, Long bookId, int quantity) {
         Book book = this.bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException(String.format("Book id %s not found", bookId)));
+                .orElseThrow(BookNotFoundException::new);
 
         // 1. 추가하려는 아이템이 이미 담긴 아이템인 경우
         Optional<CartItem> itemOptional = this.cartItemRepository.findByCartIdAndBookId(cartId, bookId);

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
 import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
@@ -46,7 +47,7 @@ public class BookService {
     private String aladinApiKey;
 
     @Transactional
-    public void createBook(BookCreateRequest request) {
+    public BookCreateResponse createBook(BookCreateRequest request) {
         if (bookRepository.existsByIsbn(request.isbn())) {
             throw new IllegalArgumentException("이미 등록된 ISBN입니다: " + request.isbn());
         }
@@ -69,13 +70,10 @@ public class BookService {
 
         bookRepository.save(book);
 
-        BookImage bookImage = new BookImage(book, request.imageUrl());
-        bookImageRepository.save(bookImage);
-
         List<Category> categories = categoryRepository.findAllById(request.categoryIds());
 
         if (categories.size() != request.categoryIds().size()) {
-            throw new CategoryNotFoundException("일부 카테고리 ID를 찾을 수 없습니다.");
+            throw new CategoryNotFoundException();
         }
 
         for (Category category : categories) {
@@ -85,22 +83,22 @@ public class BookService {
         List<Tag> tags = tagRepository.findAllById(request.tagIds());
 
         if (tags.size() != request.tagIds().size()) {
-            throw new TagNotFoundException("일부 태그 ID를 찾을 수 없습니다.");
+            throw new TagNotFoundException();
         }
 
         for (Tag tag : tags) {
             bookTagRepository.save(new BookTag(book, tag));
         }
+
+        return new BookCreateResponse(book.getId());
     }
 
     @Transactional
     public void updateBook(Long bookId, BookUpdateRequest request) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException(String.format("Book id %s not found", bookId)));
+                .orElseThrow(BookNotFoundException::new);
 
         book.update(request);
-
-        bookImageRepository.findByBookId(bookId).ifPresent(bookImage -> bookImage.updateUrl(request.imageUrl()));
 
         // 책 카테고리 업데이트
         if (request.categoryIds() != null) {
@@ -116,23 +114,21 @@ public class BookService {
     @Transactional
     public void deleteBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException(String.format("삭제할 책을 찾을 수 없습니다. Book id : %d", bookId)));
-
-        bookRepository.delete(book);
+                .orElseThrow(BookNotFoundException::new);
 
         // 북 속성 엔티티들 삭제
         bookCategoryRepository.deleteAll(bookCategoryRepository.findByBook(book));
         bookImageRepository.deleteAll(bookImageRepository.findByBook(book));
         bookTagRepository.deleteAll(bookTagRepository.findByBook(book));
 
+        // 북 삭제
+        bookRepository.delete(book);
+
     }
 
     public BookResponse getBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException(String.format("Book id %d not found", bookId)));
-
-        BookImage bookImage = bookImageRepository.findByBookId(bookId)
-                .orElse(null);
+                .orElseThrow(BookNotFoundException::new);
 
         List<BookCategory> bookCategories = bookCategoryRepository.findByBook(book);
         List<Long> categoryIds = new ArrayList<>();
@@ -146,9 +142,7 @@ public class BookService {
             tagIds.add(bookTag.getTag().getId());
         }
 
-        String imageUrl = (bookImage != null) ? bookImage.getImageUrl() : null;
-
-        return BookResponse.from(book, imageUrl, categoryIds, tagIds);
+        return BookResponse.from(book, categoryIds, tagIds);
     }
 
     public Page<BookListResponse> getBookList(BookSearchCondition condition, Pageable pageable) {
@@ -229,7 +223,7 @@ public class BookService {
         List<Category> categories = categoryRepository.findAllById(request.categoryIds());
 
         if (categories.size() != request.categoryIds().size()) {
-            throw new CategoryNotFoundException("일부 카테고리를 찾을 수 없습니다.");
+            throw new CategoryNotFoundException();
         }
 
         for (Category category : categories) {
@@ -241,7 +235,7 @@ public class BookService {
             List<Tag> tags = tagRepository.findAllById(request.tagIds());
 
             if (tags.size() != request.tagIds().size()) {
-                throw new TagNotFoundException("일부 태그를 찾을 수 없습니다.");
+                throw new TagNotFoundException();
             }
 
             for (Tag tag : tags) {
@@ -271,7 +265,7 @@ public class BookService {
             List<Category> categoriesToAdd = categoryRepository.findAllById(idsToAdd);
 
             if (categoriesToAdd.size() != idsToAdd.size()) {
-                throw new CategoryNotFoundException("일부 카테고리를 찾을 수 없습니다.");
+                throw new CategoryNotFoundException();
             }
 
             // 책과 매핑해서 담기
@@ -308,7 +302,7 @@ public class BookService {
             List<Tag> tagsToAdd = tagRepository.findAllById(idsToAdd);
 
             if (tagsToAdd.size() != idsToAdd.size()) {
-                throw new TagNotFoundException("일부 태그를 찾을 수 없습니다.");
+                throw new TagNotFoundException();
             }
 
             for (Tag tag : tagsToAdd) {

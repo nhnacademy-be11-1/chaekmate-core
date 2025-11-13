@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 
@@ -26,7 +27,7 @@ public interface BookControllerDocs {
     )
     @ApiResponse(responseCode = "201", description = "생성 성공")
     @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
-    ResponseEntity<Void> createBook(
+    ResponseEntity<BookCreateResponse> createBook(
             @Valid @RequestBody BookCreateRequest request
     );
 

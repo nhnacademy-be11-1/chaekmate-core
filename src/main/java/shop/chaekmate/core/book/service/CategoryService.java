@@ -63,12 +63,12 @@ public class CategoryService {
         Category targetCategory = categoryRepository.findById(targetCategoryId)
                 .orElseThrow(CategoryNotFoundException::new);
 
-        String parentCategoryName = "null";
+        Long parentCategoryId = null;
         if (targetCategory.getParentCategory() != null) {
-            parentCategoryName = targetCategory.getParentCategory().getName();
+            parentCategoryId = targetCategory.getParentCategory().getId();
         }
 
-        return new ReadCategoryResponse(targetCategory.getId(), parentCategoryName, targetCategory.getName());
+        return new ReadCategoryResponse(targetCategory.getId(), parentCategoryId, targetCategory.getName());
     }
 
     @Transactional
