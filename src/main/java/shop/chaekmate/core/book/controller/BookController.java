@@ -14,8 +14,11 @@ import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
+import shop.chaekmate.core.book.dto.response.BookSummaryResponse;
 import shop.chaekmate.core.book.exception.InvalidSearchConditionException;
 import shop.chaekmate.core.book.service.BookService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,6 +54,14 @@ public class BookController implements BookControllerDocs {
         BookResponse response = bookService.getBook(bookId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/bulk")
+    public ResponseEntity<List<BookSummaryResponse>> getBooksByIds(
+            @RequestParam List<Long> bookIds) {
+        List<BookSummaryResponse> books = bookService.getBooksByIds(bookIds);
+
+        return ResponseEntity.ok(books);
     }
 
     @GetMapping
