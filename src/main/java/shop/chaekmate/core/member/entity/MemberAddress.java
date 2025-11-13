@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -20,6 +21,7 @@ import shop.chaekmate.core.common.entity.BaseEntity;
 @Getter
 @Table(name = "member_address")
 @SQLRestriction("deleted_at is null")
+@AllArgsConstructor(access = PROTECTED)
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE member_address SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
@@ -44,4 +46,12 @@ public class MemberAddress extends BaseEntity {
 
     @Column(length = 10, nullable = false)
     private int zipcode;
+
+    public MemberAddress(Member member, String memo, String streetName, String detail, int zipcode) {
+        this.member = member;
+        this.memo = memo;
+        this.streetName = streetName;
+        this.detail = detail;
+        this.zipcode = zipcode;
+    }
 }

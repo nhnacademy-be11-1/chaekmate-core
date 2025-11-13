@@ -77,7 +77,6 @@ public class PointService {
         PointPolicy policy = pointPolicyRepository.findByType(request.pointEarnedType())
                 .orElseThrow(PointPolicyNotFoundException::new);
         pointPolicyRepository.delete(policy);
-
     }
     
 }

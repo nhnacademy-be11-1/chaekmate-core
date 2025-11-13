@@ -25,7 +25,7 @@ public class PointPolicyController implements PointPolicyCotrollerDocs {
     private final PointService pointService;
 
     //단일 정책 불러오기
-    @GetMapping({"/point-policies/{type}", "admin/point-policies/{type}"})
+    @GetMapping({"/point-policies/{type}","/admin/point-policies/{type}"})
     public ResponseEntity<PointPolicyResponse> getPolicy(@PathVariable("type") PointEarnedType type) {
         var dto = pointService.getPolicyByType(type);
         return ResponseEntity.ok(dto);

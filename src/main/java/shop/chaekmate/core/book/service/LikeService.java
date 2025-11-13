@@ -30,7 +30,7 @@ public class LikeService {
     @Transactional
     public LikeResponse createLike(Long bookId, Long memberId) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException("Book not found"));
+                .orElseThrow(BookNotFoundException::new);
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
@@ -54,7 +54,7 @@ public class LikeService {
     @Transactional
     public List<LikeResponse> getBookLikes(Long bookId) {
         if (!bookRepository.existsById(bookId)) {
-            throw new BookNotFoundException("Book not found");
+            throw new BookNotFoundException();
         }
 
         List<Like> likeList = likeRepository.findByBook_Id(bookId);
