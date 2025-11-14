@@ -54,5 +54,5 @@ management:
     redis:
       enabled: false
     rabbit:
-      enabled: false
+      enabled: true
 
