@@ -12,8 +12,10 @@ public record CartItemRequest(
         Long memberId,
 
         @Schema(description = "장바구니 ID", example = "1")
-        @NotNull
         Long cartId,
+
+        @Schema(description = "장바구니 아이템 ID", example = "1")
+        Long cartItemId,
 
         @NotNull
         @Schema(description = "도서 ID", example = "1")

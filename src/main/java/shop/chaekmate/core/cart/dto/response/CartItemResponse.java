@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "장바구니 아이템 응답")
 public record CartItemResponse(
 
+        @Schema(description = "장바구니 아이템 ID", example = "1")
+        Long cartItemId,
+
         @Schema(description = "도서 ID", example = "1")
         Long bookId,
 

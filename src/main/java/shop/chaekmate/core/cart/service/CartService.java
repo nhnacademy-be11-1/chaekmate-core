@@ -2,7 +2,6 @@ package shop.chaekmate.core.cart.service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +19,7 @@ import shop.chaekmate.core.cart.exception.cart.CartNotFoundException;
 import shop.chaekmate.core.cart.exception.cart.MemberNotFoundException;
 import shop.chaekmate.core.cart.exception.cartitem.BookInsufficientStockException;
 import shop.chaekmate.core.cart.exception.cartitem.BookNotFoundException;
+import shop.chaekmate.core.cart.exception.cartitem.CartItemNotFoundException;
 import shop.chaekmate.core.cart.model.CartItemSortCriteria;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
@@ -33,12 +33,11 @@ public class CartService {
     private final CartStore cartStore;
 
     /* ------------------------------ 장바구니 ------------------------------ */
-    // 장바구니 삭제
-    @Transactional
-    public void deleteCart(CartDto dto) {
-        this.memberRepository.findById(dto.memberId())
-                .ifPresent(member -> this.cartStore.deleteCart(member.getId()));
-    }
+//    // 장바구니 삭제
+//    @Transactional
+//    public void deleteCart(CartDto dto) {
+//        this.memberRepository.findById(dto.cartId());
+//    }
 
     /* --------------------------- 장바구니 아이템 --------------------------- */
     // 장바구니 아이템 생성
@@ -65,6 +64,7 @@ public class CartService {
         return new CartItemSingleResponse(
                 member.getId(),
                 cart.getId(),
+                item.getId(),
                 item.getBook().getId(),
                 item.getQuantity()
         );
@@ -93,6 +93,7 @@ public class CartService {
         return new CartItemSingleResponse(
                 member.getId(),
                 cart.getId(),
+                item.getId(),
                 item.getBook().getId(),
                 item.getQuantity()
         );
@@ -109,7 +110,12 @@ public class CartService {
             throw new CartNotFoundException();
         }
 
-        this.cartStore.removeItem(cart.getId(), dto.bookId());
+        CartItem item = this.cartStore.findItemById(dto.cartItemId());
+        if(Objects.isNull(item)) {
+            throw new CartItemNotFoundException();
+        }
+
+        this.cartStore.removeItem(item.getId());
     }
 
     // 장바구니 아이템 삭제 - 전체 아이템 삭제(장바구니 비우기)
@@ -138,7 +144,7 @@ public class CartService {
         List<CartItem> cartItemList = this.cartStore.findItemList(cart.getId(), CartItemSortCriteria.CREATED_DESC);
 
         List<CartItemResponse> itemResponseList = cartItemList.stream()
-                .map(item -> new CartItemResponse(item.getBook().getId(), item.getQuantity()))
+                .map(item -> new CartItemResponse(item.getId(), item.getBook().getId(), item.getQuantity()))
                 .toList();
 
         return new CartItemListResponse(dto.memberId(), cart.getId(), itemResponseList);

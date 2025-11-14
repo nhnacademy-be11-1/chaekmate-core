@@ -3,7 +3,6 @@ package shop.chaekmate.core.cart.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import shop.chaekmate.core.cart.entity.Cart;
 import shop.chaekmate.core.cart.entity.CartItem;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long>, CartItemRepositoryCustom {
@@ -15,6 +14,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long>, CartI
     List<CartItem> findAllByCartIdOrderByCreatedAtDesc (Long cartId);
 
     // 삭제
-    int deleteByCartIdAndBookId(Long cartId, Long bookId);
+    void deleteById(Long id);
     int deleteAllByCartId(Long cartId);
 }

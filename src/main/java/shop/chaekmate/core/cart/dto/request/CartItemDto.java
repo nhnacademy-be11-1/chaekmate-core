@@ -10,6 +10,9 @@ public record CartItemDto(
         @Schema(description = "장바구니 ID", example = "1")
         Long cartId,
 
+        @Schema(description = "장바구니 아이템 ID", example = "1")
+        Long cartItemId,
+
         @Schema(description = "도서 ID", example = "1")
         Long bookId,
 

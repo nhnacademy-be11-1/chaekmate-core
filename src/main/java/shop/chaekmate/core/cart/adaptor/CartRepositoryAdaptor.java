@@ -42,6 +42,11 @@ public class CartRepositoryAdaptor implements CartStore {
         this.cartRepository.deleteByMemberId(memberId);
     }
 
+    @Override
+    public CartItem findItemById(Long cartItemId) {
+        return this.cartItemRepository.findById(cartItemId).orElse(null);   // 추후 NPE 방지 위해 Optional 반환 수정 고려
+    }
+
     // 장바구니 아이템 조회 - 정렬 조건에 따라 조회 (기본값: 최근순(생성일 내림차순))
     @Override
     public List<CartItem> findItemList(Long cartId, CartItemSortCriteria criteria) {
@@ -78,8 +83,9 @@ public class CartRepositoryAdaptor implements CartStore {
 
     // 장바구니 아이템 삭제
     @Override
-    public void removeItem(Long cartId, Long bookId) {
-        this.cartItemRepository.deleteByCartIdAndBookId(cartId, bookId);
+    public void removeItem(Long cartItemId) {
+        this.cartItemRepository.deleteById(cartItemId);
+        this.cartItemRepository.flush();
     }
 
     @Override
