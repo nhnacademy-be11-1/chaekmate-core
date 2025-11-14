@@ -19,7 +19,7 @@ public class AddressController {
     private final AddressService addressService;
 
     @PostMapping
-    public ResponseEntity<Void> create(@PathVariable Long memberId,
+    public ResponseEntity<Void> createAddress(@PathVariable Long memberId,
                                        @Valid @RequestBody CreateAddressRequest request) {
         addressService.createAddress(request, memberId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
