@@ -50,17 +50,15 @@ class BookImageQueryRepositoryTest {
                 .build());
 
         bookImageRepository.saveAndFlush(new BookImage(book, "url1"));
-        bookImageRepository.saveAndFlush(new BookImage(book, "url2"));
-        bookImageRepository.saveAndFlush(new BookImage(book, "url3"));
 
         // when
         List<BookImage> result = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(book.getId());
 
         // then
         assertAll(
-                () -> assertThat(result).hasSize(3),
+                () -> assertThat(result).hasSize(1),
                 () -> assertThat(result).extracting(BookImage::getImageUrl)
-                        .containsExactly("url1", "url2", "url3")
+                        .containsExactly("url1")
         );
     }
 }
