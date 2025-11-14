@@ -14,6 +14,7 @@ import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
+import shop.chaekmate.core.book.dto.response.BookSummaryResponse;
 import shop.chaekmate.core.book.entity.*;
 import shop.chaekmate.core.book.event.BookCreatedEvent;
 import shop.chaekmate.core.book.event.BookDeletedEvent;
@@ -28,11 +29,9 @@ import shop.chaekmate.core.external.aladin.AladinSearchType;
 import shop.chaekmate.core.external.aladin.dto.request.AladinBookRegisterRequest;
 import shop.chaekmate.core.external.aladin.dto.response.AladinApiResponse;
 import shop.chaekmate.core.external.aladin.dto.response.BookSearchResponse;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -158,6 +157,26 @@ public class BookService {
         }
 
         return BookResponse.from(book, categoryIds, tagIds);
+    }
+
+    public List<BookSummaryResponse> getBooksByIds(List<Long> bookIds) {
+        List<Book> books = bookRepository.findAllById(bookIds);
+
+        Map<Long, Book> bookMap = new HashMap<>();
+        for (Book book : books) {
+            bookMap.put(book.getId(), book);
+        }
+
+        List<BookSummaryResponse> result = new ArrayList<>();
+        for (Long bookId : bookIds) {
+            Book book = bookMap.get(bookId);
+
+            if (book != null) {
+                result.add(BookSummaryResponse.from(book));
+            }
+        }
+
+        return result;
     }
 
     public Page<BookListResponse> getBookList(BookSearchCondition condition, Pageable pageable) {
