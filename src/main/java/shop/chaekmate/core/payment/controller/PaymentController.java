@@ -1,5 +1,6 @@
 package shop.chaekmate.core.payment.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +20,14 @@ public class PaymentController implements PaymentControllerDocs {
 
     @PostMapping("/approve")
     @Override
-    public ResponseEntity<PaymentResponse> approve(@RequestBody PaymentApproveRequest request) {
+    public ResponseEntity<PaymentResponse> approve(@Valid @RequestBody PaymentApproveRequest request) {
         PaymentResponse response = paymentService.approve(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/cancel")
     @Override
-    public ResponseEntity<PaymentCancelResponse> cancel(@RequestBody PaymentCancelRequest request) {
+    public ResponseEntity<PaymentCancelResponse> cancel(@Valid @RequestBody PaymentCancelRequest request) {
         PaymentCancelResponse response = paymentService.cancel(request);
         return ResponseEntity.ok(response);
     }
