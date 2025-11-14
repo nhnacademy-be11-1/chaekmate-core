@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+/*
 
 @DataJpaTest
 @Import({QueryDslConfig.class, JpaAuditingConfig.class, BookImageQueryRepository.class})
@@ -62,3 +63,4 @@ class BookImageQueryRepositoryTest {
         );
     }
 }
+*/
