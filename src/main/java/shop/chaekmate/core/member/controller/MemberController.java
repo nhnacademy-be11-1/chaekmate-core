@@ -25,14 +25,17 @@ public class MemberController implements MemberControllerDocs {
     }
 
     @GetMapping("/check-login-id")
+    @Override
     public ResponseEntity<AvailabilityResponse> checkLoginId(@RequestParam("loginId") String loginId) {
         boolean exists = memberService.isDuplicateLoginId(loginId);
         return ResponseEntity.ok(new AvailabilityResponse(!exists));
     }
 
     @GetMapping("/check-email")
+    @Override
     public ResponseEntity<AvailabilityResponse> checkEmail(@RequestParam("email") String email) {
-        return ResponseEntity.ok(new AvailabilityResponse(!memberService.isDuplicateEmail(email)));
+        boolean exists = memberService.isDuplicateEmail(email);
+        return ResponseEntity.ok(new AvailabilityResponse(!exists));
     }
 
     @DeleteMapping("/{memberId}")
