@@ -1,7 +1,9 @@
 package shop.chaekmate.core.book.exception;
 
-public class InvalidSearchConditionException extends RuntimeException {
-    public InvalidSearchConditionException(String message) {
-        super(message);
+import shop.chaekmate.core.common.exception.CoreException;
+
+public class InvalidSearchConditionException extends CoreException {
+    public InvalidSearchConditionException() {
+        super(BookErrorCode.INVALID_SEARCH_CONDITION);
     }
 }

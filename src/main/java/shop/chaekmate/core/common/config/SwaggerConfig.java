@@ -1,8 +1,6 @@
 package shop.chaekmate.core.common.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.info.Info;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -11,12 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @io.swagger.v3.oas.annotations.info.Info(title = "chaekmate core API", version = "v1", description = "chaekmate core 서버 API 문서")
-)
-@SecurityScheme(
-        name = "bearerAuth",               // 사용할 인증 이름
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        bearerFormat = "JWT"
 )
 public class SwaggerConfig {
 
@@ -88,6 +80,20 @@ public class SwaggerConfig {
     }
 
     @Bean
+    public GroupedOpenApi memberApi() {
+        return GroupedOpenApi.builder()
+                .group("Member API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("회원 관련 API")
+                                .description("회원 가입, 조회, 수정, 탈퇴 기능")
+                                .version("v1.0")))
+                .pathsToMatch(
+                        "/members/**"
+                )
+                .build();
+    }
+
     public GroupedOpenApi bookApi() {
         return GroupedOpenApi.builder()
                 .group("Book API")
@@ -123,6 +129,20 @@ public class SwaggerConfig {
                                 .description("포인트 History 조회 API")
                                 .version("v1.0")))
                 .pathsToMatch("/admin/point-history/**", "/point-history/**")
+                .build();
+    }
+
+    // payment, paymentHistory
+    @Bean
+    public GroupedOpenApi paymentApi() {
+        return GroupedOpenApi.builder()
+                .group("Payment API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("결제 관련 API")
+                                .description("결제 승인, 취소 맟 (관리자)결제내역 조회 기능")
+                                .version("v1.0")))
+                .pathsToMatch("/payments/**", "/admin/payments/histories/**")
                 .build();
     }
 }

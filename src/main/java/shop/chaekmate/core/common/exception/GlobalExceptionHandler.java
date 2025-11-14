@@ -10,6 +10,13 @@ import shop.chaekmate.core.common.dto.ErrorResponse;
 
 
 import io.jsonwebtoken.JwtException;
+import shop.chaekmate.core.member.exception.AddressLimitExceededException;
+import shop.chaekmate.core.member.exception.DuplicatedEmailException;
+import shop.chaekmate.core.member.exception.DuplicatedLoginIdException;
+import shop.chaekmate.core.member.exception.MemberErrorCode;
+
+import java.util.Collection;
+import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
@@ -44,5 +51,25 @@ public class GlobalExceptionHandler {
         log.error("[Unexpected Exception]", e);
         BaseErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode));
+    }
+
+    @ExceptionHandler(DuplicatedLoginIdException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicatedLoginIdException(DuplicatedLoginIdException e) {
+        log.warn("[DuplicatedLoginIdException] {}", e.getMessage());
+        MemberErrorCode errorCode = MemberErrorCode.DUPLICATED_LOGIN_ID;
+        return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, e.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicatedEmailException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicatedEmailException(DuplicatedEmailException e) {
+        log.warn("[DuplicatedEmailException] {}", e.getMessage());
+        MemberErrorCode errorCode = MemberErrorCode.DUPLICATED_EMAIL;
+        return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, e.getMessage()));
+    }
+
+    @ExceptionHandler(AddressLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleAddressLimitExceededException(AddressLimitExceededException e) {
+        log.warn("[AddressLimitExceededException] {}", e.getMessage());
+        return ResponseEntity.status(e.getErrorCode().getStatus()).body(ErrorResponse.from(e.getErrorCode()));
     }
 }

@@ -56,8 +56,13 @@ public class PaymentHistory {
         return create(payment, PaymentStatusType.ABORTED, amount, reason, occurredAt);
     }
 
-    // 취소 이력
+    // 전체 취소 이력
     public static PaymentHistory canceled(Payment payment, long cancelAmount, String reason, OffsetDateTime canceledAt) {
         return create(payment, PaymentStatusType.CANCELED, cancelAmount, reason, canceledAt);
+    }
+
+    // 부분 취소 이력
+    public static PaymentHistory partialCanceled(Payment payment, long cancelAmount, String reason, OffsetDateTime canceledAt) {
+        return create(payment, PaymentStatusType.PARTIAL_CANCELED, cancelAmount, reason, canceledAt);
     }
 }

@@ -3,8 +3,7 @@ package shop.chaekmate.core.book.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.response.AdminBookResponse;
-import shop.chaekmate.core.book.repository.BookImageRepository;
-import shop.chaekmate.core.book.entity.BookImage;
+import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.repository.AdminBookRepositoryImpl;
 
 import java.util.List;
@@ -14,14 +13,17 @@ import java.util.List;
 public class AdminBookService {
 
     private final AdminBookRepositoryImpl adminBookRepository;
-    private final BookImageRepository bookImageRepository;
+    private final BookImageService bookImageService; // BookImageService 주입
 
     public List<AdminBookResponse> findRecentBooks(int limit) {
         return adminBookRepository.findRecentBooks(limit).stream()
                 .map(book -> {
-                    String imageUrl = bookImageRepository.findByBookId(book.getId())
-                            .map(BookImage::getImageUrl)
-                            .orElse(null);
+                    String imageUrl = null;
+                    try {
+                        imageUrl = bookImageService.findThumbnail(book.getId()).imageUrl();
+                    } catch (BookImageNotFoundException e) {
+                        // 썸네일 이미지가 없는 경우 null 처리
+                    }
                     return AdminBookResponse.of(book, imageUrl);
                 })
                 .toList();
