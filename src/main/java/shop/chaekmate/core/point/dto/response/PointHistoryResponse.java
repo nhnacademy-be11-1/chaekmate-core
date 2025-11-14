@@ -1,5 +1,6 @@
 package shop.chaekmate.core.point.dto.response;
 
+import java.time.LocalDateTime;
 import shop.chaekmate.core.point.entity.type.PointSpendType;
 
 public record PointHistoryResponse(
@@ -7,6 +8,7 @@ public record PointHistoryResponse(
         Long member,
         PointSpendType type,
         int point,
-        String source
+        String source,
+        LocalDateTime createdAt
 ) {
 }

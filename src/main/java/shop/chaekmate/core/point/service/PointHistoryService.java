@@ -82,14 +82,16 @@ public class PointHistoryService {
                         point.getMember().getId(),
                         point.getType(),
                         point.getPoint(),
-                        point.getSource())
+                        point.getSource(),
+                        point.getCreatedAt()
+                        )
                 );
     }
 
     //포인트 history 조회 (특정 회원)
     @Transactional(readOnly = true)
     public Page<PointHistoryResponse> getPointHistoryByMemberId(Long memberId, Pageable pageable) {
-        Member member = memberRepository.findById(memberId)
+        memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
 
         return pointHistoryRepository.findByMemberId(memberId, pageable)
@@ -98,7 +100,8 @@ public class PointHistoryService {
                         point.getMember().getId(),
                         point.getType(),
                         point.getPoint(),
-                        point.getSource())
+                        point.getSource(),
+                        point.getCreatedAt())
                 );
     }
 
