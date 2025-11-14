@@ -10,7 +10,6 @@ import shop.chaekmate.core.common.dto.ErrorResponse;
 
 
 import io.jsonwebtoken.JwtException;
-import shop.chaekmate.core.member.exception.DuplicatedEmailException;
 import shop.chaekmate.core.member.exception.DuplicatedLoginIdException;
 import shop.chaekmate.core.member.exception.MemberErrorCode;
 
@@ -64,5 +63,11 @@ public class GlobalExceptionHandler {
         log.warn("[DuplicatedEmailException] {}", e.getMessage());
         MemberErrorCode errorCode = MemberErrorCode.DUPLICATED_EMAIL;
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, e.getMessage()));
+    }
+
+    @ExceptionHandler(AddressLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleAddressLimitExceededException(AddressLimitExceededException e) {
+        log.warn("[AddressLimitExceededException] {}", e.getMessage());
+        return ResponseEntity.status(e.getErrorCode().getStatus()).body(ErrorResponse.from(e.getErrorCode()));
     }
 }

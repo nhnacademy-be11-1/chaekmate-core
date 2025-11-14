@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import shop.chaekmate.core.member.controller.docs.MemberControllerDocs;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
+import shop.chaekmate.core.member.dto.response.MemberGradeResponse;
 import shop.chaekmate.core.member.service.MemberService;
 
 @RestController
@@ -25,14 +26,17 @@ public class MemberController implements MemberControllerDocs {
     }
 
     @GetMapping("/check-login-id")
+    @Override
     public ResponseEntity<AvailabilityResponse> checkLoginId(@RequestParam("loginId") String loginId) {
         boolean exists = memberService.isDuplicateLoginId(loginId);
         return ResponseEntity.ok(new AvailabilityResponse(!exists));
     }
 
     @GetMapping("/check-email")
+    @Override
     public ResponseEntity<AvailabilityResponse> checkEmail(@RequestParam("email") String email) {
-        return ResponseEntity.ok(new AvailabilityResponse(!memberService.isDuplicateEmail(email)));
+        boolean exists = memberService.isDuplicateEmail(email);
+        return ResponseEntity.ok(new AvailabilityResponse(!exists));
     }
 
     @DeleteMapping("/{memberId}")
