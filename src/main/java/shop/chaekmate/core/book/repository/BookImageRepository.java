@@ -8,7 +8,7 @@ import shop.chaekmate.core.book.entity.BookImage;
 import java.util.Optional;
 
 public interface BookImageRepository extends JpaRepository<BookImage, Long> {
-    Optional<BookImage> findByBookId(Long bookId);
+    List<BookImage> findByBookId(Long bookId);
 
     List<BookImage> findByBook(Book book);
 

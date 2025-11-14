@@ -1,30 +1,23 @@
 package shop.chaekmate.core.book.service;
 
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
-import shop.chaekmate.core.book.dto.response.CategoryHierarchyResponse;
-import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
-import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
-import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
-import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
+import shop.chaekmate.core.book.dto.response.*;
 import shop.chaekmate.core.book.entity.Category;
 import shop.chaekmate.core.book.exception.CategoryHasBookException;
 import shop.chaekmate.core.book.exception.CategoryHasChildException;
-import shop.chaekmate.core.book.exception.category.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
+import shop.chaekmate.core.book.exception.category.CategoryNotFoundException;
 import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
+
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -63,12 +56,12 @@ public class CategoryService {
         Category targetCategory = categoryRepository.findById(targetCategoryId)
                 .orElseThrow(CategoryNotFoundException::new);
 
-        String parentCategoryName = "null";
+        Long parentCategoryId = null;
         if (targetCategory.getParentCategory() != null) {
-            parentCategoryName = targetCategory.getParentCategory().getName();
+            parentCategoryId = targetCategory.getParentCategory().getId();
         }
 
-        return new ReadCategoryResponse(targetCategory.getId(), parentCategoryName, targetCategory.getName());
+        return new ReadCategoryResponse(targetCategory.getId(), parentCategoryId, targetCategory.getName());
     }
 
     @Transactional
@@ -151,6 +144,77 @@ public class CategoryService {
                 .toList();
 
         return new PageImpl<>(responses, pageable, categoriesPage.getTotalElements());
+    }
+
+    @Transactional
+    public List<List<CategoryPathResponse>> getCategoriesWithParents(List<Long> categoryIds) {
+        List<Category> categories = categoryRepository.findAllById(categoryIds);
+
+        if (categories.size() != categoryIds.size()) {
+            throw new CategoryNotFoundException();
+        }
+
+        Set<Long> allCategoryIds = new HashSet<>(categoryIds);
+        for (Category category : categories) {
+            collectParentIds(category, allCategoryIds);
+        }
+
+        List<Category> allCategories = categoryRepository.findAllById(allCategoryIds);
+
+        Map<Long, Category> categoryMap = new HashMap<>();
+        for (Category category : allCategories) {
+            categoryMap.put(category.getId(), category);
+        }
+
+        List<List<CategoryPathResponse>> result = new ArrayList<>();
+        for (Long categoryId : categoryIds) {
+            List<CategoryPathResponse> path = tracePathList(categoryId, categoryMap);
+
+            result.add(path);
+        }
+
+        return result;
+    }
+
+    private List<CategoryPathResponse> tracePathList(Long categoryId, Map<Long, Category> categoryMap) {
+        List<CategoryPathResponse> path = new ArrayList<>();
+        Category current = categoryMap.get(categoryId);
+
+        if (current == null) {
+            throw new CategoryNotFoundException();
+        }
+
+        while (current != null) {
+            int depth = calculateDepth(current);
+
+            path.add(new CategoryPathResponse(current.getId(), current.getName(), depth));
+
+            current = current.getParentCategory();
+        }
+
+        return path;
+    }
+
+    private int calculateDepth(Category category) {
+        int depth = 0;
+        Category current = category;
+
+        while (current.getParentCategory() != null) {
+            depth++;
+
+            current = current.getParentCategory();
+        }
+
+        return depth;
+    }
+
+    private void collectParentIds(Category category, Set<Long> allCategoryIds) {
+        Category currentCategory = category.getParentCategory();
+
+        while (currentCategory != null) {
+            allCategoryIds.add(currentCategory.getId());
+            currentCategory = currentCategory.getParentCategory();
+        }
     }
 
     private String buildCategoryHierarchy(Category category, List<Category> allCategories) {

@@ -168,4 +168,6 @@ class PointPolicyServiceTest {
         verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.REVIEW);
         verify(pointPolicyRepository, times(0)).delete(any(PointPolicy.class));
     }
+
+    
 }

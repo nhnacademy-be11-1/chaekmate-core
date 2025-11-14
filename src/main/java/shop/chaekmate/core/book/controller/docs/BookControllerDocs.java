@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
+import shop.chaekmate.core.book.dto.response.BookSummaryResponse;
+
+import java.util.List;
 
 @Tag(name = "도서 관리 API", description = "도서 등록, 수정, 삭제, 조회 관련 API")
 public interface BookControllerDocs {
@@ -26,7 +30,7 @@ public interface BookControllerDocs {
     )
     @ApiResponse(responseCode = "201", description = "생성 성공")
     @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
-    ResponseEntity<Void> createBook(
+    ResponseEntity<BookCreateResponse> createBook(
             @Valid @RequestBody BookCreateRequest request
     );
 
@@ -63,6 +67,20 @@ public interface BookControllerDocs {
     ResponseEntity<BookResponse> getBook(
             @Parameter(description = "조회할 도서 ID", example = "1", required = true)
             @PathVariable Long bookId
+    );
+
+    @Operation(
+            summary = "도서 대량 조회",
+            description = "여러 도서 ID 목록으로 도서 요약 정보를 조회합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    ResponseEntity<List<BookSummaryResponse>> getBooksByIds(
+            @Parameter(
+                    description = "조회할 도서 ID 목록",
+                    example = "1,2,3",
+                    required = true
+            )
+            @RequestParam List<Long> bookIds
     );
 
     @Operation(

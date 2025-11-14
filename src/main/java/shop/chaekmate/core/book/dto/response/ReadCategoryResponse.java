@@ -8,7 +8,7 @@ public record ReadCategoryResponse(
         Long id,
 
         @Schema(description = "부모 카테고리 ID", example = "10")
-        String parentCategoryId,
+        Long parentCategoryId,
 
         @Schema(description = "카테고리명", example = "소설")
         String name
