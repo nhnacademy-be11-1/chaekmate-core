@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import shop.chaekmate.core.common.exception.BaseErrorCode;
 
-
 @Getter
     public enum PointErrorCode implements BaseErrorCode {
 

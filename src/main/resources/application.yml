@@ -20,7 +20,12 @@ eureka:
 aladin:
   api:
     base-url: http://www.aladin.co.kr/ttb/api
-    key: ttbgudcjf15411308001
+    key: ${ALADIN_API_KEY}
+
+toss:
+  api:
+    url: https://api.tosspayments.com/v1
+  secret-key: ${TOSS_SECRET_KEY}
 
 management:
   endpoints:

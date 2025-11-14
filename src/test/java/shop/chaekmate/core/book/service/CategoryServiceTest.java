@@ -208,7 +208,8 @@ class CategoryServiceTest {
     void 카테고리_삭제_실패_존재하지_않는_카테고리() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.deleteCategory(1L));
+        CategoryNotFoundException exception = assertThrows(CategoryNotFoundException.class, () -> categoryService.deleteCategory(1L));
+        assertThat(exception.getMessage()).isEqualTo("해당 카테고리를 찾을 수 없습니다.");
 
         verify(categoryRepository, never()).delete(any(Category.class));
     }

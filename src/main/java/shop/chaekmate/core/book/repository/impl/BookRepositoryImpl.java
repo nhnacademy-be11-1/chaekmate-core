@@ -28,9 +28,9 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    @Override
     public Page<BookListResponse> searchBooks(BookSearchCondition condition, Pageable pageable) {
 
+        // 서브쿼리: 각 책의 첫 번째 이미지 URL (섬네일)
         JPQLQuery<String> imageUrlSubQuery = JPAExpressions
                 .select(bookImage.imageUrl)
                 .from(bookImage)
@@ -51,7 +51,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
                 .from(book)
                 .leftJoin(bookCategory).on(bookCategory.book.eq(book))
                 .leftJoin(bookTag).on(bookTag.book.eq(book))
-                .leftJoin(bookImage).on(bookImage.book.eq(book))
+                // bookImage 조인 제거
                 .where(
                         categoryIdEq(condition.categoryId()),
                         tagIdEq(condition.tagId()),
