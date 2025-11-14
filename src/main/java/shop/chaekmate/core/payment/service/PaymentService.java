@@ -42,6 +42,7 @@ public class PaymentService {
         try {
             PaymentApproveResponse response = provider.approve(request);
 
+            // todo 수정부분 eventResponse 추가해야함
             // 이벤트 발행 -> 주문 서비스 이동
             eventPublisher.publishPaymentApproved(response);
             log.info("[결제 승인 완료 및 이벤트 발행] 주문번호={}, 상태={}", response.orderNumber(), response.status());
@@ -73,30 +74,17 @@ public class PaymentService {
         Payment payment = paymentRepository.findByOrderNumber(request.orderNumber())
                 .orElseThrow(NotFoundOrderNumberException::new);
 
-        Long cancelAmount = request.cancelAmount();
         OffsetDateTime now = OffsetDateTime.now();
 
-        PaymentHistory history;
+        long canceledAmount = payment.cancelOrPartial(request.cancelAmount());
 
-        // 전체 취소
-        if (cancelAmount == null) {
-            cancelAmount = payment.cancel();
-            history = PaymentHistory.canceled(payment, cancelAmount, request.cancelReason(), now);
-        }
-        // 부분 취소
-        else {
-            payment.partialCancel(cancelAmount);
-            history = (payment.getPaymentStatus() == PaymentStatusType.CANCELED)
-                    ? PaymentHistory.canceled(payment, cancelAmount, request.cancelReason(), now)
-                    : PaymentHistory.partialCanceled(payment, cancelAmount, request.cancelReason(), now);
-        }
-
+        PaymentHistory history = PaymentHistory.canceled(payment, canceledAmount, request.cancelReason(), now);
         paymentHistoryRepository.save(history);
 
         PaymentCancelResponse response = new PaymentCancelResponse(
                 payment.getOrderNumber(),
                 request.cancelReason(),
-                cancelAmount,
+                canceledAmount,
                 now,
                 request.canceledBooks()
         );

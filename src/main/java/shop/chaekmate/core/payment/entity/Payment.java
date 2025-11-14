@@ -77,37 +77,7 @@ public class Payment extends BaseEntity {
         return payment;
     }
 
-//    // 전체 취소
-//    public long cancel() {
-//        if (this.paymentStatus == PaymentStatusType.CANCELED) {
-//            throw new AlreadyCanceledException();
-//        }
-//
-//        long canceledAmount = this.totalAmount;
-//        this.totalAmount = 0L;
-//        this.paymentStatus = PaymentStatusType.CANCELED;
-//
-//        return canceledAmount;
-//    }
-//
-//    // 부분 취소
-//    public void partialCancel(Long cancelAmount) {
-//        if (this.paymentStatus == PaymentStatusType.CANCELED) {
-//            throw new AlreadyCanceledException();
-//        }
-//        if (cancelAmount == null || cancelAmount <= 0) {
-//            throw new InvalidCancelAmountException();
-//        }
-//        if (cancelAmount > this.totalAmount) {
-//            throw new ExceedCancelAmountException();
-//        }
-//
-//        this.totalAmount -= cancelAmount;
-//
-//        this.paymentStatus = (this.totalAmount == 0) ? PaymentStatusType.CANCELED : PaymentStatusType.PARTIAL_CANCELED;
-//    }
-
-    public void cancelOrPartial(Long cancelAmount) {
+    public long cancelOrPartial(Long cancelAmount) {
         if (this.paymentStatus == PaymentStatusType.CANCELED) {
             throw new AlreadyCanceledException();
         }
@@ -116,12 +86,12 @@ public class Payment extends BaseEntity {
         final int point = (this.pointUsed == null ? 0 : this.pointUsed);
         final long totalPaid = cash + point;
 
-        // 전체 취소
+        // 전체취소
         if (cancelAmount == null || cancelAmount == totalPaid) {
             this.totalAmount = 0L;
             this.pointUsed = 0;
             this.paymentStatus = PaymentStatusType.CANCELED;
-            return;
+            return totalPaid;
         }
 
         if (cancelAmount <= 0) {
@@ -131,22 +101,30 @@ public class Payment extends BaseEntity {
             throw new ExceedCancelAmountException();
         }
 
-        // 부분취소: 현금 먼저 차감 → 남으면 포인트 차감
+        // 부분취소: 현금 먼저, 남으면 포인트
         long remaining = cancelAmount;
+        long cashCanceled = 0;
+        long pointCanceled = 0;
 
         if (remaining >= cash) {
-            // 현금 전부 차감 후 포인트 일부 차감
+            // 현금 다 차감 후 포인트 일부 차감
+            cashCanceled = cash;
             remaining -= cash;
+
+            int usedPoints = Math.min(point, (int) remaining);
+            pointCanceled = usedPoints;
             this.totalAmount = 0L;
-            this.pointUsed = (int) Math.max(point - remaining, 0);
+            this.pointUsed = point - usedPoints;
         } else {
             // 현금 일부만 차감
+            cashCanceled = remaining;
             this.totalAmount = cash - remaining;
         }
 
         this.paymentStatus = (this.totalAmount == 0 && this.pointUsed == 0)
-                        ? PaymentStatusType.CANCELED
-                        : PaymentStatusType.PARTIAL_CANCELED;
-    }
+                ? PaymentStatusType.CANCELED
+                : PaymentStatusType.PARTIAL_CANCELED;
 
+        return cashCanceled + pointCanceled;
+    }
 }
