@@ -11,7 +11,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
 import shop.chaekmate.core.member.dto.response.MemberGradeResponse;
 
 @Tag(name = "Member", description = "회원 API")
@@ -29,15 +32,15 @@ public interface MemberControllerDocs {
                                     @ExampleObject(
                                             name = "기본 예시",
                                             value = """
-                        {
-                          "loginId": "user123",
-                          "password": "Pa$$word1234!",
-                          "name": "홍길동",
-                          "phone": "010-1234-5678",
-                          "email": "user@example.com",
-                          "birthDate": "2000-01-01"
-                        }
-                        """
+                                                    {
+                                                      "loginId": "user123",
+                                                      "password": "Pa$$word1234!",
+                                                      "name": "홍길동",
+                                                      "phone": "010-1234-5678",
+                                                      "email": "user@example.com",
+                                                      "birthDate": "2000-01-01"
+                                                    }
+                                                    """
                                     )
                             }
                     )
@@ -48,21 +51,57 @@ public interface MemberControllerDocs {
                     @ApiResponse(responseCode = "409", description = "중복(ID/이메일) 충돌", content = @Content)
             }
     )
-    ResponseEntity<Void> createMember(@Valid @org.springframework.web.bind.annotation.RequestBody CreateMemberRequest request);
+    ResponseEntity<Void> createMember(
+            @Valid
+            @org.springframework.web.bind.annotation.RequestBody CreateMemberRequest request
+    );
 
     @Operation(
-            summary = "회원 등급 조회",
-            description = "회원의 등급을 조회합니다.",
+            summary = "로그인 ID 중복 체크",
+            description = "로그인 ID의 사용 가능 여부를 확인합니다.",
             parameters = {
-                    @Parameter(name = "memberId", description = "회원 ID", required = true, example = "7")
+                    @Parameter(
+                            name = "loginId",
+                            description = "중복 여부를 확인할 로그인 ID",
+                            required = true,
+                            example = "user123"
+                    )
             },
             responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공",
-                            content = @Content(schema = @Schema(implementation = MemberGradeResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "회원 없음", content = @Content)
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "중복 여부 조회 성공",
+                            content = @Content(schema = @Schema(implementation = AvailabilityResponse.class))
+                    )
             }
     )
-    ResponseEntity<MemberGradeResponse> getMemberGrade(@PathVariable Long memberId);
+    ResponseEntity<AvailabilityResponse> checkLoginId(
+            @RequestParam("loginId") String loginId
+    );
+
+    @Operation(
+            summary = "이메일 중복 체크",
+            description = "이메일의 사용 가능 여부를 확인합니다.",
+            parameters = {
+                    @Parameter(
+                            name = "email",
+                            description = "중복 여부를 확인할 이메일",
+                            required = true,
+                            example = "user@example.com"
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "중복 여부 조회 성공",
+                            content = @Content(schema = @Schema(implementation = AvailabilityResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<AvailabilityResponse> checkEmail(
+            @RequestParam("email") String email
+    );
+
 
     @Operation(
             summary = "회원 삭제",

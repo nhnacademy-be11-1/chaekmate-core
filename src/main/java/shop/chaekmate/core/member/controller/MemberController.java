@@ -26,21 +26,17 @@ public class MemberController implements MemberControllerDocs {
     }
 
     @GetMapping("/check-login-id")
+    @Override
     public ResponseEntity<AvailabilityResponse> checkLoginId(@RequestParam("loginId") String loginId) {
         boolean exists = memberService.isDuplicateLoginId(loginId);
         return ResponseEntity.ok(new AvailabilityResponse(!exists));
     }
 
     @GetMapping("/check-email")
+    @Override
     public ResponseEntity<AvailabilityResponse> checkEmail(@RequestParam("email") String email) {
         boolean exists = memberService.isDuplicateEmail(email);
         return ResponseEntity.ok(new AvailabilityResponse(!exists));
-    }
-
-    @GetMapping("/{memberId}/grades")
-    @Override
-    public ResponseEntity<MemberGradeResponse> getMemberGrade(@PathVariable Long memberId) {
-        return ResponseEntity.ok(memberService.getMemberGrade(memberId));
     }
 
     @DeleteMapping("/{memberId}")
@@ -49,5 +45,4 @@ public class MemberController implements MemberControllerDocs {
         memberService.deleteMember(memberId);
         return ResponseEntity.noContent().build();
     }
-
 }
