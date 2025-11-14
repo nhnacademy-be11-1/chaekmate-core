@@ -26,7 +26,7 @@ public record PaymentApproveRequest(
         @PositiveOrZero(message = "승인 금액은 음수가 될 수 없습니다.")
         long amount,
 
-        @Schema(description = "포인트 사용 금액", example = "입력하지 않으면 0")
+        @Schema(description = "포인트 사용 금액")
         @PositiveOrZero(message = "포인트는 음수가 될 수 없습니다.")
-        Integer pointUsed
+        int pointUsed
 ) {}
