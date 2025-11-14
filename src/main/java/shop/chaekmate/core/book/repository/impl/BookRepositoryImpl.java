@@ -28,6 +28,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
+    @Override
     public Page<BookListResponse> searchBooks(BookSearchCondition condition, Pageable pageable) {
 
         // 서브쿼리: 각 책의 첫 번째 이미지 URL (섬네일)

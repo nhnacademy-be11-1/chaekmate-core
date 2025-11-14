@@ -5,20 +5,16 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
-import shop.chaekmate.core.book.dto.response.CategoryHierarchyResponse;
-import shop.chaekmate.core.book.dto.response.CreateCategoryResponse;
-import shop.chaekmate.core.book.dto.response.PageResponse;
-import shop.chaekmate.core.book.dto.response.ReadAllCategoriesResponse;
-import shop.chaekmate.core.book.dto.response.ReadCategoryResponse;
 import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
-import shop.chaekmate.core.book.dto.response.UpdateCategoryResponse;
+import shop.chaekmate.core.book.dto.response.*;
 
-import org.springframework.http.ResponseEntity;
+import java.util.List;
 
 @Tag(name = "카테고리 관리 API", description = "카테고리 등록, 수정, 삭제, 조회 관련 API")
 public interface CategoryControllerDocs {
@@ -54,4 +50,18 @@ public interface CategoryControllerDocs {
     @ApiResponse(responseCode = "404", description = "해당 ID의 카테고리를 찾을 수 없음")
     ResponseEntity<Void> deleteCategory(
             @Parameter(description = "삭제할 카테고리 ID", example = "1") @PathVariable(name = "id") Long categoryId);
+
+    @Operation(
+            summary = "카테고리 경로 대량 조회",
+            description = "여러 카테고리 ID 목록으로 각 카테고리의 전체 경로(최상위 부모부터 현재 카테고리까지)를 조회합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    ResponseEntity<List<List<CategoryPathResponse>>> getCategoriesWithParents(
+            @Parameter(
+                    description = "조회할 카테고리 ID 목록",
+                    example = "1,2,3",
+                    required = true
+            )
+            @RequestParam List<Long> categoryIds
+    );
 }
