@@ -12,6 +12,7 @@ import shop.chaekmate.core.book.controller.docs.BookControllerDocs;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
 import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.dto.response.BookSummaryResponse;
@@ -69,7 +70,7 @@ public class BookController implements BookControllerDocs {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long tagId,
             @RequestParam(required = false) String keyword,
-            @PageableDefault(size = 12, page = 0) Pageable pageable) {
+            @PageableDefault(size = 12) Pageable pageable) {
 
         validateSearchParameters(categoryId, tagId, keyword);
 
