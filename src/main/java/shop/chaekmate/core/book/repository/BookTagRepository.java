@@ -8,7 +8,7 @@ import shop.chaekmate.core.book.entity.BookTag;
 import java.util.List;
 import java.util.Set;
 
-public interface BookTagRepository extends JpaRepository<BookTag, Long> {
+public interface BookTagRepository extends JpaRepository<BookTag, Long>, BookTagRepositoryCustom {
     List<BookTag> findByBook(Book book);
 
     @Modifying

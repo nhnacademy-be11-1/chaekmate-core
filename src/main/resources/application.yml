@@ -2,6 +2,12 @@ spring:
   application:
     name: chaekmate-core
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -32,3 +38,10 @@ management:
     web:
       exposure:
         include: health, info
+
+rabbitmq:
+  exchange:
+    name: cm-book-exchange
+  queues:
+    queue-name:  cm-book-1 # cm-book-2, cm-book-3
+    routing-key:  cm-book-key-1 # cm-book-key-2, cm-book-key-3

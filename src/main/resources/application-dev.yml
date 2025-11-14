@@ -27,7 +27,7 @@ spring:
     hibernate:
       # create , update 금지
       ddl-auto: none # validate 로 수정 (전체 entity  수정 후)
-    show-sql: true
+    show-sql: false # SQL 로그 끄기
     properties:
       hibernate:
         format_sql: true
@@ -38,8 +38,9 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
+    org.hibernate.SQL: off # 위의 jpa: show-sql 이 true 이면 의미없음
+    org.hibernate.orm.jdbc.bind: off
+    org.springframework.amqp.rabbit.core.RabbitTemplate: debug # RabbitMQ 로깅
 
 # Spring Boot Actuator 서버 상태(헬스) 모니터링
 management:
@@ -53,5 +54,5 @@ management:
     redis:
       enabled: false
     rabbit:
-      enabled: false
+      enabled: true
 
