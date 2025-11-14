@@ -13,8 +13,8 @@ public record CreateAddressRequest(
 
         @NotBlank(message = "도로명주소를 입력해야 합니다.")
         @Pattern(
-                regexp = "^(?=.*(?:대로|로|길))([가-힣0-9\\s]+(?:대로|로|길)\\s\\d{1,4}(?:-\\d{1,3})?(?:[ ,].*)?)$",
-                message = "도로명주소 형식이 아닙니다. 예: 서울특별시 중구 세종대로 110"
+                regexp = ".*(로|길|대로).*",
+                message = "도로명주소 형식이 아닙니다."
         )
         @Schema(
                 description = "도로명주소 (지번 불가). 예: '서울특별시 중구 세종대로 110'",

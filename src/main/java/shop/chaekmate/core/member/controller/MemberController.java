@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import shop.chaekmate.core.member.controller.docs.MemberControllerDocs;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
-import shop.chaekmate.core.member.dto.response.MemberGradeResponse;
 import shop.chaekmate.core.member.service.MemberService;
 
 @RestController

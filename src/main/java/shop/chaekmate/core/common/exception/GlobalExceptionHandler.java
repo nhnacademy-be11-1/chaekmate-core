@@ -10,6 +10,8 @@ import shop.chaekmate.core.common.dto.ErrorResponse;
 
 
 import io.jsonwebtoken.JwtException;
+import shop.chaekmate.core.member.exception.AddressLimitExceededException;
+import shop.chaekmate.core.member.exception.DuplicatedEmailException;
 import shop.chaekmate.core.member.exception.DuplicatedLoginIdException;
 import shop.chaekmate.core.member.exception.MemberErrorCode;
 

@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.chaekmate.core.member.controller.docs.AddressControllerDocs;
-import shop.chaekmate.core.member.controller.docs.MemberControllerDocs;
 import shop.chaekmate.core.member.dto.request.CreateAddressRequest;
 import shop.chaekmate.core.member.dto.response.AddressResponse;
 import shop.chaekmate.core.member.service.AddressService;
