@@ -1,5 +1,6 @@
 package shop.chaekmate.core.book.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -9,18 +10,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 import shop.chaekmate.core.book.dto.response.AdminBookResponse;
+import shop.chaekmate.core.book.dto.response.BookImageResponse;
 import shop.chaekmate.core.book.entity.Book;
-import shop.chaekmate.core.book.entity.BookImage;
+import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.repository.AdminBookRepositoryImpl;
-import shop.chaekmate.core.book.repository.BookImageRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -36,7 +37,7 @@ class AdminBookServiceTest {
     private AdminBookRepositoryImpl adminBookRepository;
 
     @Mock
-    private BookImageRepository bookImageRepository;
+    private BookImageService bookImageService;
 
     @Test
     void 최신_도서_조회_성공() {
@@ -51,19 +52,38 @@ class AdminBookServiceTest {
         setPrivateField(book2, "createdAt", LocalDateTime.now().minusDays(1));
 
         List<Book> books = List.of(book1, book2);
-        BookImage bookImage = new BookImage(book1, "imageUrl");
+        BookImageResponse bookImageResponse = BookImageResponse.builder()
+                .imageUrl("imageUrl")
+                .build();
 
         when(adminBookRepository.findRecentBooks(anyInt())).thenReturn(books);
-        when(bookImageRepository.findByBookId(anyLong())).thenReturn(Optional.of(bookImage));
+        when(bookImageService.findThumbnail(1L)).thenReturn(bookImageResponse);
+        doThrow(new BookImageNotFoundException()).when(bookImageService).findThumbnail(2L);
+
 
         // when
         List<AdminBookResponse> result = adminBookService.findRecentBooks(limit);
 
         // then
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).title()).isEqualTo("Book 1");
-        assertThat(result.get(1).title()).isEqualTo("Book 2");
-        assertThat(result.get(0).imageUrl()).isEqualTo("imageUrl");
+        assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> {
+                    Assertions.assertNotNull(result);
+                    assertThat(result.getFirst().title()).isEqualTo("Book 1");
+                },
+                () -> {
+                    Assertions.assertNotNull(result);
+                    assertThat(result.get(1).title()).isEqualTo("Book 2");
+                },
+                () -> {
+                    Assertions.assertNotNull(result);
+                    assertThat(result.getFirst().imageUrl()).isEqualTo("imageUrl");
+                },
+                () -> {
+                    Assertions.assertNotNull(result);
+                    assertThat(result.get(1).imageUrl()).isNull();
+                }
+        );
     }
 
     private void setPrivateField(Object obj, String fieldName, Object value) {

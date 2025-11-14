@@ -51,7 +51,7 @@ public class PointService {
     }
 
     //정책 단건 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public PointPolicyResponse getPolicyByType(PointEarnedType type) {
         PointPolicy policy = pointPolicyRepository.findByType(type)
                 .orElseThrow(PointPolicyNotFoundException::new);
@@ -77,6 +77,7 @@ public class PointService {
         PointPolicy policy = pointPolicyRepository.findByType(request.pointEarnedType())
                 .orElseThrow(PointPolicyNotFoundException::new);
         pointPolicyRepository.delete(policy);
+
     }
     
 }

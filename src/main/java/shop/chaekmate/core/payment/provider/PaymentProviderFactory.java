@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
-import shop.chaekmate.core.payment.exception.PaymentMethodNotFoundException;
+import shop.chaekmate.core.payment.exception.NotFoundPaymentMethodException;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +17,6 @@ public class PaymentProviderFactory {
         return providers.stream()
                 .filter(provider -> provider.getType() == paymentType)
                 .findFirst()
-                .orElseThrow(PaymentMethodNotFoundException::new);
+                .orElseThrow(NotFoundPaymentMethodException::new);
     }
 }

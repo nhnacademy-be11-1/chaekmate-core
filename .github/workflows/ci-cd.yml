@@ -25,12 +25,13 @@ jobs:
       REDIS_PORT: ${{ secrets.REDIS_PORT }}
       REDIS_RANGE: ${{ secrets.REDIS_RANGE }}
       RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
+      RABBITMQ_PORT: ${{ secrets.RABBITMQ_PORT }}
       RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
       RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
       ALADIN_API_KEY: ${{ secrets.ALADIN_API_KEY }}
-      EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
       TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
 
 
     steps:
@@ -113,11 +114,12 @@ jobs:
             export REDIS_PORT="${{ secrets.REDIS_PORT }}"
             export REDIS_RANGE="${{ secrets.REDIS_RANGE }}"
             export RABBITMQ_HOST="${{ secrets.RABBITMQ_HOST }}"
+            export RABBITMQ_PORT="${{ secrets.RABBITMQ_PORT }}"
             export RABBITMQ_USERNAME="${{ secrets.RABBITMQ_USERNAME }}"
             export RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}"
             export ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}"
-            export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
             export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
             export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
+            export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
             
             bash -lc ./startup.sh
