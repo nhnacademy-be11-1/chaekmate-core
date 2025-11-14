@@ -53,6 +53,10 @@ public class MemberService {
         return bool == 1;
     }
 
+    public boolean isDuplicateEmail(String email) {
+        return memberRepository.existsByEmail(email);
+    }
+
     @Transactional
     public void deleteMember(Long id) {
         Member member = memberRepository.findById(id)
