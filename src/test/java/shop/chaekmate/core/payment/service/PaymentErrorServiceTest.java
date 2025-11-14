@@ -40,7 +40,7 @@ class PaymentErrorServiceTest {
     @Test
     void 승인_실패시_에러이벤트_발행_및_로그기록() {
         PaymentApproveRequest request = new PaymentApproveRequest(
-                PaymentMethodType.TOSS, null, "test_order_number_nanoid", 29800L, null
+                PaymentMethodType.TOSS, null, "test_order_number_nanoid", 29800L, 0
         );
 
         paymentErrorService.saveAbortedPayment(request, "실패 에러");
