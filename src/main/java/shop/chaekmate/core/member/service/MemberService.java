@@ -58,7 +58,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public GradeResponse getMemberGrade(Long memberId) {
         MemberGradeHistory memberGradeHistory = memberGradeHistoryRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
-                .orElseThrow(MemberHistoryNotFoundException::new);
+                .orElseThrow(MemberGradeHistoryNotFoundException::new);
         String name = memberGradeHistory.getGrade().getName();
         Byte pointRate = memberGradeHistory.getGrade().getPointRate();
         int upgradeStandardAmount = memberGradeHistory.getGrade().getUpgradeStandardAmount();
