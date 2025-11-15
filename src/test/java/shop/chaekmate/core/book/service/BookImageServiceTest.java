@@ -8,12 +8,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import shop.chaekmate.core.book.dto.request.BookImageAddRequest;
 import shop.chaekmate.core.book.dto.request.ThumbnailUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookImageResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.BookImage;
+import shop.chaekmate.core.book.event.BookThumbnailEvent;
 import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.repository.BookImageQueryRepository;
@@ -47,6 +49,9 @@ class BookImageServiceTest {
     @Mock
     private BookImageQueryRepository bookImageQueryRepository;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @Test
     void 이미지_추가_성공() {
         // given
@@ -73,6 +78,7 @@ class BookImageServiceTest {
         verify(bookRepository).findById(bookId);
         verify(bookImageRepository).save(any(BookImage.class));
         verify(bookImageQueryRepository).findAllByBookIdOrderByCreatedAtAsc(bookId);
+        verify(eventPublisher).publishEvent(any(BookThumbnailEvent.class));
     }
 
     @Test
@@ -180,6 +186,7 @@ class BookImageServiceTest {
 
         // then
         verify(originalThumbnail).updateUrl(request.getNewImageUrl());
+        verify(eventPublisher).publishEvent(any(BookThumbnailEvent.class));
     }
 
     @Test

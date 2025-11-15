@@ -46,10 +46,9 @@ class BookInfoMqRequestTest {
         // given
         List<String> categories = List.of("Novel");
         List<String> tags = List.of("Fantasy");
-        String bookImages = "https://example.com/image.jpg";
 
         // when
-        BookInfoMqRequest dto = BookInfoMqRequest.of(book, bookImages, categories, tags);
+        BookInfoMqRequest dto = BookInfoMqRequest.of(book, categories, tags);
 
         // then
         assertNotNull(dto);
@@ -59,7 +58,6 @@ class BookInfoMqRequestTest {
         assertEquals("테스트 저자", dto.author());
         assertEquals(10000, dto.price());
         assertEquals("설명", dto.description());
-        assertEquals(bookImages, dto.bookImages());
         assertEquals(categories, dto.categories());
         assertEquals(LocalDate.of(2024, 1, 1), dto.publicationDatetime());
         assertEquals("9781234567890", dto.isbn());

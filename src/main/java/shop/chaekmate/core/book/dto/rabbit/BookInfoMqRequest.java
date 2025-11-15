@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.Builder;
 import shop.chaekmate.core.book.entity.Book;
-import shop.chaekmate.core.book.entity.BookImage;
 
 @Builder
 public record BookInfoMqRequest(
