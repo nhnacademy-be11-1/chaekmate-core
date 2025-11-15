@@ -18,3 +18,16 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
+aladin:
+  api:
+    base-url: http://www.aladin.co.kr/ttb/api
+    key: ${ALADIN_API_KEY:ttbgudcjf15411308001}
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY:chaekmatedummykeychaekmatedummykeychaekmatedummykey}
+
+toss:
+  api:
+    url: https://api.tosspayments.com/v1
+  secret-key: ${TOSS_SECRET_KEY:test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6}
