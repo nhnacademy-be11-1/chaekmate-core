@@ -26,6 +26,7 @@ import shop.chaekmate.core.member.repository.MemberRepository;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class AddressControllerTest {
 
