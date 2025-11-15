@@ -12,7 +12,6 @@ import shop.chaekmate.core.book.entity.BookImage;
 import shop.chaekmate.core.book.event.BookThumbnailEvent;
 import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
-import shop.chaekmate.core.book.repository.BookImageQueryRepository;
 import shop.chaekmate.core.book.repository.BookImageRepository;
 import shop.chaekmate.core.book.repository.BookRepository;
 
@@ -26,7 +25,6 @@ public class BookImageService {
 
     private final BookRepository bookRepository;
     private final BookImageRepository bookImageRepository;
-    private final BookImageQueryRepository bookImageQueryRepository;
 
     // 트랜잭션 끝 난 뒤 서비스 호출 이벤트 발행
     private final ApplicationEventPublisher eventPublisher;
@@ -37,7 +35,7 @@ public class BookImageService {
         BookImage newBookImage = new BookImage(book, request.getImageUrl());
         newBookImage = bookImageRepository.save(newBookImage);
 
-        List<BookImage> images = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
+        List<BookImage> images = bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
         boolean isThumbnail = images.size() == 1 && images.getFirst().getId().equals(newBookImage.getId());
 
         if(isThumbnail){
@@ -54,7 +52,7 @@ public class BookImageService {
 
     public BookImageResponse findThumbnail(Long bookId) {
         findBookById(bookId);
-        return bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)
+        return bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)
                 .stream()
                 .findFirst()
                 .map(image -> BookImageResponse.builder()
@@ -67,7 +65,7 @@ public class BookImageService {
 
     public List<BookImageResponse> findDetailImages(Long bookId) {
         findBookById(bookId);
-        List<BookImage> images = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
+        List<BookImage> images = bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
 
         if (images.size() <= 1) {
             return Collections.emptyList();
@@ -85,7 +83,7 @@ public class BookImageService {
 
     public List<BookImageResponse> findAllImages(Long bookId) {
         findBookById(bookId);
-        List<BookImage> images = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
+        List<BookImage> images = bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
 
         return IntStream.range(0, images.size())
                 .mapToObj(i -> {
@@ -104,7 +102,7 @@ public class BookImageService {
     @Transactional
     public void updateThumbnail(Long bookId, ThumbnailUpdateRequest request) {
         Book book = findBookById(bookId); // Check if book exists
-        BookImage thumbnail = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)
+        BookImage thumbnail = bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)
                 .stream()
                 .findFirst()
                 .orElse(null);
