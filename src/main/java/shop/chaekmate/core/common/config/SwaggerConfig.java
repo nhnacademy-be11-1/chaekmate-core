@@ -94,6 +94,7 @@ public class SwaggerConfig {
                 .build();
     }
 
+    @Bean
     public GroupedOpenApi bookApi() {
         return GroupedOpenApi.builder()
                 .group("Book API")
