@@ -39,10 +39,4 @@ public class MemberGradeHistory extends BaseEntity {
 
     @Column(length = 100, nullable = false)
     private String reason;
-
-    public MemberGradeHistory(Member member, Grade grade, String reason) {
-        this.member = member;
-        this.grade = grade;
-        this.reason = reason;
-    }
 }

@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import shop.chaekmate.core.member.controller.docs.MemberControllerDocs;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
+import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.service.MemberService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,5 +46,15 @@ public class MemberController implements MemberControllerDocs {
     public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
         memberService.deleteMember(memberId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{memberId}/grade")
+    public ResponseEntity<GradeResponse> getMemberGrade(@PathVariable Long memberId) {
+        return ResponseEntity.ok(memberService.getMemberGrade(memberId));
+    }
+
+    @GetMapping("/grades")
+    public ResponseEntity<List<GradeResponse>> getAllGrades() {
+        return ResponseEntity.ok(memberService.getAllGrades());
     }
 }

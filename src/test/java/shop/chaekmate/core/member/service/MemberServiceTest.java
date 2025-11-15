@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -18,15 +20,28 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.response.GradeResponse;
+import shop.chaekmate.core.member.entity.Grade;
 import shop.chaekmate.core.member.entity.Member;
+import shop.chaekmate.core.member.entity.MemberGradeHistory;
 import shop.chaekmate.core.member.entity.type.PlatformType;
+import shop.chaekmate.core.member.exception.MemberGradeHistoryNotFoundException;
+import shop.chaekmate.core.member.repository.GradeRepository;
+import shop.chaekmate.core.member.repository.MemberGradeHistoryRepository;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class MemberServiceTest {
+
     @Mock
     MemberRepository memberRepository;
+
+    @Mock
+    MemberGradeHistoryRepository memberGradeHistoryRepository;
+
+    @Mock
+    GradeRepository gradeRepository;
 
     @InjectMocks
     MemberService memberService;
@@ -92,5 +107,51 @@ class MemberServiceTest {
         boolean result = memberService.isDuplicateEmail("b@test.com");
 
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void 회원_등급_조회_성공() {
+        Long memberId = 1L;
+        Grade grade = new Grade("일반");
+
+        MemberGradeHistory history = mock(MemberGradeHistory.class);
+        given(history.getGrade()).willReturn(grade);
+        given(memberGradeHistoryRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId))
+                .willReturn(Optional.of(history));
+
+        GradeResponse result = memberService.getMemberGrade(memberId);
+
+        assertThat(result.name()).isEqualTo("일반");
+        assertThat(result.pointRate()).isEqualTo(grade.getPointRate());
+        assertThat(result.upgradeStandardAmount()).isEqualTo(grade.getUpgradeStandardAmount());
+    }
+
+    @Test
+    void 회원_등급_조회_실패_히스토리_없음() {
+        Long memberId = 1L;
+        given(memberGradeHistoryRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId))
+                .willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> memberService.getMemberGrade(memberId))
+                .isInstanceOf(MemberGradeHistoryNotFoundException.class);
+    }
+
+    @Test
+    void 전체_등급_목록_조회_성공() {
+        Grade general = new Grade("일반");
+        Grade royal = new Grade("로얄");
+
+        given(gradeRepository.findAll())
+                .willReturn(List.of(general, royal));
+
+        List<GradeResponse> result = memberService.getAllGrades();
+
+        assertThat(result).hasSize(2);
+        assertThat(result)
+                .extracting(GradeResponse::name)
+                .containsExactly("일반", "로얄");
+        assertThat(result)
+                .extracting(GradeResponse::pointRate)
+                .containsExactly(general.getPointRate(), royal.getPointRate());
     }
 }

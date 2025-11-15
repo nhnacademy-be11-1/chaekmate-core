@@ -134,15 +134,15 @@ class AddressServiceTest {
         AddressResponse res1 = result.get(0);
         AddressResponse res2 = result.get(1);
 
-        assertThat(res1.getMemo()).isEqualTo("집");
-        assertThat(res1.getStreetName()).isEqualTo("대전 서구 대학로 99");
-        assertThat(res1.getDetail()).isEqualTo("공대 4호관 101호");
-        assertThat(res1.getZipcode()).isEqualTo(34134);
+        assertThat(res1.memo()).isEqualTo("집");
+        assertThat(res1.streetName()).isEqualTo("대전 서구 대학로 99");
+        assertThat(res1.detail()).isEqualTo("공대 4호관 101호");
+        assertThat(res1.zipcode()).isEqualTo(34134);
 
-        assertThat(res2.getMemo()).isEqualTo("학교");
-        assertThat(res2.getStreetName()).isEqualTo("대전 유성구 대학로 1");
-        assertThat(res2.getDetail()).isEqualTo("어딘가 202호");
-        assertThat(res2.getZipcode()).isEqualTo(12345);
+        assertThat(res2.memo()).isEqualTo("학교");
+        assertThat(res2.streetName()).isEqualTo("대전 유성구 대학로 1");
+        assertThat(res2.detail()).isEqualTo("어딘가 202호");
+        assertThat(res2.zipcode()).isEqualTo(12345);
     }
 
     @Test
@@ -164,10 +164,10 @@ class AddressServiceTest {
 
         AddressResponse result = addressService.getAddress(memberId, addressId);
 
-        assertThat(result.getMemo()).isEqualTo("학교");
-        assertThat(result.getStreetName()).isEqualTo("대전 유성구 대학로 99");
-        assertThat(result.getDetail()).isEqualTo("정보화본부");
-        assertThat(result.getZipcode()).isEqualTo(34134);
+        assertThat(result.memo()).isEqualTo("학교");
+        assertThat(result.streetName()).isEqualTo("대전 유성구 대학로 99");
+        assertThat(result.detail()).isEqualTo("정보화본부");
+        assertThat(result.zipcode()).isEqualTo(34134);
     }
 
     @Test
