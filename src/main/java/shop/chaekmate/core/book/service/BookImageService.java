@@ -1,6 +1,7 @@
 package shop.chaekmate.core.book.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.request.BookImageAddRequest;
@@ -8,6 +9,7 @@ import shop.chaekmate.core.book.dto.request.ThumbnailUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookImageResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.BookImage;
+import shop.chaekmate.core.book.event.BookThumbnailEvent;
 import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.repository.BookImageQueryRepository;
@@ -26,6 +28,9 @@ public class BookImageService {
     private final BookImageRepository bookImageRepository;
     private final BookImageQueryRepository bookImageQueryRepository;
 
+    // 트랜잭션 끝 난 뒤 서비스 호출 이벤트 발행
+    private final ApplicationEventPublisher eventPublisher;
+
     @Transactional
     public BookImageResponse addImage(Long bookId, BookImageAddRequest request) {
         Book book = findBookById(bookId);
@@ -34,6 +39,11 @@ public class BookImageService {
 
         List<BookImage> images = bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
         boolean isThumbnail = images.size() == 1 && images.getFirst().getId().equals(newBookImage.getId());
+
+        if(isThumbnail){
+            // 섬네일 변경시 검색 서버에 반영
+            eventPublisher.publishEvent(new BookThumbnailEvent(bookId,newBookImage.getImageUrl()));
+        }
 
         return BookImageResponse.builder()
                 .bookImageId(newBookImage.getId())
@@ -89,6 +99,8 @@ public class BookImageService {
                 .toList();
     }
 
+
+    // 섬네일 생성 , 수정
     @Transactional
     public void updateThumbnail(Long bookId, ThumbnailUpdateRequest request) {
         Book book = findBookById(bookId); // Check if book exists
@@ -104,6 +116,10 @@ public class BookImageService {
         } else {
             thumbnail.updateUrl(request.getNewImageUrl());
         }
+
+        // 섬네일 이벤트 발행
+        eventPublisher.publishEvent(new BookThumbnailEvent(bookId, request.getNewImageUrl()));
+
     }
 
     @Transactional
