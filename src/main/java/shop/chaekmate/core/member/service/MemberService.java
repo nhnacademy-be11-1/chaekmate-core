@@ -5,10 +5,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.entity.Member;
+import shop.chaekmate.core.member.entity.MemberGradeHistory;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 import shop.chaekmate.core.member.exception.*;
+import shop.chaekmate.core.member.repository.GradeRepository;
+import shop.chaekmate.core.member.repository.MemberGradeHistoryRepository;
 import shop.chaekmate.core.member.repository.MemberRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +22,8 @@ import shop.chaekmate.core.member.repository.MemberRepository;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final MemberGradeHistoryRepository memberGradeHistoryRepository;
+    private final GradeRepository gradeRepository;
 
     @Transactional
     public void createMember(CreateMemberRequest request) {
@@ -45,5 +53,20 @@ public class MemberService {
         Member member = memberRepository.findById(id)
                 .orElseThrow(MemberNotFoundException::new);
         memberRepository.delete(member);
+    }
+
+    @Transactional(readOnly = true)
+    public GradeResponse getMemberGrade(Long memberId) {
+        MemberGradeHistory memberGradeHistory = memberGradeHistoryRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
+                .orElseThrow(MemberHistoryNotFoundException::new);
+        String name = memberGradeHistory.getGrade().getName();
+        Byte pointRate = memberGradeHistory.getGrade().getPointRate();
+        int upgradeStandardAmount = memberGradeHistory.getGrade().getUpgradeStandardAmount();
+
+        return new GradeResponse(name, pointRate, upgradeStandardAmount);
+    }
+
+    public List<GradeResponse> getAllGrades() {
+        return gradeRepository.findAll().stream().map(GradeResponse::from).toList();
     }
 }
