@@ -3,7 +3,6 @@ package shop.chaekmate.core.book.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,17 +43,9 @@ public class AdminBookRepositoryImpl {
         if (req.getKeyword() != null && !req.getKeyword().isBlank()) {
             builder.and(
                     book.title.containsIgnoreCase(req.getKeyword())
-                            .or(book.author.containsIgnoreCase(req.getKeyword()))
+                            // 저자 동시 검색 .or(book.author.containsIgnoreCase(req.getKeyword()))
             );
         }
-
-        // thumbnail subquery
-        var thumbnail = JPAExpressions
-                .select(bookImage.imageUrl)
-                .from(bookImage)
-                .where(bookImage.book.eq(book))
-                .orderBy(bookImage.createdAt.asc())
-                .limit(1);
 
         // 정렬 조건
         OrderSpecifier<?> orderSpecifier = switch (req.getSortType()) {
@@ -64,18 +55,19 @@ public class AdminBookRepositoryImpl {
         };
 
         // 목록 조회
-        List<AdminBookResponse> content = queryFactory
+        var content = queryFactory
                 .select(Projections.constructor(
                         AdminBookResponse.class,
                         book.id,
                         book.title,
                         book.author,
-                        thumbnail,
-                        // 리뷰 개수
+                        bookImage.imageUrl.min(), // 가장 오래된
                         review.count().intValue()
                 ))
                 .from(book)
                 .leftJoin(review).on(review.orderedBook.book.eq(book))
+                .leftJoin(bookImage)
+                .on(bookImage.book.eq(book))
                 .where(builder)
                 .groupBy(book.id)
                 .orderBy(orderSpecifier)
