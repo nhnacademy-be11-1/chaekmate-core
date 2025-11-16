@@ -3,6 +3,7 @@ package shop.chaekmate.core.book.event;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -24,6 +25,7 @@ public class BookEventListener {
     private final BookTagRepository bookTagRepository;
 
     // 책 등록
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleBookCreated(BookCreatedEvent event){
         try {
@@ -35,6 +37,7 @@ public class BookEventListener {
     }
 
     // 책 수정
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleBookUpdated(BookUpdatedEvent event){
         try {
@@ -46,6 +49,7 @@ public class BookEventListener {
     }
 
     // 책 삭제
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleBookDeleted(BookDeletedEvent event){
         try {
@@ -58,6 +62,7 @@ public class BookEventListener {
     }
 
     // 책 섬네일 등록,수정
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleBookThumbnail(BookThumbnailEvent event){
         try {
@@ -70,6 +75,7 @@ public class BookEventListener {
     }
 
     // 책 리뷰 요약 생성, 변경
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleReviewSummaryUpdated(BookReviewSummaryEvent event) {
         try {
@@ -85,6 +91,7 @@ public class BookEventListener {
     }
 
     // 책 평점 생성, 변경
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleRatingUpdated(BookRatingEvent event) {
         try {
@@ -100,6 +107,7 @@ public class BookEventListener {
     }
 
     // 책 리뷰 카운트 생성, 변경 (집계시)
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleReviewCountUpdated(BookReviewCountEvent event) {
         try {
