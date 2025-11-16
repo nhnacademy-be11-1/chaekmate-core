@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,12 +60,16 @@ class AddressServiceTest {
         verify(memberAddressRepository).save(captor.capture());
 
         MemberAddress saved = captor.getValue();
-        assertThat(saved.getMember()).isEqualTo(member);
-        assertThat(saved.getMemo()).isEqualTo("집");
-        assertThat(saved.getStreetName()).isEqualTo("대전 서구 대학로 99");
-        assertThat(saved.getDetail()).isEqualTo("공대 4호관 101호");
-        assertThat(saved.getZipcode()).isEqualTo(34134);
+
+        assertAll(
+                () -> assertThat(saved.getMember()).isEqualTo(member),
+                () -> assertThat(saved.getMemo()).isEqualTo("집"),
+                () -> assertThat(saved.getStreetName()).isEqualTo("대전 서구 대학로 99"),
+                () -> assertThat(saved.getDetail()).isEqualTo("공대 4호관 101호"),
+                () -> assertThat(saved.getZipcode()).isEqualTo(34134)
+        );
     }
+
 
     @Test
     void 주소_생성_실패_최대개수_초과() {
@@ -129,21 +134,24 @@ class AddressServiceTest {
 
         List<AddressResponse> result = addressService.getAllAddresses(memberId);
 
-        assertThat(result).hasSize(2);
-
         AddressResponse res1 = result.get(0);
         AddressResponse res2 = result.get(1);
 
-        assertThat(res1.memo()).isEqualTo("집");
-        assertThat(res1.streetName()).isEqualTo("대전 서구 대학로 99");
-        assertThat(res1.detail()).isEqualTo("공대 4호관 101호");
-        assertThat(res1.zipcode()).isEqualTo(34134);
+        assertAll(
+                () -> assertThat(result).hasSize(2),
 
-        assertThat(res2.memo()).isEqualTo("학교");
-        assertThat(res2.streetName()).isEqualTo("대전 유성구 대학로 1");
-        assertThat(res2.detail()).isEqualTo("어딘가 202호");
-        assertThat(res2.zipcode()).isEqualTo(12345);
+                () -> assertThat(res1.memo()).isEqualTo("집"),
+                () -> assertThat(res1.streetName()).isEqualTo("대전 서구 대학로 99"),
+                () -> assertThat(res1.detail()).isEqualTo("공대 4호관 101호"),
+                () -> assertThat(res1.zipcode()).isEqualTo(34134),
+
+                () -> assertThat(res2.memo()).isEqualTo("학교"),
+                () -> assertThat(res2.streetName()).isEqualTo("대전 유성구 대학로 1"),
+                () -> assertThat(res2.detail()).isEqualTo("어딘가 202호"),
+                () -> assertThat(res2.zipcode()).isEqualTo(12345)
+        );
     }
+
 
     @Test
     void 단일_주소_조회_성공() {
@@ -164,11 +172,14 @@ class AddressServiceTest {
 
         AddressResponse result = addressService.getAddress(memberId, addressId);
 
-        assertThat(result.memo()).isEqualTo("학교");
-        assertThat(result.streetName()).isEqualTo("대전 유성구 대학로 99");
-        assertThat(result.detail()).isEqualTo("정보화본부");
-        assertThat(result.zipcode()).isEqualTo(34134);
+        assertAll(
+                () -> assertThat(result.memo()).isEqualTo("학교"),
+                () -> assertThat(result.streetName()).isEqualTo("대전 유성구 대학로 99"),
+                () -> assertThat(result.detail()).isEqualTo("정보화본부"),
+                () -> assertThat(result.zipcode()).isEqualTo(34134)
+        );
     }
+
 
     @Test
     void 단일_주소_조회_실패_존재하지_않음() {
