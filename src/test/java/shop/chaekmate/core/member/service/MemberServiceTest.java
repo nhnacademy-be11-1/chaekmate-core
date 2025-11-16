@@ -1,6 +1,7 @@
 package shop.chaekmate.core.member.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
@@ -49,7 +50,8 @@ class MemberServiceTest {
     @Test
     void 회원가입_성공() {
         var req = new CreateMemberRequest(
-                "test", "password", "username", "01012345678", "j@test.com", LocalDate.of(2003,5,1)
+                "test", "password", "username", "01012345678", "j@test.com",
+                LocalDate.of(2003, 5, 1)
         );
 
         given(memberRepository.save(any(Member.class)))
@@ -61,17 +63,20 @@ class MemberServiceTest {
         verify(memberRepository).save(captor.capture());
 
         Member saved = captor.getValue();
-        assertThat(saved.getLoginId()).isEqualTo("test");
-        assertThat(saved.getName()).isEqualTo("username");
-        assertThat(saved.getPhone()).isEqualTo("01012345678");
-        assertThat(saved.getEmail()).isEqualTo("j@test.com");
-        assertThat(saved.getBirthDate()).isEqualTo(LocalDate.of(2003, 5, 1));
-        assertThat(saved.getPlatformType()).isEqualTo(PlatformType.LOCAL);
-
-        assertThat(saved.getPassword()).isNotEqualTo("password");
         var encoder = new BCryptPasswordEncoder();
-        assertThat(encoder.matches("password", saved.getPassword())).isTrue();
+
+        assertAll(
+                () -> assertThat(saved.getLoginId()).isEqualTo("test"),
+                () -> assertThat(saved.getName()).isEqualTo("username"),
+                () -> assertThat(saved.getPhone()).isEqualTo("01012345678"),
+                () -> assertThat(saved.getEmail()).isEqualTo("j@test.com"),
+                () -> assertThat(saved.getBirthDate()).isEqualTo(LocalDate.of(2003, 5, 1)),
+                () -> assertThat(saved.getPlatformType()).isEqualTo(PlatformType.LOCAL),
+                () -> assertThat(saved.getPassword()).isNotEqualTo("password"),
+                () -> assertThat(encoder.matches("password", saved.getPassword())).isTrue()
+        );
     }
+
 
     @Test
     void 아이디_중복_조회_true() {
