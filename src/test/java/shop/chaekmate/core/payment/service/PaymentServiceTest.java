@@ -10,7 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,7 +86,7 @@ class PaymentServiceTest {
                 PaymentMethodType.TOSS, "test_payment_key_random", "test_order_number_nanoid", 29800, 0);
 
         PaymentApproveResponse response = new PaymentApproveResponse(
-                "test_order_number_nanoid", 29800L, 0, PaymentStatusType.APPROVED.name(), OffsetDateTime.now());
+                "test_order_number_nanoid", 29800L, 0, PaymentStatusType.APPROVED.name(), LocalDateTime.now());
 
         when(providerFactory.getProvider(any())).thenReturn(provider);
         when(provider.approve(any())).thenReturn(response);
@@ -112,7 +112,7 @@ class PaymentServiceTest {
                 "test_order_number_nanoid", 0L, 29800);
 
         PaymentApproveResponse response = new PaymentApproveResponse("test_order_number_nanoid", 0L, 29800, "APPROVED",
-                OffsetDateTime.now());
+                LocalDateTime.now());
 
         when(providerFactory.getProvider(any())).thenReturn(provider);
         when(provider.approve(any())).thenReturn(response);

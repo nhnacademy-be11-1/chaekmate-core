@@ -2,7 +2,7 @@ package shop.chaekmate.core.payment.dto.response.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import shop.chaekmate.core.payment.dto.response.base.PaymentApproveResponseBase;
 
 @Schema(description = "결제 승인 응답")
@@ -22,6 +22,6 @@ public record PaymentApproveResponse(
         String status,
 
         @Schema(description = "결제 승인 시각")
-        OffsetDateTime approvedAt
+        LocalDateTime approvedAt
 
 )implements PaymentApproveResponseBase {}

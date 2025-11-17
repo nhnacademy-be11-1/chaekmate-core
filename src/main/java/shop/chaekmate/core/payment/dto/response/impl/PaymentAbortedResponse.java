@@ -1,7 +1,7 @@
 package shop.chaekmate.core.payment.dto.response.impl;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import shop.chaekmate.core.payment.dto.response.base.PaymentAbortedResponseBase;
 
 @Schema(description = "결제 실패 응답")
@@ -14,6 +14,6 @@ public record PaymentAbortedResponse(
         String message,
 
         @Schema(description = "결제 승인 시각")
-        OffsetDateTime approvedAt
+        LocalDateTime approvedAt
 
 ) implements PaymentAbortedResponseBase {}
