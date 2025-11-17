@@ -24,7 +24,8 @@ public record BookInfoMqRequest(
     Integer reviewCnt
 ){
 
-    public static BookInfoMqRequest of(Book book, String bookImages, List<String> categories, List<String> tags){
+    // Book 엔티티 생성,변경 시 사용 (카테고리, 태그는 Book 서비스에 포함)
+    public static BookInfoMqRequest of(Book book, List<String> categories, List<String> tags){
         return BookInfoMqRequest.builder()
                 .dtoType("BOOK_INFO")
                 .id(book.getId())
@@ -32,7 +33,6 @@ public record BookInfoMqRequest(
                 .author(book.getAuthor())
                 .price(book.getPrice())
                 .description(book.getDescription())
-                .bookImages(bookImages)
                 .categories(categories)
                 .publicationDatetime(
                         book.getPublishedAt() == null ? LocalDate.now() : book.getPublishedAt().toLocalDate()
@@ -42,4 +42,18 @@ public record BookInfoMqRequest(
                 .tags(tags)
                 .build();
     }
+
+
+    // 책 부가정보 엔티티들 변경 이벤트 발생 시 사용
+    public static BookInfoMqRequest ofBookObjects(Long bookId, String thumbnailUrl, String reviewSummary, Double rating, Integer reviewCnt){
+        return BookInfoMqRequest.builder()
+                .dtoType("BOOK_INFO")
+                .id(bookId)
+                .bookImages(thumbnailUrl)
+                .reviewSummary(reviewSummary)
+                .rating(rating)
+                .reviewCnt(reviewCnt)
+                .build();
+    }
+
 }
