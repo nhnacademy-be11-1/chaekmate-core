@@ -4,10 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @EnableRedisRepositories
@@ -21,11 +24,13 @@ public class RedisConfig {
             @Value("${spring.data.redis.password}") String password
 
     ) {
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(host, port);
-        factory.setDatabase(database);
-        factory.setPassword(password);
-        factory.afterPropertiesSet();
-        return factory;
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        config.setHostName(host);
+        config.setPort(port);
+        config.setDatabase(database);
+        config.setPassword(password);
+
+        return new LettuceConnectionFactory(config);
     }
 
     @Bean
@@ -33,10 +38,10 @@ public class RedisConfig {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
-        redisTemplate.setKeySerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
-        redisTemplate.setHashKeySerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
-        redisTemplate.setValueSerializer(new org.springframework.data.redis.serializer.GenericToStringSerializer<>(Object.class));
-        redisTemplate.setHashValueSerializer(new org.springframework.data.redis.serializer.GenericToStringSerializer<>(Object.class));
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+        redisTemplate.setHashValueSerializer(new GenericToStringSerializer<>(Object.class));
 
         redisTemplate.afterPropertiesSet();
 
