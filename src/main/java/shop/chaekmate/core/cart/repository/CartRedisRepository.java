@@ -2,6 +2,7 @@ package shop.chaekmate.core.cart.repository;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
@@ -28,6 +29,13 @@ public class CartRedisRepository {
         this.hashOperations.put(key, "ownerId", ownerId);   // HSET
     }
 
+    // 장바구니 소유자 조회
+    public String getOwnerId(String cartId) {
+        String key = CART_PREFIX + cartId;
+        Object value = hashOperations.get(key, "ownerId");
+        return Objects.nonNull(value) ? value.toString() : null;
+    }
+
     /* 장바구니 아이템 */
     // 장바구니 아이템 추가/수정(수량)
     public void putCartItem(String cartId, Long bookId, int quantity) {
@@ -40,7 +48,9 @@ public class CartRedisRepository {
     public Integer getCartItem(String cartId, Long bookId) {
         String key = CART_PREFIX + cartId;
         String bookField = BOOK_PREFIX + bookId;
-        return (Integer) this.hashOperations.get(key, bookField);   // HGET
+        Object value = this.hashOperations.get(key, bookField);     // HGET
+
+        return Objects.nonNull(value) ? Integer.parseInt(value.toString()) : null;
     }
 
     // 장바구니 아이템 전체 조회
@@ -60,9 +70,11 @@ public class CartRedisRepository {
     // 장바구니 아이템 전체 삭제
     public void deleteAllCartItems(String cartId) {
         String key = CART_PREFIX + cartId;
-        Set<String> bookFields = this.hashOperations.keys(key); // HKEYS
-        for (String bookField : bookFields) {
-            this.hashOperations.delete(key, bookField); // HKEYS
+        Set<String> fields = this.hashOperations.keys(key); // HKEYS
+        for (String field : fields) {
+            if (field.startsWith(BOOK_PREFIX)) {
+                this.hashOperations.delete(key, field); // HDEL
+            }
         }
     }
 
@@ -72,6 +84,8 @@ public class CartRedisRepository {
 
         for (Map.Entry<String, Object> entry : entries.entrySet()) {
             String field = entry.getKey();
+
+            // ownerId FIELD 제외
             if (!field.startsWith(BOOK_PREFIX)) {
                 continue;
             }
