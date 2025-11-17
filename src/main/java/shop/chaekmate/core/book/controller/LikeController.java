@@ -26,7 +26,7 @@ public class LikeController implements LikeControllerDocs {
 
     @PostMapping("/books/{bookId}/likes")
     public ResponseEntity<LikeResponse> createLike(@PathVariable Long bookId,
-                                                   @RequestHeader("X-USER-ID") Long memberId) {
+                                                   @RequestHeader("X-Member-Id") Long memberId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(likeService.createLike(bookId, memberId));
     }
 
@@ -41,7 +41,7 @@ public class LikeController implements LikeControllerDocs {
     }
 
     @GetMapping("/members/likes")
-    public ResponseEntity<List<LikeResponse>> getMemberLikes(@RequestHeader("X-USER-ID") Long memberId) {
+    public ResponseEntity<List<LikeResponse>> getMemberLikes(@RequestHeader("X-Member-Id") Long memberId) {
         return ResponseEntity.ok(likeService.getMemberLikes(memberId));
     }
 
@@ -53,7 +53,7 @@ public class LikeController implements LikeControllerDocs {
 
     @DeleteMapping("/books/{bookId}/likes")
     public ResponseEntity<Void> deleteLikeByBookIdAndMemberId(@PathVariable Long bookId,
-                                                              @RequestHeader("X-USER-ID") Long memberId) {
+                                                              @RequestHeader("X-Member-Id") Long memberId) {
         likeService.deleteLikeByBookIdAndMemberId(bookId, memberId);
         return ResponseEntity.noContent().build();
     }
