@@ -17,7 +17,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "`like`")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE like SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+@SQLDelete(sql = "UPDATE `like` SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 public class Like extends BaseEntity {
 
     @Id
