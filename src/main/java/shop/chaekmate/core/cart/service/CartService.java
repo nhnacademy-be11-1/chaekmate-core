@@ -106,6 +106,7 @@ public class CartService {
                     book.getId(),
                     bookImageUrl,
                     book.getTitle(),
+                    book.getPrice(),
                     book.getSalesPrice(),
                     quantity
             );
