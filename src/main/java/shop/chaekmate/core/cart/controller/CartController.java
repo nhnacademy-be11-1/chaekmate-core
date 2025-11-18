@@ -52,15 +52,14 @@ public class CartController {
     @PostMapping("/carts/items")
     public ResponseEntity<CartItemListResponse> addCartItem(
             @Valid @RequestBody CartItemCreateRequest request,
-            @RequestHeader(value = "X-Member-Id", required = false) String memberId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
             @CookieValue(name = "Guest-Id", required = false) String guestId
     )
     {
-        Long resolvedMemberId = (Objects.nonNull(memberId)) ? Long.valueOf(memberId) : null;
         String resolvedGuestId = (Objects.isNull(memberId)) ? guestId : null;
 
         CartItemCreateDto dto = new CartItemCreateDto(
-                resolvedMemberId,
+                memberId,
                 resolvedGuestId,
                 request.bookId()
         );
@@ -84,15 +83,14 @@ public class CartController {
      */
     @GetMapping("/carts")
     public ResponseEntity<CartItemListAdvancedResponse> getCart(
-            @RequestHeader(value = "X-Member-Id", required = false) String memberId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
             @CookieValue(name = "Guest-Id", required = false) String guestId
     )
     {
-        Long resolvedMemberId = (Objects.nonNull(memberId)) ? Long.valueOf(memberId) : null;
         String resolvedGuestId = (Objects.isNull(memberId)) ? guestId : null;
 
         CartItemReadDto dto = new CartItemReadDto(
-                resolvedMemberId,
+                memberId,
                 resolvedGuestId
         );
 
@@ -116,15 +114,14 @@ public class CartController {
     public ResponseEntity<CartItemUpdateResponse> updateCartItem(
             @PathVariable Long bookId,
             @RequestBody CartItemUpdateRequest request,
-            @RequestHeader(value = "X-Member-Id", required = false) String memberId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
             @CookieValue(name = "Guest-Id", required = false) String guestId
     )
     {
-        Long resolvedMemberId = (Objects.nonNull(memberId)) ? Long.valueOf(memberId) : null;
         String resolvedGuestId = (Objects.isNull(memberId)) ? guestId : null;
 
         CartItemUpdateDto dto = new CartItemUpdateDto(
-                resolvedMemberId,
+                memberId,
                 resolvedGuestId,
                 bookId,
                 request.quantity()
@@ -150,15 +147,14 @@ public class CartController {
     @DeleteMapping("/carts/items/{bookId}")
     public ResponseEntity<Void> deleteCartItem(
             @PathVariable Long bookId,
-            @RequestHeader(value = "X-Member-Id", required = false) String memberId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
             @CookieValue(name = "Guest-Id", required = false) String guestId
     )
     {
-        Long resolvedMemberId = (Objects.nonNull(memberId)) ? Long.valueOf(memberId) : null;
         String resolvedGuestId = (Objects.isNull(memberId)) ? guestId : null;
 
         CartItemDeleteDto dto = new CartItemDeleteDto(
-                resolvedMemberId,
+                memberId,
                 resolvedGuestId,
                 bookId
         );
@@ -181,15 +177,14 @@ public class CartController {
      */
     @DeleteMapping("/carts/items")
     public ResponseEntity<Void> flushCart(
-            @RequestHeader(value = "X-Member-Id", required = false) String memberId,
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
             @CookieValue(name = "Guest-Id", required = false) String guestId
     )
     {
-        Long resolvedMemberId = (Objects.nonNull(memberId)) ? Long.valueOf(memberId) : null;
         String resolvedGuestId = (Objects.isNull(memberId)) ? guestId : null;
 
         CartItemDeleteAllDto dto = new CartItemDeleteAllDto(
-                resolvedMemberId,
+                memberId,
                 resolvedGuestId
         );
 
