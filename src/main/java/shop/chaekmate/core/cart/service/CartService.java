@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.repository.BookImageQueryRepository;
 import shop.chaekmate.core.book.repository.BookRepository;
@@ -48,6 +49,7 @@ public class CartService {
      * @param dto 생성 요청 DTO (owner + bookId 포함)
      * @return 장바구니 전체 아이템 목록 응답 DTO
      */
+    @Transactional
     public CartItemListResponse addCartItem(CartItemCreateDto dto) {
 
         // 장바구니 조회
@@ -78,6 +80,7 @@ public class CartService {
      * @return 도서 상세 정보가 포함된 장바구니 아이템 목록 응답 DTO
      * @throws BookNotFoundException 도서가 존재하지 않는 경우
      */
+    @Transactional(readOnly = true)
     public CartItemListAdvancedResponse getCartItemsWithBookInfo(CartOwner dto) {
         // 장바구니 조회
         String cartId = this.resolveOrCreateCartId(dto);
@@ -120,6 +123,7 @@ public class CartService {
      * @param dto bookId 및 새로운 quantity를 포함한 DTO
      * @return 업데이트 결과 응답 DTO
      */
+    @Transactional
     public CartItemUpdateResponse updateCartItem(CartItemUpdateDto dto) {
         String cartId = this.resolveCartId(dto);
         if (Objects.isNull(cartId)) {
@@ -136,6 +140,7 @@ public class CartService {
      * @param dto 삭제 요청 DTO (owner + bookId)
      * @throws CartItemNotFoundException 장바구니에 해당 아이템이 존재하지 않는 경우
      */
+    @Transactional
     public void deleteCartItem(CartItemDeleteDto dto) {
         String cartId = this.resolveCartId(dto);
         if (Objects.isNull(cartId)) {
@@ -158,6 +163,7 @@ public class CartService {
      *
      * @param dto owner 정보 DTO
      */
+    @Transactional
     public void deleteAllCartItems(CartItemDeleteAllDto dto) {
         String cartId = this.resolveCartId(dto);
         if (Objects.isNull(cartId)) {
