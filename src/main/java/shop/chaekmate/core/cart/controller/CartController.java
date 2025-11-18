@@ -61,7 +61,8 @@ public class CartController {
         CartItemCreateDto dto = new CartItemCreateDto(
                 memberId,
                 resolvedGuestId,
-                request.bookId()
+                request.bookId(),
+                request.quantity()
         );
 
         CartItemListResponse response = this.cartService.addCartItem(dto);

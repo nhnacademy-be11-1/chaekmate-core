@@ -1,5 +1,6 @@
 package shop.chaekmate.core.cart.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,8 +56,8 @@ public class CartService {
         // 장바구니 조회
         String cartId = this.resolveOrCreateCartId(dto);
 
-        // 장바구니 아이템 생성 및 추가 (수량은 항상 1)
-        this.cartRedisRepository.putCartItem(cartId, dto.bookId(), 1);
+        // 장바구니 아이템 생성 및 추가
+        this.cartRedisRepository.putCartItem(cartId, dto.bookId(), dto.quantity());
 
         // 장바구니 전체 조회 후 Response DTO 반환
         Map<Long, Integer> itemsMap = this.cartRedisRepository.getAllCartItems(cartId);
@@ -83,7 +84,12 @@ public class CartService {
     @Transactional(readOnly = true)
     public CartItemListAdvancedResponse getCartItemsWithBookInfo(CartOwner dto) {
         // 장바구니 조회
-        String cartId = this.resolveOrCreateCartId(dto);
+        String cartId = this.resolveCartId(dto);
+
+        // 장바구니가 없으면 빈 목록 반환
+        if (Objects.isNull(cartId)) {
+            return new CartItemListAdvancedResponse(null, Collections.emptyList());
+        }
 
         // 장바구니 아이템 전체 조회
         // - bookId --> quantity
@@ -106,7 +112,6 @@ public class CartService {
                     book.getId(),
                     bookImageUrl,
                     book.getTitle(),
-                    book.getPrice(),
                     book.getSalesPrice(),
                     quantity
             );
@@ -187,6 +192,7 @@ public class CartService {
      * @throws IllegalArgumentException ID 정보가 없는 경우
      */
     private String resolveOwnerId(CartOwner dto) {
+        // 회원ID 존재하는 경우 (로그인O), 우선 적용 --> 즉, Guest ID 무시
         if (Objects.nonNull(dto.memberId())) {
             return dto.memberId().toString();
         } else if (Objects.nonNull(dto.guestId())) {
@@ -206,26 +212,20 @@ public class CartService {
      * @return cartId (문자열) 또는 null
      */
     private String resolveCartId(CartOwner dto) {
-        String ownerId = resolveOwnerId(dto);
-        String cartId = this.cartRedisRepository.findCartIdByOwner(ownerId);
-
-        return cartId;
+        return this.cartRedisRepository.findCartIdByOwner(this.resolveOwnerId(dto));
     }
 
     /**
      * 장바구니 ID(cartId)를 조회하며, 존재하지 않을 경우 자동으로 생성함
-     * <ul>
-     *     <li>Redis 에 owner → cartId 매핑이 없으면 새로운 cart 생성</li>
-     *     <li>이미 존재하면 해당 cartId 반환</li>
-     * </ul>
+     * <p>쓰기 작업이 필요한 메서드에서만 사용</p>
      *
      * @param dto CartOwner DTO
      * @return 생성되었거나 기존에 존재하던 cartId 문자열
      */
     private String resolveOrCreateCartId(CartOwner dto) {
-        String cartId = resolveCartId(dto);
+        String cartId = this.resolveCartId(dto);
         if (Objects.isNull(cartId)) {
-            String ownerId = resolveOwnerId(dto);
+            String ownerId = this.resolveOwnerId(dto);
             cartId = this.cartRedisRepository.createCart(ownerId);
         }
         return cartId;
