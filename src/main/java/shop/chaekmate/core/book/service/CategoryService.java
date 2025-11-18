@@ -1,11 +1,13 @@
 package shop.chaekmate.core.book.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.request.CreateCategoryRequest;
 import shop.chaekmate.core.book.dto.request.UpdateCategoryRequest;
 import shop.chaekmate.core.book.dto.response.*;
@@ -26,6 +28,7 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final BookCategoryRepository bookCategoryRepository;
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public CreateCategoryResponse createCategory(CreateCategoryRequest request) {
 
@@ -50,7 +53,7 @@ public class CategoryService {
                 category.getName());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ReadCategoryResponse readCategory(Long targetCategoryId) {
 
         Category targetCategory = categoryRepository.findById(targetCategoryId)
@@ -64,6 +67,7 @@ public class CategoryService {
         return new ReadCategoryResponse(targetCategory.getId(), parentCategoryId, targetCategory.getName());
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public UpdateCategoryResponse updateCategory(Long targetId, UpdateCategoryRequest request) {
         Long parentCategoryId = request.parentCategoryId();
@@ -88,6 +92,7 @@ public class CategoryService {
                 targetCategory.getName());
     }
 
+    @CacheEvict(value = "categories", allEntries = true)
     @Transactional
     public void deleteCategory(Long targetCategoryId) {
         Category targetCategory = categoryRepository.findById(targetCategoryId)
@@ -104,7 +109,8 @@ public class CategoryService {
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
     }
 
-    @Transactional
+    @Cacheable("categories")
+    @Transactional(readOnly = true)
     public List<ReadAllCategoriesResponse> readAllCategories() {
         List<Category> allCategories = categoryRepository.findAll();
         Map<Long, ReadAllCategoriesResponse> dtoMap = new HashMap<>();
@@ -128,7 +134,7 @@ public class CategoryService {
         return roots;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<CategoryHierarchyResponse> readAllCategoriesByPage(Pageable pageable) {
         Page<Category> categoriesPage = categoryRepository.findAll(pageable);
         List<Category> allCategories = categoryRepository.findAll();
@@ -146,7 +152,7 @@ public class CategoryService {
         return new PageImpl<>(responses, pageable, categoriesPage.getTotalElements());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<List<CategoryPathResponse>> getCategoriesWithParents(List<Long> categoryIds) {
         List<Category> categories = categoryRepository.findAllById(categoryIds);
 
