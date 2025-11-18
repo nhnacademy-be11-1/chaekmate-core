@@ -8,6 +8,7 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
 import shop.chaekmate.core.point.dto.request.CreatePointHistoryRequest;
 import shop.chaekmate.core.point.dto.response.CreatePointHistoryResponse;
+import shop.chaekmate.core.point.dto.response.MemberPointHistoryResponse;
 import shop.chaekmate.core.point.dto.response.PointHistoryResponse;
 import shop.chaekmate.core.point.dto.response.PointResponse;
 import shop.chaekmate.core.point.entity.PointHistory;
@@ -90,13 +91,12 @@ public class PointHistoryService {
 
     //포인트 history 조회 (특정 회원)
     @Transactional(readOnly = true)
-    public Page<PointHistoryResponse> getPointHistoryByMemberId(Long memberId, Pageable pageable) {
+    public Page<MemberPointHistoryResponse> getPointHistoryByMemberId(Long memberId, Pageable pageable) {
         memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
 
         return pointHistoryRepository.findByMemberId(memberId, pageable)
-                .map(point -> new PointHistoryResponse(
-                        point.getId(),
+                .map(point -> new MemberPointHistoryResponse(
                         point.getMember().getId(),
                         point.getType(),
                         point.getPoint(),
