@@ -109,7 +109,7 @@ public class CategoryService {
         categoryRepository.delete(targetCategory); // 실제론 deleted_at 이 바뀜
     }
 
-    @Cacheable("categories")
+    @Cacheable(value= "categories", key="'allCategories'")
     @Transactional(readOnly = true)
     public List<ReadAllCategoriesResponse> readAllCategories() {
         List<Category> allCategories = categoryRepository.findAll();
