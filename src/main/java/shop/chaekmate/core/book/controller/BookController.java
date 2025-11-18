@@ -53,7 +53,6 @@ public class BookController implements BookControllerDocs {
     @GetMapping("/{bookId}")
     public ResponseEntity<BookResponse> getBook(@PathVariable Long bookId) {
         BookResponse response = bookService.getBook(bookId);
-
         return ResponseEntity.ok(response);
     }
 

@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
@@ -48,6 +49,9 @@ public class BookService {
 
     // 트랜잭션 끝 난 뒤 서비스 호출 이벤트 발행
     private final ApplicationEventPublisher eventPublisher;
+
+    private final StringRedisTemplate redisTemplate;
+    private static final String VIEW_KEY_PREFIX = "book:views:";
 
     @Value("${aladin.api.key}")
     private String aladinApiKey;
@@ -156,7 +160,21 @@ public class BookService {
             tagIds.add(bookTag.getTag().getId());
         }
 
-        return BookResponse.from(book, categoryIds, tagIds);
+        // 레디스에 캐시된 조회수 있으면 증가시킴
+        String redisKey = VIEW_KEY_PREFIX + bookId;
+        String redisValue = redisTemplate.opsForValue().get(redisKey);
+        long increment = 0L;
+        if (redisValue != null) {
+            try {
+                increment = Long.parseLong(redisValue);
+            } catch (NumberFormatException e) {
+                // 잘못된 값이면 무시
+            }
+        }
+        long totalViews = book.getViews() + increment;
+
+
+        return BookResponse.from(book, categoryIds, tagIds, totalViews);
     }
 
     public List<BookSummaryResponse> getBooksByIds(List<Long> bookIds) {

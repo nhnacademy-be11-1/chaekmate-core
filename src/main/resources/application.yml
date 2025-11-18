@@ -8,6 +8,13 @@ spring:
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
 
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      port: ${REDIS_PORT}
+      database: ${REDIS_RANGE}
+
 springdoc:
   api-docs:
     path: /v3/api-docs

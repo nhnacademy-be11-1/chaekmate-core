@@ -1,4 +1,4 @@
-package shop.chaekmate.core.book.repository.impl;
+package shop.chaekmate.core.book.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -13,7 +13,6 @@ import org.springframework.util.StringUtils;
 import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.QBookListResponse;
-import shop.chaekmate.core.book.repository.BookRepositoryCustom;
 
 import java.util.List;
 

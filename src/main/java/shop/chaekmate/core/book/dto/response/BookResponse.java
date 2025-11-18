@@ -23,7 +23,7 @@ public record BookResponse(
         List<Long> categoryIds,
         List<Long> tagIds
 ) {
-    public static BookResponse from(Book book, List<Long> categoryIds, List<Long> tagIds) {
+    public static BookResponse from(Book book, List<Long> categoryIds, List<Long> tagIds, Long totalViews) {
         return new BookResponse(
                 book.getId(),
                 book.getTitle(),
@@ -38,7 +38,7 @@ public record BookResponse(
                 book.isWrappable(),
                 book.isSaleEnd(),
                 book.getStock(),
-                book.getViews(),
+                totalViews,
                 categoryIds,
                 tagIds
         );
