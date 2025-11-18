@@ -12,67 +12,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
-import shop.chaekmate.core.member.entity.Member;
-import shop.chaekmate.core.member.entity.type.PlatformType;
-import shop.chaekmate.core.member.repository.MemberRepository;
 
 @SpringBootTest
+@Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class MemberControllerTest {
 
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
-    @Autowired MemberRepository memberRepository;
-
-    @Test
-    void 아이디_중복_체크() throws Exception {
-        saveMember("dupId", "dup@test.com");
-
-        mvc.perform(get("/members/check-login-id").param("loginId", "dupId").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.available").value(false));
-
-        mvc.perform(get("/members/check-login-id").param("loginId", "newId"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.available").value(true));
-    }
-
-    @Test
-    void 이메일_중복_체크() throws Exception {
-        saveMember("u1", "user1@test.com");
-
-        mvc.perform(get("/members/check-email").param("email", "user1@test.com"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.available").value(false));
-
-        mvc.perform(get("/members/check-email").param("email", "free@test.com"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.available").value(true));
-    }
 
     @Test
     void 회원가입_성공() throws Exception {
-        var body = createReq("test", "password123", "홍길동", "01012345678", "j@test.com",
-                LocalDate.of(2003,5,1));
+        // given
+        var body = createReq(
+                "testUser",
+                "Pw123456!",
+                "홍길동",
+                "01012345678",
+                "test@example.com",
+                LocalDate.of(2000, 1, 1)
+        );
 
+        // when & then
         mvc.perform(post("/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(body)))
                 .andExpect(status().isCreated());
+        // 현재 컨트롤러는 바디를 안 돌려주므로 status만 검증
     }
 
     @Test
-    void 회원가입_검증_실패() throws Exception {
+    void 잘못된_입력값이면_400() throws Exception {
+        // NotBlank/Email 등 깨뜨려서 검증 실패 유도
         var badJson = """
             {
               "loginId": "",
@@ -90,19 +68,67 @@ class MemberControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ----------------- helpers -----------------
-
-    private void saveMember(String loginId, String email) {
-        Member m = new Member(
-                loginId,
-                "{noop}pw",
-                "이름",
+    @Test
+    void 로그인아이디_중복_체크() throws Exception {
+        // given: 먼저 한 명 가입
+        var body = createReq(
+                "dupId",
+                "Pw123456!",
+                "홍길동",
                 "01011112222",
-                email,
-                LocalDate.of(2000,1,1),
-                PlatformType.LOCAL
+                "dup@test.com",
+                LocalDate.of(2000, 1, 1)
         );
-        memberRepository.saveAndFlush(m);
+
+        mvc.perform(post("/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(body)))
+                .andExpect(status().isCreated());
+
+        // when & then
+        // 1) 이미 존재하는 아이디 -> available = false 여야 함
+        mvc.perform(get("/members/check-login-id")
+                        .param("loginId", "dupId"))
+                .andExpect(status().isOk())
+                // 공통 응답 래퍼가 있으면 $.data.available, 없으면 $.available로 바꾸세요
+                .andExpect(jsonPath("$.data.available").value(false));
+
+        // 2) 존재하지 않는 아이디 -> available = true 여야 함
+        mvc.perform(get("/members/check-login-id")
+                        .param("loginId", "newLoginId"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.available").value(true));
+    }
+
+    @Test
+    void 이메일_중복_체크() throws Exception {
+        // given: 먼저 한 명 가입
+        var body = createReq(
+                "emailUser",
+                "Pw123456!",
+                "이영희",
+                "01099998888",
+                "dup-email@test.com",
+                LocalDate.of(1999, 12, 31)
+        );
+
+        mvc.perform(post("/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(body)))
+                .andExpect(status().isCreated());
+
+        // when & then
+        // 1) 이미 존재하는 이메일 -> available = false
+        mvc.perform(get("/members/check-email")
+                        .param("email", "dup-email@test.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.available").value(false));
+
+        // 2) 존재하지 않는 이메일 -> available = true
+        mvc.perform(get("/members/check-email")
+                        .param("email", "new-email@test.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.available").value(true));
     }
 
     private CreateMemberRequest createReq(

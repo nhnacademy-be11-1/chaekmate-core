@@ -8,10 +8,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import shop.chaekmate.core.book.dto.request.BookCreateRequest;
@@ -19,7 +22,9 @@ import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
+import shop.chaekmate.core.book.dto.response.BookSummaryResponse;
 import shop.chaekmate.core.book.entity.*;
+import shop.chaekmate.core.book.event.BookCreatedEvent;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.exception.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
@@ -72,6 +77,15 @@ class BookServiceTest {
 
     @Mock
     private AladinClient aladinClient;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
 
     private Book book;
     private Category category;
@@ -127,12 +141,16 @@ class BookServiceTest {
         given(bookRepository.save(any(Book.class))).willReturn(book);
         given(categoryRepository.findAllById(anyList())).willReturn(List.of(category));
         given(tagRepository.findAllById(anyList())).willReturn(List.of(tag));
+        willDoNothing().given(eventPublisher).publishEvent(any(BookCreatedEvent.class));
 
+        // when
         bookService.createBook(request);
 
-        then(bookRepository).should().save(any(Book.class));
-        then(bookCategoryRepository).should().save(any(BookCategory.class));
-        then(bookTagRepository).should().save(any(BookTag.class));
+        // then
+        then(bookRepository).should(times(1)).save(any(Book.class));
+        then(bookCategoryRepository).should(times(1)).saveAll(anyList());
+        then(bookTagRepository).should(times(1)).saveAll(anyList());
+        then(eventPublisher).should(times(1)).publishEvent(any(BookCreatedEvent.class));
     }
 
     @Test
@@ -250,6 +268,8 @@ class BookServiceTest {
         given(bookRepository.findById(bookId)).willReturn(Optional.of(book));
         given(bookCategoryRepository.findByBook(book)).willReturn(List.of(new BookCategory(book, category)));
         given(bookTagRepository.findByBook(book)).willReturn(List.of(new BookTag(book, tag)));
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(any())).thenReturn("0");
 
         BookResponse response = bookService.getBook(bookId);
 
@@ -257,6 +277,16 @@ class BookServiceTest {
         assertThat(response.title()).isEqualTo("테스트 책");
         assertThat(response.categoryIds()).hasSize(1);
         assertThat(response.tagIds()).hasSize(1);
+    }
+
+    @Test
+    void ID들로_도서리스트_조회_성공(){
+
+        when(bookRepository.findAllById(any())).thenReturn(List.of(book));
+
+        List<BookSummaryResponse> result = bookService.getBooksByIds(List.of(1L));
+
+        assertThat(result.getFirst().id()).isEqualTo(book.getId());
     }
 
     @Test

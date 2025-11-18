@@ -9,7 +9,7 @@ import shop.chaekmate.core.book.entity.Category;
 import java.util.List;
 import java.util.Set;
 
-public interface BookCategoryRepository extends JpaRepository<BookCategory, Long> {
+public interface BookCategoryRepository extends JpaRepository<BookCategory, Long>, BookCategoryRepositoryCustom {
     @Modifying
     void deleteByBookIdAndCategoryIdIn(Long id, Set<Long> idsToRemove);
 

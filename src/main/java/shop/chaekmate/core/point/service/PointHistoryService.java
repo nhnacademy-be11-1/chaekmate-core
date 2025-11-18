@@ -72,16 +72,36 @@ public class PointHistoryService {
         );
     }
 
-    //포인트 history 조회
-    @Transactional
+
+    //포인트 history 조회 (전체)
+    @Transactional(readOnly = true)
     public Page<PointHistoryResponse> getPointHistory(Pageable pageable) {
         return pointHistoryRepository.findAll(pageable)
                 .map(point -> new PointHistoryResponse(
                         point.getId(),
-                        point.getMember(),
+                        point.getMember().getId(),
                         point.getType(),
                         point.getPoint(),
-                        point.getSource())
+                        point.getSource(),
+                        point.getCreatedAt()
+                        )
+                );
+    }
+
+    //포인트 history 조회 (특정 회원)
+    @Transactional(readOnly = true)
+    public Page<PointHistoryResponse> getPointHistoryByMemberId(Long memberId, Pageable pageable) {
+        memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        return pointHistoryRepository.findByMemberId(memberId, pageable)
+                .map(point -> new PointHistoryResponse(
+                        point.getId(),
+                        point.getMember().getId(),
+                        point.getType(),
+                        point.getPoint(),
+                        point.getSource(),
+                        point.getCreatedAt())
                 );
     }
 

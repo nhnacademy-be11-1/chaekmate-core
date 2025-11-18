@@ -94,6 +94,7 @@ public class SwaggerConfig {
                 .build();
     }
 
+    @Bean
     public GroupedOpenApi bookApi() {
         return GroupedOpenApi.builder()
                 .group("Book API")
@@ -129,6 +130,20 @@ public class SwaggerConfig {
                                 .description("포인트 History 조회 API")
                                 .version("v1.0")))
                 .pathsToMatch("/admin/point-history/**", "/point-history/**")
+                .build();
+    }
+
+    // payment, paymentHistory
+    @Bean
+    public GroupedOpenApi paymentApi() {
+        return GroupedOpenApi.builder()
+                .group("Payment API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("결제 관련 API")
+                                .description("결제 승인, 취소 맟 (관리자)결제내역 조회 기능")
+                                .version("v1.0")))
+                .pathsToMatch("/payments/**", "/admin/payments/histories/**")
                 .build();
     }
 }
