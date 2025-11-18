@@ -193,14 +193,15 @@ class LikeServiceTest {
         long bookId = 1L;
         long memberId = 1L;
         var like = mock(Like.class);
+        var likes = List.of(like);
 
-        when(likeRepository.findByBook_IdAndMember_Id(bookId, memberId)).thenReturn(Optional.of(like));
-        doNothing().when(likeRepository).delete(like);
+        when(likeRepository.findAllByBook_IdAndMember_Id(bookId,memberId)).thenReturn(likes);
+        doNothing().when(likeRepository).deleteAll(likes);
 
         // when
         likeService.deleteLikeByBookIdAndMemberId(bookId, memberId);
 
         // then
-        verify(likeRepository, times(1)).delete(like);
+        verify(likeRepository, times(1)).deleteAll(likes);
     }
 }

@@ -17,7 +17,6 @@ import shop.chaekmate.core.book.dto.response.LikeResponse;
 import shop.chaekmate.core.book.service.LikeService;
 
 import lombok.RequiredArgsConstructor;
-import shop.chaekmate.core.common.annotation.RequiredMember;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,8 +26,8 @@ public class LikeController implements LikeControllerDocs {
 
     @PostMapping("/books/{bookId}/likes")
     public ResponseEntity<LikeResponse> createLike(@PathVariable Long bookId,
-                                                   @RequestHeader("X-Member-Id") String memberId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(likeService.createLike(bookId, Long.parseLong(memberId)));
+                                                   @RequestHeader("X-Member-Id") Long memberId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(likeService.createLike(bookId, memberId));
     }
 
     @GetMapping("/likes/{likeId}")
@@ -52,7 +51,6 @@ public class LikeController implements LikeControllerDocs {
         return ResponseEntity.noContent().build();
     }
 
-    @RequiredMember
     @DeleteMapping("/books/{bookId}/likes")
     public ResponseEntity<Void> deleteLikeByBookIdAndMemberId(@PathVariable Long bookId,
                                                               @RequestHeader("X-Member-Id") Long memberId) {
