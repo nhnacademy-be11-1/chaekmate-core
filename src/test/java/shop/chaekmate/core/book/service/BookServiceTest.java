@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
 import shop.chaekmate.core.book.entity.*;
+import shop.chaekmate.core.book.event.BookCreatedEvent;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.exception.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
@@ -72,6 +74,9 @@ class BookServiceTest {
 
     @Mock
     private AladinClient aladinClient;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     private Book book;
     private Category category;
@@ -127,12 +132,16 @@ class BookServiceTest {
         given(bookRepository.save(any(Book.class))).willReturn(book);
         given(categoryRepository.findAllById(anyList())).willReturn(List.of(category));
         given(tagRepository.findAllById(anyList())).willReturn(List.of(tag));
+        willDoNothing().given(eventPublisher).publishEvent(any(BookCreatedEvent.class));
 
+        // when
         bookService.createBook(request);
 
-        then(bookRepository).should().save(any(Book.class));
-        then(bookCategoryRepository).should().save(any(BookCategory.class));
-        then(bookTagRepository).should().save(any(BookTag.class));
+        // then
+        then(bookRepository).should(times(1)).save(any(Book.class));
+        then(bookCategoryRepository).should(times(1)).saveAll(anyList());
+        then(bookTagRepository).should(times(1)).saveAll(anyList());
+        then(eventPublisher).should(times(1)).publishEvent(any(BookCreatedEvent.class));
     }
 
     @Test

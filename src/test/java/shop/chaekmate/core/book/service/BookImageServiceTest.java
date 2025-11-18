@@ -8,15 +8,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import shop.chaekmate.core.book.dto.request.BookImageAddRequest;
 import shop.chaekmate.core.book.dto.request.ThumbnailUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookImageResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.BookImage;
+import shop.chaekmate.core.book.event.BookThumbnailEvent;
 import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
-import shop.chaekmate.core.book.repository.BookImageQueryRepository;
 import shop.chaekmate.core.book.repository.BookImageRepository;
 import shop.chaekmate.core.book.repository.BookRepository;
 
@@ -45,7 +46,7 @@ class BookImageServiceTest {
     private BookImageRepository bookImageRepository;
 
     @Mock
-    private BookImageQueryRepository bookImageQueryRepository;
+    private ApplicationEventPublisher eventPublisher;
 
     @Test
     void 이미지_추가_성공() {
@@ -60,7 +61,7 @@ class BookImageServiceTest {
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
         when(bookImageRepository.save(any(BookImage.class))).thenReturn(imageToSave);
-        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(imageToSave));
+        when(bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(imageToSave));
 
         // when
         BookImageResponse response = bookImageService.addImage(bookId, request);
@@ -72,7 +73,8 @@ class BookImageServiceTest {
         );
         verify(bookRepository).findById(bookId);
         verify(bookImageRepository).save(any(BookImage.class));
-        verify(bookImageQueryRepository).findAllByBookIdOrderByCreatedAtAsc(bookId);
+        verify(bookImageRepository).findAllByBookIdOrderByCreatedAtAsc(bookId);
+        verify(eventPublisher).publishEvent(any(BookThumbnailEvent.class));
     }
 
     @Test
@@ -94,7 +96,7 @@ class BookImageServiceTest {
         BookImage thumbnail = new BookImage(book, "http://example.com/thumb.jpg");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(thumbnail));
+        when(bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(thumbnail));
 
         // when
         BookImageResponse response = bookImageService.findThumbnail(bookId);
@@ -112,7 +114,7 @@ class BookImageServiceTest {
         long bookId = 1L;
         Book book = mock(Book.class);
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(Collections.emptyList());
+        when(bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(Collections.emptyList());
 
         // when & then
         assertThrows(BookImageNotFoundException.class, () -> bookImageService.findThumbnail(bookId));
@@ -128,7 +130,7 @@ class BookImageServiceTest {
         BookImage detail2 = new BookImage(book, "detail2.jpg");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(thumbnail, detail1, detail2));
+        when(bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(thumbnail, detail1, detail2));
 
         // when
         List<BookImageResponse> responses = bookImageService.findDetailImages(bookId);
@@ -155,7 +157,7 @@ class BookImageServiceTest {
         BookImage thumbnail = new BookImage(book, "thumb.jpg");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(thumbnail));
+        when(bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(thumbnail));
 
         // when
         List<BookImageResponse> responses = bookImageService.findDetailImages(bookId);
@@ -173,13 +175,14 @@ class BookImageServiceTest {
         ThumbnailUpdateRequest request = new ThumbnailUpdateRequest("http://new.url/thumb.jpg");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(originalThumbnail));
+        when(bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(originalThumbnail));
 
         // when
         bookImageService.updateThumbnail(bookId, request);
 
         // then
         verify(originalThumbnail).updateUrl(request.getNewImageUrl());
+        verify(eventPublisher).publishEvent(any(BookThumbnailEvent.class));
     }
 
     @Test
@@ -190,7 +193,7 @@ class BookImageServiceTest {
         ThumbnailUpdateRequest request = new ThumbnailUpdateRequest("http://new.url/thumb.jpg");
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId))
+        when(bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId))
                 .thenReturn(Collections.emptyList());
 
         // when

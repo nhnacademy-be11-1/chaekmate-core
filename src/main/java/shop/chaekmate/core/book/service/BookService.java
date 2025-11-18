@@ -2,6 +2,7 @@ package shop.chaekmate.core.book.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,11 @@ import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
 import shop.chaekmate.core.book.dto.response.BookCreateResponse;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.BookResponse;
+import shop.chaekmate.core.book.dto.response.BookSummaryResponse;
 import shop.chaekmate.core.book.entity.*;
+import shop.chaekmate.core.book.event.BookCreatedEvent;
+import shop.chaekmate.core.book.event.BookDeletedEvent;
+import shop.chaekmate.core.book.event.BookUpdatedEvent;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
 import shop.chaekmate.core.book.exception.CategoryNotFoundException;
 import shop.chaekmate.core.book.exception.TagNotFoundException;
@@ -24,11 +29,9 @@ import shop.chaekmate.core.external.aladin.AladinSearchType;
 import shop.chaekmate.core.external.aladin.dto.request.AladinBookRegisterRequest;
 import shop.chaekmate.core.external.aladin.dto.response.AladinApiResponse;
 import shop.chaekmate.core.external.aladin.dto.response.BookSearchResponse;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +45,9 @@ public class BookService {
     private final BookTagRepository bookTagRepository;
 
     private final AladinClient aladinClient;
+
+    // 트랜잭션 끝 난 뒤 서비스 호출 이벤트 발행
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${aladin.api.key}")
     private String aladinApiKey;
@@ -68,16 +74,12 @@ public class BookService {
                 .stock(request.stock())
                 .build();
 
-        bookRepository.save(book);
+        Book saved = bookRepository.save(book);
 
         List<Category> categories = categoryRepository.findAllById(request.categoryIds());
 
         if (categories.size() != request.categoryIds().size()) {
             throw new CategoryNotFoundException();
-        }
-
-        for (Category category : categories) {
-            bookCategoryRepository.save(new BookCategory(book, category));
         }
 
         List<Tag> tags = tagRepository.findAllById(request.tagIds());
@@ -86,9 +88,15 @@ public class BookService {
             throw new TagNotFoundException();
         }
 
-        for (Tag tag : tags) {
-            bookTagRepository.save(new BookTag(book, tag));
-        }
+        List<BookCategory> bookCategories = categories.stream().map(c -> new BookCategory(book,c)).toList();
+        bookCategoryRepository.saveAll(bookCategories);
+
+        List<BookTag> bookTags = tags.stream().map(t -> new BookTag(book, t)).toList();
+        bookTagRepository.saveAll(bookTags);
+
+
+        // RabbitMQ 이벤트 발행
+        eventPublisher.publishEvent(new BookCreatedEvent(saved));
 
         return new BookCreateResponse(book.getId());
     }
@@ -109,6 +117,9 @@ public class BookService {
         if (request.tagIds() != null) {
             updateBookTag(book, request.tagIds());
         }
+
+        // 책 업데이트 이벤트 발행
+        eventPublisher.publishEvent(new BookUpdatedEvent(book));
     }
 
     @Transactional
@@ -123,6 +134,9 @@ public class BookService {
 
         // 북 삭제
         bookRepository.delete(book);
+
+        // 삭제 이벤트 발행 (검색서버 동기화)
+        eventPublisher.publishEvent(new BookDeletedEvent(bookId));
 
     }
 
@@ -143,6 +157,26 @@ public class BookService {
         }
 
         return BookResponse.from(book, categoryIds, tagIds);
+    }
+
+    public List<BookSummaryResponse> getBooksByIds(List<Long> bookIds) {
+        List<Book> books = bookRepository.findAllById(bookIds);
+
+        Map<Long, Book> bookMap = new HashMap<>();
+        for (Book book : books) {
+            bookMap.put(book.getId(), book);
+        }
+
+        List<BookSummaryResponse> result = new ArrayList<>();
+        for (Long bookId : bookIds) {
+            Book book = bookMap.get(bookId);
+
+            if (book != null) {
+                result.add(BookSummaryResponse.from(book));
+            }
+        }
+
+        return result;
     }
 
     public Page<BookListResponse> getBookList(BookSearchCondition condition, Pageable pageable) {
