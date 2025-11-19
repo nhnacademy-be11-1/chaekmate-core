@@ -1,11 +1,13 @@
 package shop.chaekmate.core.book.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import shop.chaekmate.core.book.controller.docs.AdminBookControllerDocs;
+import shop.chaekmate.core.book.dto.request.AdminBookPagedRequest;
 import shop.chaekmate.core.book.dto.response.AdminBookResponse;
 import shop.chaekmate.core.book.service.AdminBookService;
 
@@ -23,4 +25,13 @@ public class AdminBookController implements AdminBookControllerDocs {
         List<AdminBookResponse> recentBooks = adminBookService.findRecentBooks(limit);
         return ResponseEntity.ok(recentBooks);
     }
+
+    // 관리자용 도서 검색
+    @Override
+    @GetMapping("/admin/books/paged")
+    public ResponseEntity<Page<AdminBookResponse>> getAdminBooksPaged(AdminBookPagedRequest request){
+
+        return ResponseEntity.ok(adminBookService.findBooks(request));
+    }
+
 }

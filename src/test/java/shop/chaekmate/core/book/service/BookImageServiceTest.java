@@ -167,6 +167,39 @@ class BookImageServiceTest {
     }
 
     @Test
+    void 전체_이미지_조회_성공() {
+        // given
+        long bookId = 1L;
+        Book book = mock(Book.class);
+        BookImage thumbnail = new BookImage(book, "thumb.jpg");
+        BookImage detail1 = new BookImage(book, "detail1.jpg");
+        BookImage detail2 = new BookImage(book, "detail2.jpg");
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId)).thenReturn(List.of(thumbnail, detail1, detail2));
+
+        // when
+        List<BookImageResponse> responses = bookImageService.findAllImages(bookId);
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(3),
+                () -> {
+                    Assertions.assertNotNull(responses);
+                    assertThat(responses.getFirst().imageUrl()).isEqualTo("thumb.jpg");
+                },
+                () -> {
+                    Assertions.assertNotNull(responses);
+                    assertThat(responses.get(1).imageUrl()).isEqualTo("detail1.jpg");
+                },
+                () -> {
+                    Assertions.assertNotNull(responses);
+                    assertThat(responses.get(2).imageUrl()).isEqualTo("detail2.jpg");
+                }
+        );
+    }
+
+    @Test
     void 썸네일_수정_성공() {
         // given
         long bookId = 1L;

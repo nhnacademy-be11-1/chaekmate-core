@@ -2,6 +2,7 @@ package shop.chaekmate.core.member.controller.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,12 +10,13 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
+import shop.chaekmate.core.member.dto.response.GradeResponse;
 
 @Tag(name = "Member", description = "회원 API")
 public interface MemberControllerDocs {
@@ -101,7 +103,6 @@ public interface MemberControllerDocs {
             @RequestParam("email") String email
     );
 
-
     @Operation(
             summary = "회원 삭제",
             description = "회원을 삭제합니다. (소프트 삭제인 경우 삭제 표시 처리)",
@@ -114,4 +115,45 @@ public interface MemberControllerDocs {
             }
     )
     ResponseEntity<Void> deleteMember(@PathVariable Long memberId);
+
+    @Operation(
+            summary = "회원 등급 조회",
+            description = "특정 회원의 현재 등급 정보를 조회합니다.",
+            parameters = {
+                    @Parameter(
+                            name = "memberId",
+                            description = "회원 ID",
+                            required = true,
+                            example = "7"
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "회원 등급 조회 성공",
+                            content = @Content(schema = @Schema(implementation = GradeResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "회원 없음",
+                            content = @Content
+                    )
+            }
+    )
+    ResponseEntity<GradeResponse> getMemberGrade(@PathVariable Long memberId);
+
+    @Operation(
+            summary = "전체 회원 등급 정책 조회",
+            description = "서비스에서 사용 중인 전체 회원 등급 목록을 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "등급 목록 조회 성공",
+                            content = @Content(
+                                    array = @ArraySchema(schema = @Schema(implementation = GradeResponse.class))
+                            )
+                    )
+            }
+    )
+    ResponseEntity<List<GradeResponse>> getAllGrades();
 }

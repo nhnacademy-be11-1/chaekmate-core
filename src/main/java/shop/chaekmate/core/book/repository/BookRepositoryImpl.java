@@ -1,8 +1,7 @@
-package shop.chaekmate.core.book.repository.impl;
+package shop.chaekmate.core.book.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,13 +12,12 @@ import org.springframework.util.StringUtils;
 import shop.chaekmate.core.book.dto.request.BookSearchCondition;
 import shop.chaekmate.core.book.dto.response.BookListResponse;
 import shop.chaekmate.core.book.dto.response.QBookListResponse;
-import shop.chaekmate.core.book.repository.BookRepositoryCustom;
 
 import java.util.List;
+import shop.chaekmate.core.book.entity.QBookImage;
 
 import static shop.chaekmate.core.book.entity.QBook.book;
 import static shop.chaekmate.core.book.entity.QBookCategory.bookCategory;
-import static shop.chaekmate.core.book.entity.QBookImage.bookImage;
 import static shop.chaekmate.core.book.entity.QBookTag.bookTag;
 
 @Repository
@@ -31,13 +29,7 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
     @Override
     public Page<BookListResponse> searchBooks(BookSearchCondition condition, Pageable pageable) {
 
-        // 서브쿼리: 각 책의 첫 번째 이미지 URL (섬네일)
-        JPQLQuery<String> imageUrlSubQuery = JPAExpressions
-                .select(bookImage.imageUrl)
-                .from(bookImage)
-                .where(bookImage.book.id.eq(book.id))
-                .orderBy(bookImage.id.asc())
-                .limit(1);
+        QBookImage firstImage = QBookImage.bookImage; // 썸네일
 
         List<BookListResponse> content = queryFactory
                 .select(new QBookListResponse(
@@ -47,23 +39,31 @@ public class BookRepositoryImpl implements BookRepositoryCustom {
                         book.publisher,
                         book.price,
                         book.salesPrice,
-                        imageUrlSubQuery
+                        firstImage.imageUrl
                 ))
                 .from(book)
                 .leftJoin(bookCategory).on(bookCategory.book.eq(book))
                 .leftJoin(bookTag).on(bookTag.book.eq(book))
-                // bookImage 조인 제거
+                // 첫 번째 이미지만 LEFT JOIN
+                .leftJoin(firstImage)
+                .on(firstImage.book.eq(book)
+                        .and(firstImage.id.eq(
+                                JPAExpressions.select(firstImage.id.min())
+                                        .from(firstImage)
+                                        .where(firstImage.book.eq(book))
+                        ))
+                )
                 .where(
                         categoryIdEq(condition.categoryId()),
                         tagIdEq(condition.tagId()),
                         keywordContains(condition.keyword())
                 )
-                .groupBy(book.id)
                 .orderBy(book.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        // total 쿼리
         Long total = queryFactory
                 .select(book.countDistinct())
                 .from(book)

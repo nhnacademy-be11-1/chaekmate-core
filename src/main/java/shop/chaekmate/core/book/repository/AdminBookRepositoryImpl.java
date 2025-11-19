@@ -1,12 +1,23 @@
 package shop.chaekmate.core.book.repository;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
+import shop.chaekmate.core.book.dto.request.AdminBookPagedRequest;
+import shop.chaekmate.core.book.dto.response.AdminBookResponse;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.entity.QBook;
 
 import java.util.List;
+import shop.chaekmate.core.book.entity.QBookImage;
+import shop.chaekmate.core.order.entity.QReview;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,4 +32,66 @@ public class AdminBookRepositoryImpl {
                 .limit(limit)
                 .fetch();
     }
+
+    public Page<AdminBookResponse> findBooks(AdminBookPagedRequest req) {
+
+        QBook book = QBook.book;
+        QReview review = QReview.review;
+
+        // 검색 조건
+        BooleanBuilder builder = new BooleanBuilder();
+        if (req.getKeyword() != null && !req.getKeyword().isBlank()) {
+            builder.and(
+                    book.title.containsIgnoreCase(req.getKeyword())
+                            // 저자 동시 검색 .or(book.author.containsIgnoreCase(req.getKeyword()))
+            );
+        }
+
+        // 정렬 조건
+        OrderSpecifier<?> orderSpecifier = switch (req.getSortType()) {
+            case RECENT -> book.createdAt.desc();
+            case TITLE -> book.title.asc();
+            case REVIEW_COUNT -> review.count().desc();
+        };
+
+        QBookImage firstImage = new QBookImage("firstImage"); // 썸네일
+
+        var content = queryFactory
+                .select(Projections.constructor(
+                        AdminBookResponse.class,
+                        book.id,
+                        book.title,
+                        book.author,
+                        firstImage.imageUrl,
+                        review.count().intValue()
+                ))
+                .from(book)
+                .leftJoin(firstImage)
+                .on(firstImage.book.eq(book)
+                        .and(firstImage.id.eq(
+                                JPAExpressions.select(firstImage.id.min())
+                                        .from(firstImage)
+                                        .where(firstImage.book.eq(book))
+                        ))
+                )
+                .leftJoin(review).on(review.orderedBook.book.eq(book))
+                .where(builder)
+                .groupBy(book.id, book.title, book.author, firstImage.imageUrl)
+                .orderBy(orderSpecifier)
+                .offset((long) req.getPage() * req.getSize())
+                .limit(req.getSize())
+                .fetch();
+
+        // total count (검색 포함)
+        Long total = queryFactory
+                .select(book.countDistinct())
+                .from(book)
+                .where(builder)
+                .fetchOne();
+
+        return new PageImpl<>(content,
+                PageRequest.of(req.getPage(), req.getSize()),
+                total != null ? total : 0);
+    }
+
 }
