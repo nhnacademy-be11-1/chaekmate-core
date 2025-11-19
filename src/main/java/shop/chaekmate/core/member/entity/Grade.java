@@ -43,4 +43,16 @@ public class Grade extends BaseEntity {
         this.pointRate = 0;
         this.upgradeStandardAmount = 0;
     }
+
+    public Grade(String name, Byte pointRate, int upgradeStandardAmount) {
+        this.name = name;
+        this.pointRate = pointRate;
+        this.upgradeStandardAmount = upgradeStandardAmount;
+    }
+
+    public void update(String name, byte pointRate, int upgradeStandardAmount) {
+        this.name = name;
+        this.pointRate = pointRate;
+        this.upgradeStandardAmount = upgradeStandardAmount;
+    }
 }
