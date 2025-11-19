@@ -1,7 +1,9 @@
 package shop.chaekmate.core.book.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import shop.chaekmate.core.book.dto.request.AdminBookPagedRequest;
 import shop.chaekmate.core.book.dto.response.AdminBookResponse;
 import shop.chaekmate.core.book.exception.BookImageNotFoundException;
 import shop.chaekmate.core.book.repository.AdminBookRepositoryImpl;
@@ -24,8 +26,13 @@ public class AdminBookService {
                     } catch (BookImageNotFoundException e) {
                         // 썸네일 이미지가 없는 경우 null 처리
                     }
-                    return AdminBookResponse.of(book, imageUrl);
+                    return AdminBookResponse.of(book, imageUrl,null);
                 })
                 .toList();
+    }
+
+    public Page<AdminBookResponse> findBooks(AdminBookPagedRequest request) {
+
+        return adminBookRepository.findBooks(request);
     }
 }

@@ -41,4 +41,14 @@ class AdminBookControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.[0].title").value("test title"));
     }
+
+    @Test
+    void 관리자_도서_목록_조회_요청_성공() throws Exception{
+        bookRepository.save(new Book("test title", "testIndex", "testDesc", "testAuthor", "testPublisher", LocalDateTime.now(),
+                "1234567891123", 100, 100, false, 0, false, 0));
+
+        mockMvc.perform(get("/admin/books/paged?limit=1"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.content.[0].title").value("test title"));
+    }
 }
