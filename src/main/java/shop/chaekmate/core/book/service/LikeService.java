@@ -77,7 +77,6 @@ public class LikeService {
 
     @Transactional
     public void deleteLikeById(Long likeId) {
-
         Like like = likeRepository.findById(likeId)
                 .orElseThrow(LikeNotFoundException::new);
 
@@ -87,10 +86,15 @@ public class LikeService {
     @Transactional
     public void deleteLikeByBookIdAndMemberId(Long bookId, Long memberId) {
 
-        Like like = likeRepository.findByBook_IdAndMember_Id(bookId, memberId)
-                .orElseThrow(LikeNotFoundForBookAndMemberException::new);
+        // 전부 삭제
+        List<Like> likes = likeRepository.findAllByBook_IdAndMember_Id(bookId, memberId);
 
-        likeRepository.delete(like);
+        if(likes.isEmpty()){
+            throw new LikeNotFoundForBookAndMemberException();
+        }
+
+
+        likeRepository.deleteAll(likes);
     }
 
 }

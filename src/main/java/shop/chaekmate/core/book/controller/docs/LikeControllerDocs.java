@@ -20,7 +20,7 @@ public interface LikeControllerDocs {
     @ApiResponse(responseCode = "404", description = "해당 책 또는 회원을 찾을 수 없음")
     ResponseEntity<LikeResponse> createLike(
             @Parameter(description = "좋아요를 추가할 책 ID", example = "1") @PathVariable Long bookId,
-            @Parameter(description = "요청 사용자 ID", required = true, example = "1") @RequestHeader("X-USER-ID") Long memberId);
+            @Parameter(description = "요청 사용자 ID", required = true, example = "1") @RequestHeader("X-Member-Id") Long memberId);
 
     @Operation(summary = "좋아요 단건 조회", description = "좋아요ID로 좋아요를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
@@ -36,7 +36,7 @@ public interface LikeControllerDocs {
     @Operation(summary = "회원별 좋아요 목록 조회", description = "X-USER-ID 헤더에서 회원 ID를 추출하여 해당 회원의 모든 좋아요를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     ResponseEntity<List<LikeResponse>> getMemberLikes(
-            @Parameter(description = "요청 사용자 ID", required = true, example = "1") @RequestHeader("X-USER-ID") Long memberId);
+            @Parameter(description = "요청 사용자 ID", required = true, example = "1") @RequestHeader("X-Member-Id") Long memberId);
 
     @Operation(summary = "좋아요 ID로 삭제", description = "좋아요 ID로 좋아요를 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "삭제 성공")
@@ -49,5 +49,5 @@ public interface LikeControllerDocs {
     @ApiResponse(responseCode = "404", description = "해당 좋아요를 찾을 수 없음")
     ResponseEntity<Void> deleteLikeByBookIdAndMemberId(
             @Parameter(description = "좋아요를 삭제할 책 ID", example = "1") @PathVariable Long bookId,
-            @Parameter(description = "요청 사용자 ID", required = true, example = "1") @RequestHeader("X-USER-ID") Long memberId);
+            @Parameter(description = "요청 사용자 ID", required = true, example = "1") @RequestHeader("X-Member-Id") Long memberId);
 }

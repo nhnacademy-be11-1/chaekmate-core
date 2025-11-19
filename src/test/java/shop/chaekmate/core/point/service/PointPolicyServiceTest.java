@@ -107,12 +107,12 @@ class PointPolicyServiceTest {
     @Test
     void 포인트_정책_수정_실패_정책_없음() {
         // given
-        UpdatePointPolicyRequest request = new UpdatePointPolicyRequest(PointEarnedType.REVIEW, 500);
-        when(pointPolicyRepository.findByType(PointEarnedType.REVIEW)).thenReturn(Optional.empty());
+        UpdatePointPolicyRequest request = new UpdatePointPolicyRequest(PointEarnedType.IMAGE_REVIEW, 500);
+        when(pointPolicyRepository.findByType(PointEarnedType.IMAGE_REVIEW)).thenReturn(Optional.empty());
 
         // when & then
         assertThrows(PointPolicyNotFoundException.class, () -> pointService.updatePointPolicy(request));
-        verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.REVIEW);
+        verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.IMAGE_REVIEW);
         verify(pointPolicyRepository, times(0)).save(any(PointPolicy.class));
     }
 
@@ -136,11 +136,11 @@ class PointPolicyServiceTest {
     @Test
     void 포인트_정책_조회_실패() {
         // given
-        when(pointPolicyRepository.findByType(PointEarnedType.REVIEW)).thenReturn(Optional.empty());
+        when(pointPolicyRepository.findByType(PointEarnedType.IMAGE_REVIEW)).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(PointPolicyNotFoundException.class, () -> pointService.getPolicyByType(PointEarnedType.REVIEW));
-        verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.REVIEW);
+        assertThrows(PointPolicyNotFoundException.class, () -> pointService.getPolicyByType(PointEarnedType.IMAGE_REVIEW));
+        verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.IMAGE_REVIEW);
     }
 
     @Test
@@ -160,12 +160,12 @@ class PointPolicyServiceTest {
     @Test
     void 포인트_정책_삭제_실패_정책_없음() {
         // given
-        DeletePointPolicyRequest request = new DeletePointPolicyRequest(PointEarnedType.REVIEW);
-        when(pointPolicyRepository.findByType(PointEarnedType.REVIEW)).thenReturn(Optional.empty());
+        DeletePointPolicyRequest request = new DeletePointPolicyRequest(PointEarnedType.IMAGE_REVIEW);
+        when(pointPolicyRepository.findByType(PointEarnedType.IMAGE_REVIEW)).thenReturn(Optional.empty());
 
         // when & then
         assertThrows(PointPolicyNotFoundException.class, () -> pointService.deletePointPolicyResponse(request));
-        verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.REVIEW);
+        verify(pointPolicyRepository, times(1)).findByType(PointEarnedType.IMAGE_REVIEW);
         verify(pointPolicyRepository, times(0)).delete(any(PointPolicy.class));
     }
 

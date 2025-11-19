@@ -7,9 +7,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisPassword;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -21,7 +26,7 @@ import java.time.Duration;
 public class RedisConfig {
 
     @Bean
-    public LettuceConnectionFactory redisConnectionFactory(RedisProperties redisProperties) {
+    public RedisConnectionFactory redisConnectionFactory(RedisProperties redisProperties) {
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .build();
         RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration();
@@ -32,6 +37,27 @@ public class RedisConfig {
 
         return new LettuceConnectionFactory(serverConfig, clientConfig);
     }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+        redisTemplate.setHashValueSerializer(new GenericToStringSerializer<>(Object.class));
+
+        redisTemplate.afterPropertiesSet();
+
+        return redisTemplate;
+    }
+
+    @Bean
+    public HashOperations<String, String, Object> hashOperations(RedisTemplate<String, Object> redisTemplate) {
+        return redisTemplate.opsForHash();
+    }
+
 
     @Bean
     public CacheManager cacheManager(LettuceConnectionFactory cf) {
