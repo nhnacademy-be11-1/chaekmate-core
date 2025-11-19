@@ -11,9 +11,9 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST}
-      password: ${REDIS_PASSWORD}
       port: ${REDIS_PORT}
       database: ${REDIS_RANGE}
+      password: ${REDIS_PASSWORD}
 
 springdoc:
   api-docs:
