@@ -1,36 +1,32 @@
 package shop.chaekmate.core.common.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-@EnableRedisRepositories
 public class RedisConfig {
 
+
     @Bean
-    public RedisConnectionFactory redisConnectionFactory(
-            @Value("${spring.data.redis.host}") String host,
-            @Value("${spring.data.redis.port}") int port,
-            @Value("${spring.data.redis.database}") int database,
-            @Value("${spring.data.redis.password}") String password
+    public RedisConnectionFactory redisConnectionFactory(RedisProperties redisProperties) {
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .build();
+        RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration();
+        serverConfig.setHostName(redisProperties.getHost());
+        serverConfig.setPort(redisProperties.getPort());
+        serverConfig.setPassword(RedisPassword.of(redisProperties.getPassword()));
+        serverConfig.setDatabase(redisProperties.getDatabase());
 
-    ) {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(host);
-        config.setPort(port);
-        config.setDatabase(database);
-        config.setPassword(password);
-
-        return new LettuceConnectionFactory(config);
+        return new LettuceConnectionFactory(serverConfig, clientConfig);
     }
 
     @Bean
@@ -52,4 +48,5 @@ public class RedisConfig {
     public HashOperations<String, String, Object> hashOperations(RedisTemplate<String, Object> redisTemplate) {
         return redisTemplate.opsForHash();
     }
+
 }

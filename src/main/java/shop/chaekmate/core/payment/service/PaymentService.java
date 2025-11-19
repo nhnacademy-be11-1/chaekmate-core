@@ -13,7 +13,6 @@ import shop.chaekmate.core.payment.dto.response.impl.PaymentAbortedResponse;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.entity.Payment;
 import shop.chaekmate.core.payment.entity.PaymentHistory;
-import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
 import shop.chaekmate.core.payment.event.PaymentEventPublisher;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 import shop.chaekmate.core.payment.provider.PaymentProvider;

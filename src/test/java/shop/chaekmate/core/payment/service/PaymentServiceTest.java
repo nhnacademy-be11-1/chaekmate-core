@@ -134,7 +134,7 @@ class PaymentServiceTest {
     @Test
     void 결제_승인_실패_및_저장() {
         PaymentApproveRequest request = new PaymentApproveRequest(
-                PaymentMethodType.TOSS, "test_payment_key_random", "test_order_number_nanoid", 29800, null);
+                PaymentMethodType.TOSS, "test_payment_key_random", "test_order_number_nanoid", 29800, 0);
 
         when(providerFactory.getProvider(any())).thenReturn(provider);
         when(provider.approve(any())).thenThrow(new RuntimeException("[500]SERVER:결제 실패"));

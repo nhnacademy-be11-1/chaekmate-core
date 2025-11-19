@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
-import shop.chaekmate.core.book.repository.BookImageQueryRepository;
+import shop.chaekmate.core.book.repository.BookImageRepository;
 import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.cart.dto.CartItemCreateDto;
 import shop.chaekmate.core.cart.dto.CartItemDeleteAllDto;
@@ -37,7 +37,7 @@ public class CartService {
 
     private final CartRedisRepository cartRedisRepository;
     private final BookRepository bookRepository;
-    private final BookImageQueryRepository bookImageQueryRepository;
+    private final BookImageRepository bookImageRepository;
 
     /**
      * 장바구니 아이템을 추가함 (수량은 항상 1로 고정)
@@ -105,7 +105,7 @@ public class CartService {
                     .orElseThrow(BookNotFoundException::new);
 
             // 책 이미지 조회 (대표 이미지 선택)
-            var images = this.bookImageQueryRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
+            var images = this.bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
             String bookImageUrl = images.isEmpty() ? null : images.get(0).getImageUrl();
 
             return new CartItemAdvancedResponse(

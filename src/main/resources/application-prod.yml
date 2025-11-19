@@ -29,7 +29,7 @@ spring:
   jpa:
     hibernate:
       # create , update 금지 , prod 에선 None 고려
-      ddl-auto: validate # validate 로 수정 (전체 entity  수정 후)
+      ddl-auto: none # validate 로 수정 (전체 entity  수정 후)
     show-sql: true
     properties:
       hibernate:

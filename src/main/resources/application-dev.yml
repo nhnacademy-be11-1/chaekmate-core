@@ -52,7 +52,7 @@ management:
     db:
       enabled: true
     redis:
-      enabled: false
+      enabled: true
     rabbit:
       enabled: true
 

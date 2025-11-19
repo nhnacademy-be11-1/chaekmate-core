@@ -50,18 +50,19 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private long totalAmount;
 
-    private Integer pointUsed;
+    @Column(nullable = false)
+    private int pointUsed;
 
     // 성공
     public static Payment createApproved(String orderNumber, String paymentKey, PaymentMethodType type,
-                                         long totalAmount, Integer pointUsed) {
+                                         long totalAmount, int pointUsed) {
         Payment payment = new Payment();
         payment.orderNumber = orderNumber;
         payment.paymentKey = paymentKey;
         payment.paymentType = type;
         payment.totalAmount = totalAmount;
         payment.paymentStatus = PaymentStatusType.APPROVED;
-        payment.pointUsed = (pointUsed == null) ? 0 : pointUsed;
+        payment.pointUsed = pointUsed;
         return payment;
     }
 
@@ -83,7 +84,7 @@ public class Payment extends BaseEntity {
         }
 
         final long cash = this.totalAmount;
-        final int point = (this.pointUsed == null ? 0 : this.pointUsed);
+        final int point = this.pointUsed;
         final long totalPaid = cash + point;
 
         // 전체취소

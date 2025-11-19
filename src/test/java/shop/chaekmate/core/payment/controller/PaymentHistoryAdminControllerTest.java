@@ -42,11 +42,11 @@ class PaymentHistoryControllerTest {
     void 전체_결제_내역_조회() throws Exception {
         Payment payment1 = paymentRepository.save(
                 Payment.createApproved("test_order_number1", "test_payment_key_random1", PaymentMethodType.TOSS,
-                        29800L, null)
+                        29800L, 0)
         );
         Payment payment2 = paymentRepository.save(
                 Payment.createApproved("test_order_number_2", "test_payment_key_random2", PaymentMethodType.POINT,
-                        15000L, null)
+                        15000L, 0)
         );
         Payment payment3 = paymentRepository.save(
                 Payment.createApproved("test_order_number_3", "test_payment_key_random3", PaymentMethodType.POINT,
@@ -71,11 +71,11 @@ class PaymentHistoryControllerTest {
     void 결제수단별_전체_조회() throws Exception {
         Payment toss1 = paymentRepository.save(
                 Payment.createApproved("test_order_number1", "test_payment_key_random1", PaymentMethodType.TOSS, 10000L,
-                        null)
+                        0)
         );
         Payment toss2 = paymentRepository.save(
                 Payment.createApproved("test_order_number2", "test_payment_key_random2", PaymentMethodType.TOSS, 20000L,
-                        null)
+                        0)
         );
         Payment point = paymentRepository.save(
                 Payment.createApproved("test_order_number3", "test_payment_key_random3", PaymentMethodType.POINT, 0,
@@ -104,7 +104,7 @@ class PaymentHistoryControllerTest {
 
         Payment toss = paymentRepository.save(
                 Payment.createApproved("test_order_number1", "test_payment_key_random1", PaymentMethodType.TOSS, 18000L,
-                        null)
+                        0)
         );
         Payment point = paymentRepository.save(
                 Payment.createApproved("test_order_number2", "test_payment_key_random2", PaymentMethodType.POINT, 0L,
@@ -133,11 +133,11 @@ class PaymentHistoryControllerTest {
 
         Payment toss1 = paymentRepository.save(
                 Payment.createApproved("test_order_number1", "test_payment_key_random1", PaymentMethodType.TOSS, 10000L,
-                        null)
+                        0)
         );
         Payment toss2 = paymentRepository.save(
                 Payment.createApproved("test_order_number2", "test_payment_key_random2", PaymentMethodType.TOSS, 20000L,
-                        null)
+                        0)
         );
         Payment point = paymentRepository.save(
                 Payment.createApproved("test_order_number3", "test_payment_key_random3", PaymentMethodType.POINT, 0L,
