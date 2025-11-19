@@ -32,7 +32,7 @@ public class PaymentService {
     private final PaymentHistoryRepository paymentHistoryRepository;
 
     @Transactional
-    public PaymentResponse approve(PaymentApproveRequest request) {
+    public PaymentResponse approve(Long memberId, PaymentApproveRequest request) {
         log.info("[결제 승인 요청] 주문번호={}, 결제수단={}, 결제금액={}, 포인트사용={}",
                 request.orderNumber(), request.paymentType(), request.amount(), request.pointUsed());
 
@@ -69,7 +69,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentCancelResponse cancel(PaymentCancelRequest request) {
+    public PaymentCancelResponse cancel(Long memberId, PaymentCancelRequest request) {
         // 결제사 취소 API 연동 취소 시 결제 키 필요(현재는 x)
         log.info("[결제 취소 요청] 주문번호={}, 금액={}, 사유={}",
                 request.orderNumber(), request.cancelAmount(), request.cancelReason());

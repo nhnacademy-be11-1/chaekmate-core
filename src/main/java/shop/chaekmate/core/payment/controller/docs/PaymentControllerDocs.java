@@ -1,12 +1,14 @@
 package shop.chaekmate.core.payment.controller.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import shop.chaekmate.core.common.dto.ErrorResponse;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
 import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
@@ -30,6 +32,12 @@ public interface PaymentControllerDocs {
             }
     )
     ResponseEntity<PaymentResponse> approve(
+            @Parameter(
+                    name = "X-Member-Id",
+                    description = "회원 ID",
+                    required = false
+            )
+            @RequestHeader("X-Member-Id") Long memberId,
             @RequestBody(
                     description = "결제 승인 요청 정보 (orderNumber, paymentKey, amount 등)",
                     required = true,
@@ -53,6 +61,12 @@ public interface PaymentControllerDocs {
             }
     )
     ResponseEntity<PaymentCancelResponse> cancel(
+            @Parameter(
+                    name = "X-Member-Id",
+                    description = "회원 ID, 비회원 NULL",
+                    required = false
+            )
+            @RequestHeader("X-Member-Id") Long memberId,
             @RequestBody(
                     description = "결제 취소 요청 정보 (paymentKey, cancelAmount, cancelReason 등)",
                     required = true,
