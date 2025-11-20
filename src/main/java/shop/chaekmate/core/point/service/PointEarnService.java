@@ -82,6 +82,11 @@ public class PointEarnService {
 
         Long memberId = order.getMember().getId();
 
+        if (order.getMember() == null) {
+            log.info("[포인트 적립] 비회원 주문이므로 포인트 적립하지 않음 - 주문번호: {}", orderNumber);
+            return null;
+        }
+
         if (!memberRepository.existsById(memberId)) {
             throw new MemberNotFoundException();
         }
