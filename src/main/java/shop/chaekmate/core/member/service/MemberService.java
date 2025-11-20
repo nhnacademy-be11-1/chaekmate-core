@@ -77,7 +77,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberResponse getMember(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-        return new MemberResponse(member.getLoginId(), member.getName(), member.getPhone(), member.getEmail(), member.getBirthDate());
+        return MemberResponse.from(member);
     }
 
     @Transactional(readOnly = true)
