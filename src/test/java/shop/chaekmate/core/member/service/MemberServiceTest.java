@@ -26,6 +26,7 @@ import shop.chaekmate.core.member.entity.Grade;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.MemberGradeHistory;
 import shop.chaekmate.core.member.entity.type.PlatformType;
+import shop.chaekmate.core.member.event.MemberEventPublisher;
 import shop.chaekmate.core.member.exception.MemberGradeHistoryNotFoundException;
 import shop.chaekmate.core.member.repository.GradeRepository;
 import shop.chaekmate.core.member.repository.MemberGradeHistoryRepository;
@@ -43,6 +44,9 @@ class MemberServiceTest {
 
     @Mock
     GradeRepository gradeRepository;
+
+    @Mock
+    MemberEventPublisher memberEventPublisher;
 
     @InjectMocks
     MemberService memberService;
@@ -146,7 +150,7 @@ class MemberServiceTest {
         Grade general = new Grade("일반");
         Grade royal = new Grade("로얄");
 
-        given(gradeRepository.findAll())
+        given(gradeRepository.findAllByOrderByPointRate())
                 .willReturn(List.of(general, royal));
 
         List<GradeResponse> result = memberService.getAllGrades();
