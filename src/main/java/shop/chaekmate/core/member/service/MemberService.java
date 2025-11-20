@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.chaekmate.core.member.dto.request.CreateMemberGradeHistoryRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.dto.response.MemberResponse;
+import shop.chaekmate.core.member.entity.Grade;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.MemberGradeHistory;
 import shop.chaekmate.core.member.entity.type.PlatformType;
@@ -102,17 +104,32 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
+    public MemberResponse getMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        return MemberResponse.from(member);
+    }
+
+    @Transactional(readOnly = true)
     public GradeResponse getMemberGrade(Long memberId) {
         MemberGradeHistory memberGradeHistory = memberGradeHistoryRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
                 .orElseThrow(MemberGradeHistoryNotFoundException::new);
+        Long gradeId = memberGradeHistory.getGrade().getId();
         String name = memberGradeHistory.getGrade().getName();
         Byte pointRate = memberGradeHistory.getGrade().getPointRate();
         int upgradeStandardAmount = memberGradeHistory.getGrade().getUpgradeStandardAmount();
 
-        return new GradeResponse(name, pointRate, upgradeStandardAmount);
+        return new GradeResponse(gradeId, name, pointRate, upgradeStandardAmount);
     }
 
     public List<GradeResponse> getAllGrades() {
-        return gradeRepository.findAll().stream().map(GradeResponse::from).toList();
+        return gradeRepository.findAllByOrderByPointRate().stream().map(GradeResponse::from).toList();
+    }
+
+    @Transactional
+    public void createMemberGradeHistory(CreateMemberGradeHistoryRequest request) {
+        Member member = memberRepository.findById(request.memberId()).orElseThrow(MemberNotFoundException::new);
+        Grade grade = gradeRepository.findByName(request.gradeName()).orElseThrow(GradeNotFoundException::new);
+        String reason = request.reason();
+        memberGradeHistoryRepository.save(new MemberGradeHistory(member, grade, reason));
     }
 }

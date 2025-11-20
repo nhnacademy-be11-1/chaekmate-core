@@ -13,7 +13,8 @@ public enum MemberErrorCode implements BaseErrorCode {
     INVALID_MEMBER_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER_400", "잘못된 회원 요청입니다."),
     ADDRESS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "ADDRESS_400", "최대 10개의 주소만 등록할 수 있습니다."),
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "ADDRESS_404", "주소가 존재하지 않습니다."),
-    MEMBER_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_HISTORY_404", "회원 등급 기록이 존재하지 않습니다.");
+    MEMBER_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_HISTORY_404", "회원 등급 기록이 존재하지 않습니다."),
+    GRADE_NOT_FOUND(HttpStatus.NOT_FOUND, "GRADE_404", "등급이 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String code;

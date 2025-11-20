@@ -10,7 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,32 +72,49 @@ class PaymentServiceTest {
 
     List<CanceledBooksRequest> canceledBooks;
 
+    Long memberId;
+    Long guestId;
+    private String paymentKey;
+    private String orderNumber;
+
     @BeforeEach
     void setUp() {
         canceledBooks = List.of(
                 new CanceledBooksRequest(1L, 1),
                 new CanceledBooksRequest(2L, 2)
         );
+        memberId = 1L;
+        guestId = null;
+        paymentKey = "test_payment_key_random";
+        orderNumber = "test_order_number_nanoid";
     }
 
     @Test
-    void 외부API_결제_승인_성공_이벤트() {
+    void 회원_외부API_결제_승인_성공() {
         PaymentApproveRequest request = new PaymentApproveRequest(
-                PaymentMethodType.TOSS, "test_payment_key_random", "test_order_number_nanoid", 29800, 0);
+                PaymentMethodType.TOSS,
+                paymentKey,
+                orderNumber,
+                29800L,
+                0);
 
         PaymentApproveResponse response = new PaymentApproveResponse(
-                "test_order_number_nanoid", 29800L, 0, PaymentStatusType.APPROVED.name(), OffsetDateTime.now());
+                orderNumber,
+                29800L,
+                0,
+                PaymentStatusType.APPROVED.name(),
+                LocalDateTime.now());
 
         when(providerFactory.getProvider(any())).thenReturn(provider);
         when(provider.approve(any())).thenReturn(response);
 
-        PaymentResponse result = paymentService.approve(request);
-
+        PaymentResponse result = paymentService.approve(memberId, request);
         assertNotNull(result);
+
         PaymentApproveResponse approveResult = (PaymentApproveResponse) result;
         assertAll(
-                () -> assertEquals(PaymentStatusType.APPROVED.name(), approveResult.status()),
-                () -> assertEquals("test_order_number_nanoid", approveResult.orderNumber()),
+                () -> assertEquals(orderNumber, approveResult.orderNumber()),
+                () -> assertEquals("APPROVED", approveResult.status()),
                 () -> assertEquals(29800L, approveResult.totalAmount())
         );
 
@@ -107,64 +124,99 @@ class PaymentServiceTest {
     }
 
     @Test
-    void 포인트_결제_승인_성공_이벤트() {
-        PaymentApproveRequest request = new PaymentApproveRequest(PaymentMethodType.POINT, null,
-                "test_order_number_nanoid", 0L, 29800);
+    void 회원_포인트_결제_승인_성공_이벤트() {
+        PaymentApproveRequest request = new PaymentApproveRequest(
+                PaymentMethodType.POINT,
+                null,
+                orderNumber,
+                0L,
+                29800
+        );
 
-        PaymentApproveResponse response = new PaymentApproveResponse("test_order_number_nanoid", 0L, 29800, "APPROVED",
-                OffsetDateTime.now());
+        PaymentApproveResponse response = new PaymentApproveResponse(
+                orderNumber,
+                0L,
+                29800,
+                "APPROVED",
+                LocalDateTime.now()
+        );
 
         when(providerFactory.getProvider(any())).thenReturn(provider);
         when(provider.approve(any())).thenReturn(response);
 
-        PaymentResponse result = paymentService.approve(request);
+        PaymentResponse result = paymentService.approve(memberId, request);
+        assertNotNull(result);
+
         PaymentApproveResponse approveResult = (PaymentApproveResponse) result;
 
-        assertNotNull(result);
         assertAll(
                 () -> assertEquals("APPROVED", approveResult.status()),
-                () -> assertEquals("test_order_number_nanoid", approveResult.orderNumber()),
+                () -> assertEquals(orderNumber, approveResult.orderNumber()),
                 () -> assertEquals(0L, approveResult.totalAmount())
         );
+
         verify(providerFactory, times(1)).getProvider(any());
         verify(provider, times(1)).approve(any());
         verify(eventPublisher, times(1)).publishPaymentApproved(response);
     }
 
     @Test
-    void 결제_승인_실패_및_저장() {
+    void 회원_혼합_결제_승인_성공() {
         PaymentApproveRequest request = new PaymentApproveRequest(
-                PaymentMethodType.TOSS, "test_payment_key_random", "test_order_number_nanoid", 29800, 0);
-
-        when(providerFactory.getProvider(any())).thenReturn(provider);
-        when(provider.approve(any())).thenThrow(new RuntimeException("[500]SERVER:결제 실패"));
-
-        PaymentResponse response = paymentService.approve(request);
-        PaymentAbortedResponse aborted = (PaymentAbortedResponse) response;
-
-        assertNotNull(response);
-        assertAll(
-                () -> assertEquals("결제 실패", aborted.message()),
-                () -> assertNotNull(aborted.code())
+                PaymentMethodType.TOSS,
+                paymentKey,
+                orderNumber,
+                20000L,
+                10000
         );
 
-        verify(paymentErrorService, times(1)).saveAbortedPayment(any(), any());
-        verify(eventPublisher, never()).publishPaymentApproved(any());
+        PaymentApproveResponse response = new PaymentApproveResponse(
+                orderNumber,
+                20000L,
+                10000,
+                PaymentStatusType.APPROVED.name(),
+                LocalDateTime.now()
+        );
+
+        when(providerFactory.getProvider(any())).thenReturn(provider);
+        when(provider.approve(any())).thenReturn(response);
+
+        PaymentResponse result = paymentService.approve(memberId, request);
+
+        assertNotNull(result);
+
+        PaymentApproveResponse approveResult = (PaymentApproveResponse) result;
+
+        assertAll(
+                () -> assertEquals(orderNumber, approveResult.orderNumber()),
+                () -> assertEquals("APPROVED", approveResult.status()),
+                () -> assertEquals(20000L, approveResult.totalAmount()),
+                () -> assertEquals(10000, approveResult.pointUsed())
+        );
+
+        verify(providerFactory, times(1)).getProvider(any());
+        verify(provider, times(1)).approve(any());
+        verify(eventPublisher, times(1)).publishPaymentApproved(response);
     }
 
-    @Test
-    void 포인트_결제_취소_성공_상태_변경_및_이벤트() {
-        Payment payment = Payment.createApproved(
-                "test_order_number_nanoid", "test_payment_key_random", PaymentMethodType.POINT, 0L, 29800);
 
-        when(paymentRepository.findByOrderNumber("test_order_number_nanoid")).thenReturn(Optional.of(payment));
+    @Test
+    void 회원_포인트_결제_취소_성공_상태_변경_및_이벤트() {
+        Payment payment = Payment.createApproved(
+                orderNumber,
+                paymentKey,
+                PaymentMethodType.POINT,
+                0L,
+                29800);
+
+        when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
         when(paymentHistoryRepository.save(any(PaymentHistory.class))).thenAnswer(
                 invocation -> invocation.getArgument(0));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
-                "test_order_number_nanoid", "고객 환불", 29800L, canceledBooks);
+                orderNumber, "고객 환불", 29800L, canceledBooks);
 
-        PaymentCancelResponse result = paymentService.cancel(request);
+        PaymentCancelResponse result = paymentService.cancel(memberId, request);
 
         assertNotNull(result);
         assertAll(
@@ -181,64 +233,68 @@ class PaymentServiceTest {
     }
 
     @Test
-    void 부분_결제_취소_성공_상태_변경_및_이벤트() {
-        // given
-        Payment payment = Payment.createApproved("test_order_number_nanoid", "test_payment_key_random",
-                PaymentMethodType.TOSS, 29800L, 0
+    void 회원_부분_결제_취소_성공_상태_변경_및_이벤트() {
+        Payment payment = Payment.createApproved(
+                orderNumber,
+                paymentKey,
+                PaymentMethodType.TOSS,
+                29800L,
+                0
         );
 
-        when(paymentRepository.findByOrderNumber("test_order_number_nanoid"))
-                .thenReturn(Optional.of(payment));
-
+        when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
         when(paymentHistoryRepository.save(any(PaymentHistory.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // 부분 취소 예시
         PaymentCancelRequest request = new PaymentCancelRequest(
-                "test_order_number_nanoid",
+                orderNumber,
                 "고객 요청에 의한 부분 환불",
                 15000L,
                 canceledBooks
         );
 
-        PaymentCancelResponse result = paymentService.cancel(request);
+        PaymentCancelResponse result = paymentService.cancel(memberId, request);
 
         assertNotNull(result);
         assertAll(
-                () -> assertEquals("test_order_number_nanoid", result.orderNumber()),
+                () -> assertEquals(orderNumber, result.orderNumber()),
                 () -> assertEquals("고객 요청에 의한 부분 환불", result.cancelReason()),
                 () -> assertEquals(15000L, result.canceledAmount()),
                 () -> assertEquals(PaymentStatusType.PARTIAL_CANCELED, payment.getPaymentStatus()),
-                () -> assertEquals(14800L, payment.getTotalAmount()) // 남은 금액 = 29800 - 15000
+                () -> assertEquals(14800L, payment.getTotalAmount()) // 29800 - 15000
         );
 
         verify(paymentHistoryRepository, times(1)).save(any(PaymentHistory.class));
         verify(eventPublisher, times(1)).publishPaymentCanceled(any(PaymentCancelResponse.class));
     }
 
+
     @Test
-    void 혼합_결제_취소_성공_상태_변경_및_이벤트() {
-        Payment payment = Payment.createApproved("test_order_number_nanoid", "test_payment_key_random",
-                PaymentMethodType.TOSS, 20000L, 10000);
+    void 회원_혼합_결제_취소_성공_상태_변경_및_이벤트() {
+        Payment payment = Payment.createApproved(
+                orderNumber,
+                paymentKey,
+                PaymentMethodType.TOSS,
+                20000L,
+                10000
+        );
 
-        when(paymentRepository.findByOrderNumber("test_order_number_nanoid"))
-                .thenReturn(Optional.of(payment));
-
+        when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
         when(paymentHistoryRepository.save(any(PaymentHistory.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
-                "test_order_number_nanoid",
+                orderNumber,
                 "전체 취소 요청",
                 null,
                 canceledBooks
         );
 
-        PaymentCancelResponse result = paymentService.cancel(request);
+        PaymentCancelResponse result = paymentService.cancel(memberId, request);
 
         assertNotNull(result);
         assertAll(
-                () -> assertEquals("test_order_number_nanoid", result.orderNumber()),
+                () -> assertEquals(orderNumber, result.orderNumber()),
                 () -> assertEquals("전체 취소 요청", result.cancelReason()),
                 () -> assertEquals(30000L, result.canceledAmount()),
                 () -> assertEquals(PaymentStatusType.CANCELED, payment.getPaymentStatus())
@@ -249,39 +305,108 @@ class PaymentServiceTest {
     }
 
     @Test
+    void 비회원_외부API_결제_승인_성공_이벤트() {
+        PaymentApproveRequest request = new PaymentApproveRequest(
+                PaymentMethodType.TOSS,
+                paymentKey,
+                orderNumber,
+                29800,
+                0
+        );
+
+        PaymentApproveResponse response = new PaymentApproveResponse(
+                orderNumber,
+                29800L,
+                0,
+                PaymentStatusType.APPROVED.name(),
+                LocalDateTime.now()
+        );
+
+        when(providerFactory.getProvider(any())).thenReturn(provider);
+        when(provider.approve(any())).thenReturn(response);
+
+        PaymentResponse result = paymentService.approve(guestId, request);
+        PaymentApproveResponse approveResult = (PaymentApproveResponse) result;
+
+        assertNotNull(result);
+        assertAll(
+                () -> assertEquals("APPROVED", approveResult.status()),
+                () -> assertEquals(orderNumber, approveResult.orderNumber()),
+                () -> assertEquals(29800L, approveResult.totalAmount())
+        );
+
+        verify(providerFactory, times(1)).getProvider(any());
+        verify(provider, times(1)).approve(any());
+        verify(eventPublisher, times(1)).publishPaymentApproved(response);
+    }
+
+
+
+    @Test
+    void 결제_승인_실패_및_저장() {
+        PaymentApproveRequest request = new PaymentApproveRequest(
+                PaymentMethodType.TOSS,
+                paymentKey,
+                orderNumber,
+                29800,
+                0
+        );
+
+        when(providerFactory.getProvider(any())).thenReturn(provider);
+        when(provider.approve(any())).thenThrow(new RuntimeException("[500]SERVER:결제 실패"));
+
+        PaymentResponse result = paymentService.approve(memberId, request);
+        assertNotNull(result);
+
+        PaymentAbortedResponse abortedResult = (PaymentAbortedResponse) result;
+
+        assertAll(
+                () -> assertEquals("결제 실패", abortedResult.message()),
+                () -> assertNotNull(abortedResult.code())
+        );
+
+        verify(paymentErrorService, times(1)).saveAbortedPayment(any(), any());
+        verify(eventPublisher, never()).publishPaymentApproved(any());
+    }
+
+    @Test
     void 존재하지_않는_주문번호로_취소시_예외_발생() {
-        when(paymentRepository.findByOrderNumber("invalid_order_number")).thenReturn(Optional.empty());
+        when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.empty());
 
         PaymentCancelRequest request = new PaymentCancelRequest(
-                "invalid_order_number",
+                orderNumber,
                 "주문번호를 찾을 수 없음",
                 10000L,
                 canceledBooks
         );
 
-        assertThrows(NotFoundOrderNumberException.class, () -> paymentService.cancel(request));
+        assertThrows(NotFoundOrderNumberException.class, () -> paymentService.cancel(memberId, request));
 
-        verify(paymentRepository, times(1)).findByOrderNumber("invalid_order_number");
+        verify(paymentRepository, times(1)).findByOrderNumber(orderNumber);
         verify(paymentHistoryRepository, never()).save(any());
         verify(eventPublisher, never()).publishPaymentCanceled(any());
     }
 
     @Test
     void 결제_취소_실패_잘못된_금액() {
-        Payment payment = Payment.createApproved("test_order_number_nanoid", "test_payment_key_random",
-                PaymentMethodType.TOSS, 10000L, 0
+        Payment payment = Payment.createApproved(
+                orderNumber,
+                paymentKey,
+                PaymentMethodType.TOSS,
+                10000L,
+                0
         );
 
-        when(paymentRepository.findByOrderNumber("test_order_number_nanoid")).thenReturn(Optional.of(payment));
+        when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
-                "test_order_number_nanoid",
+                orderNumber,
                 "잘못된 금액 테스트",
                 0L,
                 canceledBooks
         );
 
-        assertThrows(InvalidCancelAmountException.class, () -> paymentService.cancel(request));
+        assertThrows(InvalidCancelAmountException.class, () -> paymentService.cancel(memberId, request));
 
         verify(paymentHistoryRepository, never()).save(any());
         verify(eventPublisher, never()).publishPaymentCanceled(any());
@@ -289,20 +414,24 @@ class PaymentServiceTest {
 
     @Test
     void 결제_취소_실패_취소금액_결제금액초과() {
-        Payment payment = Payment.createApproved("test_order_number_nanoid", "test_payment_key_random",
-                PaymentMethodType.TOSS, 10000L, 5000
+        Payment payment = Payment.createApproved(
+                orderNumber,
+                paymentKey,
+                PaymentMethodType.TOSS,
+                10000L,
+                5000
         );
 
-        when(paymentRepository.findByOrderNumber("test_order_number_nanoid")).thenReturn(Optional.of(payment));
+        when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
-                "test_order_number_nanoid",
+                orderNumber,
                 "금액 초과 테스트",
                 20000L,
                 canceledBooks
         );
 
-        assertThrows(ExceedCancelAmountException.class, () -> paymentService.cancel(request));
+        assertThrows(ExceedCancelAmountException.class, () -> paymentService.cancel(memberId, request));
 
         verify(paymentHistoryRepository, never()).save(any());
         verify(eventPublisher, never()).publishPaymentCanceled(any());
@@ -310,23 +439,26 @@ class PaymentServiceTest {
 
     @Test
     void 결제_취소_실패_이미_취소된_결제() {
-        Payment payment = Payment.createApproved("test_order_number_nanoid", "test_payment_key_random",
-                PaymentMethodType.TOSS, 10000L, 0
+        Payment payment = Payment.createApproved(
+                orderNumber,
+                paymentKey,
+                PaymentMethodType.TOSS,
+                10000L,
+                0
         );
 
-        payment.cancelOrPartial(10000L);
+        payment.cancelOrPartial(10000L); // 이미 취소됨
 
-        when(paymentRepository.findByOrderNumber("test_order_number_nanoid"))
-                .thenReturn(Optional.of(payment));
+        when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
-                "test_order_number_nanoid",
+                orderNumber,
                 "이미 취소된 결제 재시도 테스트",
                 10000L,
                 canceledBooks
         );
 
-        assertThrows(AlreadyCanceledException.class, () -> paymentService.cancel(request));
+        assertThrows(AlreadyCanceledException.class, () -> paymentService.cancel(memberId, request));
 
         verify(paymentHistoryRepository, never()).save(any());
         verify(eventPublisher, never()).publishPaymentCanceled(any());
@@ -334,56 +466,62 @@ class PaymentServiceTest {
 
     @Test
     void 마지막_부분취소시_전체_취소_상태_변경() {
-        // given
-        Payment payment = Payment.createApproved("test_order_number_nanoid", "test_payment_key_random",
-                PaymentMethodType.TOSS, 20000L, 0
+        Payment payment = Payment.createApproved(
+                orderNumber,
+                paymentKey,
+                PaymentMethodType.TOSS,
+                20000L,
+                0
         );
 
-        when(paymentRepository.findByOrderNumber("test_order_number_nanoid"))
-                .thenReturn(Optional.of(payment));
+        when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
+        when(paymentHistoryRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        when(paymentHistoryRepository.save(any(PaymentHistory.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        // 첫 번째 부분 취소 10000원 -> 남은금액 10000원
+        // 1차 부분 취소 10000
         PaymentCancelRequest firstCancel = new PaymentCancelRequest(
-                "test_order_number_nanoid",
+                orderNumber,
                 "1차 부분취소",
-                10000L,
+                15000L,
                 canceledBooks
         );
 
-        PaymentCancelResponse firstResult = paymentService.cancel(firstCancel);
+        PaymentCancelResponse firstResult = paymentService.cancel(memberId, firstCancel);
 
         assertNotNull(firstResult);
         assertAll(
-                () -> assertEquals("test_order_number_nanoid", firstResult.orderNumber()),
+                () -> assertEquals(orderNumber, firstResult.orderNumber()),
                 () -> assertEquals("1차 부분취소", firstResult.cancelReason()),
-                () -> assertEquals(10000L, firstResult.canceledAmount()),
+                () -> assertEquals(15000L, firstResult.canceledAmount()),
                 () -> assertEquals(PaymentStatusType.PARTIAL_CANCELED, payment.getPaymentStatus()),
-                () -> assertEquals(10000L, payment.getTotalAmount()) // 남은 금액
+                () -> assertEquals(5000L, payment.getTotalAmount())
         );
 
-        // 두 번째 부분 취소 (남은 전액 10000원 취소 → 전체 취소 전환)
+        // 2차 부분 취소 -> 전체취소
         PaymentCancelRequest secondCancel = new PaymentCancelRequest(
-                "test_order_number_nanoid",
+                orderNumber,
                 "2차 부분취소",
-                10000L,
+                5000L,
                 canceledBooks
         );
 
-        PaymentCancelResponse secondResult = paymentService.cancel(secondCancel);
+        PaymentCancelResponse secondResult = paymentService.cancel(memberId, secondCancel);
 
         assertNotNull(secondResult);
         assertAll(
-                () -> assertEquals("test_order_number_nanoid", secondResult.orderNumber()),
+                () -> assertEquals(orderNumber, secondResult.orderNumber()),
                 () -> assertEquals("2차 부분취소", secondResult.cancelReason()),
-                () -> assertEquals(10000L, secondResult.canceledAmount()),
+                () -> assertEquals(5000L, secondResult.canceledAmount()),
                 () -> assertEquals(PaymentStatusType.CANCELED, payment.getPaymentStatus()),
-                () -> assertEquals(0L, payment.getTotalAmount()) // 전액 취소
+                () -> assertEquals(0L, payment.getTotalAmount())
         );
 
-        verify(paymentHistoryRepository, times(2)).save(any(PaymentHistory.class));
+        verify(paymentHistoryRepository, times(2)).save(any());
         verify(eventPublisher, times(2)).publishPaymentCanceled(any(PaymentCancelResponse.class));
     }
+
+    //비회원 취소 로직 고민해야 함 guestId = null
+    // 취소 시 반환 값 포인트 비회원x
+    // 1.api 취소,
+    // 2.회원가입 후 취소 포인트 반환,
+    // 3.취소 x
 }
