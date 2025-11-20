@@ -3,6 +3,7 @@ package shop.chaekmate.core.book.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +37,6 @@ public class AdminBookRepositoryImpl {
 
         QBook book = QBook.book;
         QReview review = QReview.review;
-        QBookImage bookImage = QBookImage.bookImage;
 
         // 검색 조건
         BooleanBuilder builder = new BooleanBuilder();
@@ -54,22 +54,29 @@ public class AdminBookRepositoryImpl {
             case REVIEW_COUNT -> review.count().desc();
         };
 
-        // 목록 조회
+        QBookImage firstImage = new QBookImage("firstImage"); // 썸네일
+
         var content = queryFactory
                 .select(Projections.constructor(
                         AdminBookResponse.class,
                         book.id,
                         book.title,
                         book.author,
-                        bookImage.imageUrl.min(), // 가장 오래된
+                        firstImage.imageUrl,
                         review.count().intValue()
                 ))
                 .from(book)
+                .leftJoin(firstImage)
+                .on(firstImage.book.eq(book)
+                        .and(firstImage.id.eq(
+                                JPAExpressions.select(firstImage.id.min())
+                                        .from(firstImage)
+                                        .where(firstImage.book.eq(book))
+                        ))
+                )
                 .leftJoin(review).on(review.orderedBook.book.eq(book))
-                .leftJoin(bookImage)
-                .on(bookImage.book.eq(book))
                 .where(builder)
-                .groupBy(book.id)
+                .groupBy(book.id, book.title, book.author, firstImage.imageUrl)
                 .orderBy(orderSpecifier)
                 .offset((long) req.getPage() * req.getSize())
                 .limit(req.getSize())
@@ -77,7 +84,7 @@ public class AdminBookRepositoryImpl {
 
         // total count (검색 포함)
         Long total = queryFactory
-                .select(book.count())
+                .select(book.countDistinct())
                 .from(book)
                 .where(builder)
                 .fetchOne();

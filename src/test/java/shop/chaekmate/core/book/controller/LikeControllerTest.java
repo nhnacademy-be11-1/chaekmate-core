@@ -59,7 +59,7 @@ class LikeControllerTest {
     @Test
     void 좋아요_생성_요청_성공() throws Exception {
         mockMvc.perform(post("/books/{bookId}/likes", book.getId())
-                        .header("X-USER-ID", member.getId())
+                        .header("X-Member-Id", member.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.bookId").value(book.getId()))
@@ -89,7 +89,7 @@ class LikeControllerTest {
         likeRepository.save(new Like(book, member));
 
         mockMvc.perform(get("/members/likes")
-                        .header("X-USER-ID", member.getId()))
+                        .header("X-Member-Id", member.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].memberId").value(member.getId()));
     }
@@ -109,7 +109,7 @@ class LikeControllerTest {
         Like like = likeRepository.save(new Like(book, member));
 
         mockMvc.perform(delete("/books/{bookId}/likes", book.getId())
-                        .header("X-USER-ID", member.getId()))
+                        .header("X-Member-Id", member.getId()))
                 .andExpect(status().isNoContent());
 
         assertThat(likeRepository.findById(like.getId())).isEmpty();
