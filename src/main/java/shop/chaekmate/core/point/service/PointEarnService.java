@@ -109,7 +109,7 @@ public class PointEarnService {
     @Transactional (readOnly = true)
     public Grade getCurrentGrade(Long memberId) {
         Optional<MemberGradeHistory> latedstGradeHistory =
-                memberGradeHistoryRepository.findFirstByMemberIdOrderByCreatedAtDesc(memberId);
+                memberGradeHistoryRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId);
 
         if(latedstGradeHistory.isPresent()) {
             return latedstGradeHistory.get().getGrade();
