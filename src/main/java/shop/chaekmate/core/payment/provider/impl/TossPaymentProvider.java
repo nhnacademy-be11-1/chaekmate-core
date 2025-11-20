@@ -2,6 +2,7 @@ package shop.chaekmate.core.payment.provider.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Base64;
 import java.util.HashMap;
@@ -71,17 +72,18 @@ public class TossPaymentProvider implements PaymentProvider {
                     Objects.requireNonNull(apiResponse).orderNumber(),
                     apiResponse.paymentKey(),
                     getType(),
-                    apiResponse.amount(),
+                    request.amount(),
                     request.pointUsed()
             );
-            paymentRepository.save(payment);
-            OffsetDateTime now = OffsetDateTime.now();
 
-            paymentHistoryRepository.save(PaymentHistory.approved(payment, apiResponse.amount(), now));
+            paymentRepository.save(payment);
+            LocalDateTime now = LocalDateTime.now();
+
+            paymentHistoryRepository.save(PaymentHistory.approved(payment, request.amount()+request.pointUsed(), now));
 
             return new PaymentApproveResponse(
-                    apiResponse.orderNumber(),
-                    apiResponse.amount(),
+                    request.orderNumber(),
+                    request.amount(),
                     request.pointUsed(),
                     PaymentStatusType.APPROVED.name(),
                     now

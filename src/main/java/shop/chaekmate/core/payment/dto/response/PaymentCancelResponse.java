@@ -2,7 +2,7 @@ package shop.chaekmate.core.payment.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import shop.chaekmate.core.order.dto.request.CanceledBooksRequest;
 
@@ -20,7 +20,7 @@ public record PaymentCancelResponse(
         long canceledAmount,
 
         @Schema(description = "취소 완료 시각")
-        OffsetDateTime canceledAt,
+        LocalDateTime canceledAt,
 
         @Schema(description = "취소된 도서 목록")
         List<CanceledBooksRequest> canceledBooks

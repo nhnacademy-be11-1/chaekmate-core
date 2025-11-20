@@ -20,15 +20,17 @@ public class PaymentController implements PaymentControllerDocs {
 
     @PostMapping("/approve")
     @Override
-    public ResponseEntity<PaymentResponse> approve(@Valid @RequestBody PaymentApproveRequest request) {
-        PaymentResponse response = paymentService.approve(request);
+    public ResponseEntity<PaymentResponse> approve(@RequestHeader(value = "X-Member-Id", required = false) Long memberId,
+                                                   @Valid @RequestBody PaymentApproveRequest request) {
+        PaymentResponse response = paymentService.approve(memberId, request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/cancel")
     @Override
-    public ResponseEntity<PaymentCancelResponse> cancel(@Valid @RequestBody PaymentCancelRequest request) {
-        PaymentCancelResponse response = paymentService.cancel(request);
+    public ResponseEntity<PaymentCancelResponse> cancel(@RequestHeader(value = "X-Member-Id", required = false) Long memberId,
+                                                        @Valid @RequestBody PaymentCancelRequest request) {
+        PaymentCancelResponse response = paymentService.cancel(memberId, request);
         return ResponseEntity.ok(response);
     }
 }
