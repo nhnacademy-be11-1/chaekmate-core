@@ -30,7 +30,6 @@ jobs:
       RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
       ALADIN_API_KEY: ${{ secrets.ALADIN_API_KEY }}
       TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
-      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
       EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
 
 
@@ -119,7 +118,6 @@ jobs:
             export RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}"
             export ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}"
             export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
-            export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
             export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
             
             bash -lc ./startup.sh

@@ -5,7 +5,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 import jakarta.persistence.*;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
@@ -34,9 +34,9 @@ public class PaymentHistory {
     private String reason;
 
     @Column(nullable = false)
-    private OffsetDateTime occurredAt;
+    private LocalDateTime occurredAt;
 
-    private static PaymentHistory create(Payment payment, PaymentStatusType status, long amount, String reason, OffsetDateTime occurredAt) {
+    private static PaymentHistory create(Payment payment, PaymentStatusType status, long amount, String reason, LocalDateTime occurredAt) {
         PaymentHistory history = new PaymentHistory();
         history.payment = payment;
         history.paymentStatus = status;
@@ -47,22 +47,22 @@ public class PaymentHistory {
     }
 
     // 승인 이력
-    public static PaymentHistory approved(Payment payment, long amount, OffsetDateTime occurredAt) {
+    public static PaymentHistory approved(Payment payment, long amount, LocalDateTime occurredAt) {
         return create(payment, PaymentStatusType.APPROVED, amount, null, occurredAt);
     }
 
     // 실패 이력
-    public static PaymentHistory aborted(Payment payment, long amount, String reason, OffsetDateTime occurredAt) {
+    public static PaymentHistory aborted(Payment payment, long amount, String reason, LocalDateTime occurredAt) {
         return create(payment, PaymentStatusType.ABORTED, amount, reason, occurredAt);
     }
 
     // 전체 취소 이력
-    public static PaymentHistory canceled(Payment payment, long cancelAmount, String reason, OffsetDateTime canceledAt) {
+    public static PaymentHistory canceled(Payment payment, long cancelAmount, String reason, LocalDateTime canceledAt) {
         return create(payment, PaymentStatusType.CANCELED, cancelAmount, reason, canceledAt);
     }
 
     // 부분 취소 이력
-    public static PaymentHistory partialCanceled(Payment payment, long cancelAmount, String reason, OffsetDateTime canceledAt) {
+    public static PaymentHistory partialCanceled(Payment payment, long cancelAmount, String reason, LocalDateTime canceledAt) {
         return create(payment, PaymentStatusType.PARTIAL_CANCELED, cancelAmount, reason, canceledAt);
     }
 }

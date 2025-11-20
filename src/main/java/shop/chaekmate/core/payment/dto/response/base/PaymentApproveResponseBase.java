@@ -1,6 +1,6 @@
 package shop.chaekmate.core.payment.dto.response.base;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 public interface PaymentApproveResponseBase extends PaymentResponse {
 
@@ -12,5 +12,5 @@ public interface PaymentApproveResponseBase extends PaymentResponse {
 
     String status();
 
-    OffsetDateTime approvedAt();
+    LocalDateTime approvedAt();
 }

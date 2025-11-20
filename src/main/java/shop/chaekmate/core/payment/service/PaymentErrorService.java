@@ -1,5 +1,6 @@
 package shop.chaekmate.core.payment.service;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class PaymentErrorService {
             );
             paymentRepository.save(payment);
 
-            PaymentHistory history = PaymentHistory.aborted(payment, request.amount(), reason, OffsetDateTime.now());
+            PaymentHistory history = PaymentHistory.aborted(payment, request.amount(), reason, LocalDateTime.now());
             paymentHistoryRepository.save(history);
 
             log.warn("[결제 실패 로그 저장 완료] 주문번호={}, 금액={}, 이유={}",

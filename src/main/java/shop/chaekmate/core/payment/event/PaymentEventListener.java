@@ -19,10 +19,10 @@ public class PaymentEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentApproved(PaymentApprovedEvent event) {
         PaymentApproveResponse res = event.approveResponse();
+
         log.info("[EVENT] 결제 승인 수신 - 주문ID: {}", res.orderNumber());
-        
+
         //주문 로직 작성
-        orderService.saveOrder(res);
     }
 
 

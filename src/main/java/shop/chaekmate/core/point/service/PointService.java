@@ -1,6 +1,7 @@
 package shop.chaekmate.core.point.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import shop.chaekmate.core.point.repository.PointPolicyRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PointService {
@@ -61,14 +63,23 @@ public class PointService {
     //정책 전체 조회
     @Transactional(readOnly = true)
     public List<PointPolicyResponse> getAllPolicies() {
-        return pointPolicyRepository.findAll()
-                .stream()
-                .map(policy -> new PointPolicyResponse(
-                        policy.getId(),
-                        policy.getType(),
-                        policy.getPoint()
-                ))
+        List<PointPolicy> allPolicies = pointPolicyRepository.findAll();
+        log.info("데이터베이스에서 조회된 전체 정책 개수: {}", allPolicies.size());
+
+        List<PointPolicyResponse> responses = allPolicies.stream()
+                .map(policy -> {
+                    log.info("정책 조회 - ID: {}, Type: {}, Point: {}",
+                            policy.getId(), policy.getType(), policy.getPoint());
+                    return new PointPolicyResponse(
+                            policy.getId(),
+                            policy.getType(),
+                            policy.getPoint()
+                    );
+                })
                 .toList();
+
+        log.info("반환할 정책 개수: {}", responses.size());
+        return responses;
     }
 
     //삭제 기능
@@ -79,5 +90,5 @@ public class PointService {
         pointPolicyRepository.delete(policy);
 
     }
-    
+
 }

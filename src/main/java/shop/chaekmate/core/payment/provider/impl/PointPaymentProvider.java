@@ -1,6 +1,6 @@
 package shop.chaekmate.core.payment.provider.impl;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,7 @@ public class PointPaymentProvider implements PaymentProvider {
                 request.pointUsed()
         );
         paymentRepository.save(payment);
-        OffsetDateTime now = OffsetDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         paymentHistoryRepository.save(PaymentHistory.approved(payment, request.pointUsed(), now));
 
         return new PaymentApproveResponse(
