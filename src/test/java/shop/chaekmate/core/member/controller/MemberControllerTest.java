@@ -5,19 +5,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.response.GradeResponse;
+import shop.chaekmate.core.member.service.MemberService;
+
+import static org.mockito.BDDMockito.*;
 
 @SpringBootTest
 @Transactional
@@ -25,15 +29,16 @@ import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 @ActiveProfiles("test")
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class MemberControllerTest {
 
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
 
+    @MockitoBean
+    MemberService memberService;
+
     @Test
     void 회원가입_성공() throws Exception {
-        // given
         var body = createReq(
                 "testUser",
                 "Pw123456!",
@@ -43,17 +48,14 @@ class MemberControllerTest {
                 LocalDate.of(2000, 1, 1)
         );
 
-        // when & then
         mvc.perform(post("/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(body)))
                 .andExpect(status().isCreated());
-        // 현재 컨트롤러는 바디를 안 돌려주므로 status만 검증
     }
 
     @Test
     void 잘못된_입력값이면_400() throws Exception {
-        // NotBlank/Email 등 깨뜨려서 검증 실패 유도
         var badJson = """
             {
               "loginId": "",
@@ -73,7 +75,9 @@ class MemberControllerTest {
 
     @Test
     void 로그인아이디_중복_체크() throws Exception {
-        // given: 먼저 한 명 가입
+        given(memberService.isDuplicateLoginId("dupId")).willReturn(true);
+        given(memberService.isDuplicateLoginId("newLoginId")).willReturn(false);
+
         var body = createReq(
                 "dupId",
                 "Pw123456!",
@@ -88,15 +92,11 @@ class MemberControllerTest {
                         .content(om.writeValueAsString(body)))
                 .andExpect(status().isCreated());
 
-        // when & then
-        // 1) 이미 존재하는 아이디 -> available = false 여야 함
         mvc.perform(get("/members/check-login-id")
                         .param("loginId", "dupId"))
                 .andExpect(status().isOk())
-                // 공통 응답 래퍼가 있으면 $.data.available, 없으면 $.available로 바꾸세요
                 .andExpect(jsonPath("$.data.available").value(false));
 
-        // 2) 존재하지 않는 아이디 -> available = true 여야 함
         mvc.perform(get("/members/check-login-id")
                         .param("loginId", "newLoginId"))
                 .andExpect(status().isOk())
@@ -105,7 +105,9 @@ class MemberControllerTest {
 
     @Test
     void 이메일_중복_체크() throws Exception {
-        // given: 먼저 한 명 가입
+        given(memberService.isDuplicateEmail("dup-email@test.com")).willReturn(true);
+        given(memberService.isDuplicateEmail("new-email@test.com")).willReturn(false);
+
         var body = createReq(
                 "emailUser",
                 "Pw123456!",
@@ -120,18 +122,49 @@ class MemberControllerTest {
                         .content(om.writeValueAsString(body)))
                 .andExpect(status().isCreated());
 
-        // when & then
-        // 1) 이미 존재하는 이메일 -> available = false
         mvc.perform(get("/members/check-email")
                         .param("email", "dup-email@test.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.available").value(false));
 
-        // 2) 존재하지 않는 이메일 -> available = true
         mvc.perform(get("/members/check-email")
                         .param("email", "new-email@test.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.available").value(true));
+    }
+
+    @Test
+    void 회원_등급_조회_성공() throws Exception {
+        Long memberId = 1L;
+        GradeResponse grade = new GradeResponse("일반", (byte) 1, 0);
+
+        given(memberService.getMemberGrade(memberId)).willReturn(grade);
+
+        mvc.perform(get("/members/{memberId}/grade", memberId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("일반"))
+                .andExpect(jsonPath("$.data.pointRate").value(1))
+                .andExpect(jsonPath("$.data.upgradeStandardAmount").value(0));
+    }
+
+    @Test
+    void 전체_등급_목록_조회_성공() throws Exception {
+        var grades = List.of(
+                new GradeResponse("일반", (byte) 1, 0),
+                new GradeResponse("로얄", (byte) 2, 100_000),
+                new GradeResponse("골드", (byte) 3, 300_000),
+                new GradeResponse("플래티넘", (byte) 5, 500_000)
+        );
+
+        given(memberService.getAllGrades()).willReturn(grades);
+
+        mvc.perform(get("/members/grades"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(4))
+                .andExpect(jsonPath("$.data[0].name").value("일반"))
+                .andExpect(jsonPath("$.data[1].name").value("로얄"))
+                .andExpect(jsonPath("$.data[2].name").value("골드"))
+                .andExpect(jsonPath("$.data[3].name").value("플래티넘"));
     }
 
     private CreateMemberRequest createReq(

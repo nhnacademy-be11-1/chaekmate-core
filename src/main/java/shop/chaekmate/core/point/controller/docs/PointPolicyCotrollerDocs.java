@@ -37,7 +37,7 @@ public interface PointPolicyCotrollerDocs {
 
     @Operation(
             summary = "포인트 정책 전체 조회",
-            description = "모든 포인트 정책을 조회합니다. (WELCOME, ORDER, REVIEW)",
+            description = "모든 포인트 정책을 조회합니다. (WELCOME, ORDER, IMAGE_REVIEW, TEXT_REVIEW)",
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공",
                             content = @Content(schema = @Schema(implementation = PointPolicyResponse.class)))

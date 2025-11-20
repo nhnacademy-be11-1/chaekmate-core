@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import shop.chaekmate.core.point.dto.response.MemberPointHistoryResponse;
 import shop.chaekmate.core.point.dto.response.PointHistoryResponse;
 import shop.chaekmate.core.point.dto.response.PointResponse;
 import shop.chaekmate.core.point.service.PointHistoryService;
@@ -29,11 +30,11 @@ public class PointHistoryController {
 
     // 특정 회원의 포인트 history 조회
     @GetMapping(path = "/members/{memberId}/point-histories")
-    public ResponseEntity<Page<PointHistoryResponse>> getMemberPointHistory(
+    public ResponseEntity<Page<MemberPointHistoryResponse>> getMemberPointHistory(
             @PathVariable("memberId") Long memberId,
             @PageableDefault(size = 10) Pageable pageable) {
         log.info("회원 {} 포인트 히스토리 조회", memberId);
-        Page<PointHistoryResponse> response = pointHistoryService.getPointHistoryByMemberId(memberId, pageable);
+        Page<MemberPointHistoryResponse> response = pointHistoryService.getPointHistoryByMemberId(memberId, pageable);
         return ResponseEntity.ok().body(response);
     }
 

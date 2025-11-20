@@ -70,12 +70,12 @@ class PointPolicyControllerTest {
 
     @Test
     void 포인트_정책_관리자용_조회() throws Exception {
-        PointPolicy policy = pointPolicyRepository.save(new PointPolicy(PointEarnedType.REVIEW, 500));
+        PointPolicy policy = pointPolicyRepository.save(new PointPolicy(PointEarnedType.IMAGE_REVIEW, 500));
 
-        mockMvc.perform(get("/admin/point-policies/{type}", "REVIEW"))
+        mockMvc.perform(get("/admin/point-policies/{type}", "IMAGE_REVIEW"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(policy.getId()))
-                .andExpect(jsonPath("$.data.earnType").value("REVIEW"))
+                .andExpect(jsonPath("$.data.earnType").value("IMAGE_REVIEW"))
                 .andExpect(jsonPath("$.data.point").value(500));
     }
 
