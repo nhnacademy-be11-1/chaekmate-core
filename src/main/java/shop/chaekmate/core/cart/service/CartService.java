@@ -20,6 +20,7 @@ import shop.chaekmate.core.cart.dto.response.CartItemListAdvancedResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemListResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemUpdateResponse;
+import shop.chaekmate.core.cart.exception.BookInsufficientStockException;
 import shop.chaekmate.core.cart.exception.CartItemNotFoundException;
 import shop.chaekmate.core.cart.exception.CartNotFoundException;
 import shop.chaekmate.core.cart.repository.CartRedisRepository;
@@ -55,6 +56,15 @@ public class CartService {
 
         // 장바구니 조회
         String cartId = this.resolveOrCreateCartId(dto);
+
+        // 도서 재고 검증
+        var book = this.bookRepository.findById(dto.bookId())
+                .orElseThrow(BookNotFoundException::new);
+
+        int stock = book.getStock();
+        if (dto.quantity() > stock) {
+            throw new BookInsufficientStockException();
+        }
 
         // 장바구니 아이템 생성 및 추가
         this.cartRedisRepository.putCartItem(cartId, dto.bookId(), dto.quantity());
@@ -136,6 +146,15 @@ public class CartService {
         String cartId = this.resolveCartId(dto);
         if (Objects.isNull(cartId)) {
             throw new CartNotFoundException();
+        }
+
+        // 도서 재고 검증
+        var book = this.bookRepository.findById(dto.bookId())
+                .orElseThrow(BookNotFoundException::new);
+
+        int stock = book.getStock();
+        if (dto.quantity() > stock) {
+            throw new BookInsufficientStockException();
         }
 
         this.cartRedisRepository.putCartItem(cartId, dto.bookId(), dto.quantity());
