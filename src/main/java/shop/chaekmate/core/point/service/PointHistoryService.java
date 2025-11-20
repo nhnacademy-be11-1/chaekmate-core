@@ -68,11 +68,16 @@ public class PointHistoryService {
     }
 
     //회원 포인트 차감
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CreatePointHistoryResponse spendPointHistory(Long memberId, CreatePointHistoryRequest request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
+        log.info("[포인트 히스토리] 포인트 차감 시작 - 회원ID: {}, 포인트: {}, 사유: {}",
+                memberId, request.point(), request.source());
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> {
+                    log.error("[포인트 히스토리] 회원을 찾을 수 없음 - 회원ID: {}", memberId);
+                    return new MemberNotFoundException();
+                });
 
         PointHistory history = new PointHistory(
                 member,
@@ -81,15 +86,25 @@ public class PointHistoryService {
                 request.source()
         );
 
+        log.info("[포인트 히스토리] PointHistory 엔티티 생성 완료 - 회원ID: {}, 포인트: {}", memberId, request.point());
+
         PointHistory saved = pointHistoryRepository.save(history);
 
-        return new CreatePointHistoryResponse(
+        log.info("[포인트 히스토리] DB 저장 완료 - ID: {}, 회원ID: {}, 포인트: {}",
+                saved.getId(), saved.getMember().getId(), saved.getPoint());
+
+        CreatePointHistoryResponse response = new CreatePointHistoryResponse(
                 saved.getId(),
                 saved.getMember().getId(),
                 saved.getType(),
                 saved.getPoint(),
                 saved.getSource()
         );
+
+        log.info("[포인트 히스토리] 포인트 차감 완료 - 응답 ID: {}, 회원ID: {}, 포인트: {}",
+                response.id(), response.member(), response.point());
+
+        return response;
     }
 
 
