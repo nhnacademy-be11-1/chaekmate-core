@@ -11,13 +11,12 @@ import java.time.LocalDate;
 public record CreateMemberRequest(
 
         @NotBlank(message = "ID는 필수입니다.")
-        @Size(max = 20, message = "ID는 20자 이하로 입력해주세요.")
-        @Schema(description = "로그인용 ID", example = "user123", maxLength = 20, required = true)
+        @Size(max = 100, message = "ID는 100자 이하로 입력해주세요.")
+        @Schema(description = "로그인용 ID (PAYCO의 경우 idNo 사용)", example = "5c8e0390-7775-11e8-ac6f-005056ac5e22", maxLength = 100, required = true)
         String loginId,
 
-        @NotBlank(message = "비밀번호는 필수입니다.")
         @Size(min = 8, max = 100, message = "비밀번호는 8자 이상, 100자 이하로 입력해주세요.")
-        @Schema(description = "비밀번호(8~100자)", example = "Pa$$word1234!", minLength = 8, required = true)
+        @Schema(description = "비밀번호 (PAYCO 회원가입 시 값은 무시되고 랜덤 생성)", example = "Pa$$word1234!", minLength = 8, required = false)
         String password,
 
         @NotBlank(message = "이름은 필수입니다.")
