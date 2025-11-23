@@ -172,4 +172,18 @@ class BookQueryControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content.length()").value(3)); // book1, book3, book4 are in stock
     }
+
+    @Test
+    void 맞춤_추천_조회_재고있는_책_중_랜덤() throws Exception {
+        mockMvc.perform(get("/books/personal-recommendations").param("size", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content.length()").value(3)); // book1, book3, book4 are in stock
+    }
+
+    @Test
+    void 전체_조회() throws Exception {
+        mockMvc.perform(get("/books/all").param("size", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content.length()").value(3));
+    }
 }
