@@ -44,4 +44,11 @@ public class Review extends BaseEntity {
 
     @Column(nullable = false)
     private int rating;
+
+    public Review(Member member, OrderedBook orderedBook, String comment, int rating) {
+        this.member = member;
+        this.orderedBook = orderedBook;
+        this.comment = comment;
+        this.rating = rating;
+    }
 }
