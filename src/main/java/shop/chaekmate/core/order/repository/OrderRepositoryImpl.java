@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
-import shop.chaekmate.core.order.dto.request.NonMemberOrderHistoryRequest;
 import shop.chaekmate.core.order.entity.Order;
 
 import static shop.chaekmate.core.order.entity.QOrder.order;
@@ -22,17 +21,17 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Order> searchNonMemberOrder(NonMemberOrderHistoryRequest request, Pageable pageable) {
+    public Page<Order> searchNonMemberOrder(String orderNumber, String ordererName, String ordererPhone, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
-        if (StringUtils.hasText(request.orderNumber())) {
-            builder.and(order.orderNumber.eq(request.orderNumber()));
+        if (StringUtils.hasText(orderNumber)) {
+            builder.and(order.orderNumber.eq(orderNumber));
         }
-        if (StringUtils.hasText(request.ordererName())) {
-            builder.and(order.ordererName.eq(request.ordererName()));
+        if (StringUtils.hasText(ordererName)) {
+            builder.and(order.ordererName.eq(ordererName));
         }
-        if (StringUtils.hasText(request.ordererPhone())) {
-            builder.and(order.ordererPhone.eq(request.ordererPhone()));
+        if (StringUtils.hasText(ordererPhone)) {
+            builder.and(order.ordererPhone.eq(ordererPhone));
         }
 
         // At least one condition must be present

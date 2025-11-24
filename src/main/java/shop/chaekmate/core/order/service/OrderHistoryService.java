@@ -6,7 +6,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.chaekmate.core.order.dto.request.NonMemberOrderHistoryRequest;
 import shop.chaekmate.core.order.dto.response.OrderHistoryResponse;
 import shop.chaekmate.core.order.dto.response.OrderedBookHistoryResponse;
 import shop.chaekmate.core.order.entity.Order;
@@ -31,8 +30,8 @@ public class OrderHistoryService {
         return convertToOrderHistoryResponsePage(ordersPage, pageable);
     }
 
-    public Page<OrderHistoryResponse> findNonMemberOrderHistory(NonMemberOrderHistoryRequest request, Pageable pageable) {
-        Page<Order> ordersPage = orderRepository.searchNonMemberOrder(request, pageable);
+    public Page<OrderHistoryResponse> findNonMemberOrderHistory(String orderNumber, String ordererName, String ordererPhone, Pageable pageable) {
+        Page<Order> ordersPage = orderRepository.searchNonMemberOrder(orderNumber, ordererName, ordererPhone, pageable);
         return convertToOrderHistoryResponsePage(ordersPage, pageable);
     }
 

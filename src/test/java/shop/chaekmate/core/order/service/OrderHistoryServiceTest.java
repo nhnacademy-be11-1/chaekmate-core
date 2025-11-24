@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import shop.chaekmate.core.book.entity.Book;
-import shop.chaekmate.core.order.dto.request.NonMemberOrderHistoryRequest;
 import shop.chaekmate.core.order.dto.response.OrderHistoryResponse;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
@@ -107,23 +106,25 @@ class OrderHistoryServiceTest {
         @Test
         void 비회원_주문_내역_조회_성공() {
             // given
-            NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest("1", "n", "p");
+            String orderNumber = "1";
+            String ordererName = "n";
+            String ordererPhone = "p";
             Pageable pageable = PageRequest.of(0, 10);
             Order mockOrder1 = createMockOrder(1L);
             Page<Order> orderPage = new PageImpl<>(List.of(mockOrder1), pageable, 1);
 
             OrderedBook mockOb1 = createMockOrderedBook(mockOrder1, 101L, "Book A");
 
-            when(orderRepository.searchNonMemberOrder(request, pageable)).thenReturn(orderPage);
+            when(orderRepository.searchNonMemberOrder(orderNumber, ordererName, ordererPhone, pageable)).thenReturn(orderPage);
             when(orderedBookRepository.findAllByOrderIn(any())).thenReturn(List.of(mockOb1));
 
             // when
-            Page<OrderHistoryResponse> result = orderHistoryService.findNonMemberOrderHistory(request, pageable);
+            Page<OrderHistoryResponse> result = orderHistoryService.findNonMemberOrderHistory(orderNumber, ordererName, ordererPhone, pageable);
 
             // then
             assertThat(result).isNotNull();
             assertThat(result.getTotalElements()).isEqualTo(1);
-            assertThat(result.getContent().get(0).orderedBooks()).hasSize(1);
+            assertThat(result.getContent().getFirst().orderedBooks()).hasSize(1);
         }
 
         @Test

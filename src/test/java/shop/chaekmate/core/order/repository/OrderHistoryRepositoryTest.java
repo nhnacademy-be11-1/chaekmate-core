@@ -19,7 +19,6 @@ import shop.chaekmate.core.common.config.QueryDslConfig;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 import shop.chaekmate.core.member.repository.MemberRepository;
-import shop.chaekmate.core.order.dto.request.NonMemberOrderHistoryRequest;
 import shop.chaekmate.core.order.entity.Order;
 
 import java.time.LocalDate;
@@ -54,11 +53,10 @@ class OrderHistoryRepositoryTest {
     @Test
     void 비회원_주문_조회_성공_모든_조건() {
         // given
-        NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest("order123", "tester", "010-1234-5678");
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Order> result = orderRepository.searchNonMemberOrder(request, pageable);
+        Page<Order> result = orderRepository.searchNonMemberOrder("order123", "tester", "010-1234-5678", pageable);
 
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
@@ -68,11 +66,10 @@ class OrderHistoryRepositoryTest {
     @Test
     void 비회원_주문_조회_성공_일부_조건() {
         // given
-        NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest(null, "tester", "010-1234-5678");
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Order> result = orderRepository.searchNonMemberOrder(request, pageable);
+        Page<Order> result = orderRepository.searchNonMemberOrder(null, "tester", "010-1234-5678", pageable);
 
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
@@ -82,11 +79,10 @@ class OrderHistoryRepositoryTest {
     @Test
     void 비회원_주문_조회_실패_조건_불일치() {
         // given
-        NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest("wrong-number", "tester", "010-1234-5678");
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Order> result = orderRepository.searchNonMemberOrder(request, pageable);
+        Page<Order> result = orderRepository.searchNonMemberOrder("wrong-number", "tester", "010-1234-5678", pageable);
 
         // then
         assertThat(result.getTotalElements()).isZero();
@@ -95,11 +91,10 @@ class OrderHistoryRepositoryTest {
     @Test
     void 비회원_주문_조회_실패_조건_없음() {
         // given
-        NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest(null, null, null);
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Order> result = orderRepository.searchNonMemberOrder(request, pageable);
+        Page<Order> result = orderRepository.searchNonMemberOrder(null, null, null, pageable);
 
         // then
         assertThat(result.getTotalElements()).isZero();

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +18,6 @@ import shop.chaekmate.core.member.repository.MemberRepository;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import shop.chaekmate.core.order.dto.request.NonMemberOrderHistoryRequest;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -70,11 +67,10 @@ class OrderHistoryControllerTest {
 
     @Test
     void 비회원_주문_내역_조회_성공() throws Exception {
-        NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest("order123", "tester", "010-1234-5678");
-
         mockMvc.perform(get("/orders/history/non-member")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
+                        .param("orderNumber", "order123")
+                        .param("ordererName", "tester")
+                        .param("ordererPhone", "010-1234-5678")
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -84,11 +80,35 @@ class OrderHistoryControllerTest {
 
     @Test
     void 비회원_주문_내역_조회_실패_내역_없음() throws Exception {
-        NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest("wrong-number", "tester", "010-1234-5678");
-
         mockMvc.perform(get("/orders/history/non-member")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .param("orderNumber", "wrong-number")
+                        .param("ordererName", "tester")
+                        .param("ordererPhone", "010-1234-5678"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").isEmpty());
+    }
+
+    @Test
+    void 비회원_주문_내역_조회_성공_주문번호만_입력() throws Exception {
+        mockMvc.perform(get("/orders/history/non-member")
+                        .param("orderNumber", "order123"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content[0].orderId").value(order.getId()));
+    }
+
+    @Test
+    void 비회원_주문_내역_조회_성공_주문자명만_입력() throws Exception {
+        mockMvc.perform(get("/orders/history/non-member")
+                        .param("ordererName", "tester"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content[0].orderId").value(order.getId()));
+    }
+
+    @Test
+    void 비회원_주문_내역_조회_실패_파라미터_없음() throws Exception {
+        mockMvc.perform(get("/orders/history/non-member"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content").isEmpty());
     }
