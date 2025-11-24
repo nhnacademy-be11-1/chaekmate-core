@@ -25,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -73,7 +72,7 @@ class OrderHistoryControllerTest {
     void 비회원_주문_내역_조회_성공() throws Exception {
         NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest("order123", "tester", "010-1234-5678");
 
-        mockMvc.perform(post("/orders/history/non-member")
+        mockMvc.perform(get("/orders/history/non-member")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .param("page", "0")
@@ -87,7 +86,7 @@ class OrderHistoryControllerTest {
     void 비회원_주문_내역_조회_실패_내역_없음() throws Exception {
         NonMemberOrderHistoryRequest request = new NonMemberOrderHistoryRequest("wrong-number", "tester", "010-1234-5678");
 
-        mockMvc.perform(post("/orders/history/non-member")
+        mockMvc.perform(get("/orders/history/non-member")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
