@@ -29,9 +29,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@MockitoSettings(strictness = Strictness.LENIENT) // 필요없는 when 경고 제한 해제
 class OrderHistoryServiceTest {
 
     @InjectMocks
@@ -66,7 +70,7 @@ class OrderHistoryServiceTest {
             return order;
         }
 
-        private OrderedBook createMockOrderedBook(Order order, Long bookId, String bookTitle) {
+        private OrderedBook createMockOrderedBook(Order order, Long bookId, String bookTitle, OrderedBookStatusType status) {
             OrderedBook orderedBook = mock(OrderedBook.class);
             when(orderedBook.getOrder()).thenReturn(order);
             Book book = mock(Book.class);
@@ -76,7 +80,7 @@ class OrderHistoryServiceTest {
             when(orderedBook.getQuantity()).thenReturn(1);
             when(orderedBook.getFinalUnitPrice()).thenReturn(100);
             when(orderedBook.getTotalPrice()).thenReturn(120L);
-            when(orderedBook.getUnitStatus()).thenReturn(OrderedBookStatusType.PAYMENT_COMPLETE);
+            when(orderedBook.getUnitStatus()).thenReturn(status);
             return orderedBook;
         }
 
@@ -89,11 +93,11 @@ class OrderHistoryServiceTest {
             Order mockOrder2 = createMockOrder(2L);
             Page<Order> orderPage = new PageImpl<>(List.of(mockOrder1, mockOrder2), pageable, 2);
 
-            OrderedBook mockOb1 = createMockOrderedBook(mockOrder1, 101L, "Book A");
-            OrderedBook mockOb2 = createMockOrderedBook(mockOrder1, 102L, "Book B");
-            OrderedBook mockOb3 = createMockOrderedBook(mockOrder2, 103L, "Book C");
+            OrderedBook mockOb1 = createMockOrderedBook(mockOrder1, 101L, "Book A", OrderedBookStatusType.PAYMENT_COMPLETE);
+            OrderedBook mockOb2 = createMockOrderedBook(mockOrder1, 102L, "Book B", OrderedBookStatusType.PAYMENT_COMPLETE);
+            OrderedBook mockOb3 = createMockOrderedBook(mockOrder2, 103L, "Book C", OrderedBookStatusType.PAYMENT_COMPLETE);
 
-            when(orderRepository.findByMemberId(memberId, pageable)).thenReturn(orderPage);
+            when(orderRepository.findMemberOrders(memberId, pageable)).thenReturn(orderPage);
             when(orderedBookRepository.findAllByOrderIn(any())).thenReturn(List.of(mockOb1, mockOb2, mockOb3));
 
             // when
@@ -116,7 +120,7 @@ class OrderHistoryServiceTest {
             Order mockOrder1 = createMockOrder(1L);
             Page<Order> orderPage = new PageImpl<>(List.of(mockOrder1), pageable, 1);
 
-            OrderedBook mockOb1 = createMockOrderedBook(mockOrder1, 101L, "Book A");
+            OrderedBook mockOb1 = createMockOrderedBook(mockOrder1, 101L, "Book A", OrderedBookStatusType.PAYMENT_COMPLETE);
 
             when(orderRepository.searchNonMemberOrder(orderNumber, ordererName, ordererPhone, pageable)).thenReturn(orderPage);
             when(orderedBookRepository.findAllByOrderIn(any())).thenReturn(List.of(mockOb1));
@@ -135,7 +139,7 @@ class OrderHistoryServiceTest {
             // given
             Long memberId = 1L;
             Pageable pageable = PageRequest.of(0, 10);
-            when(orderRepository.findByMemberId(memberId, pageable)).thenReturn(Page.empty());
+            when(orderRepository.findMemberOrders(memberId, pageable)).thenReturn(Page.empty());
 
             // when
             Page<OrderHistoryResponse> result = orderHistoryService.findMemberOrderHistory(memberId, pageable);
@@ -144,6 +148,30 @@ class OrderHistoryServiceTest {
             assertThat(result).isNotNull();
             assertThat(result.getTotalElements()).isZero();
             assertThat(result.getContent()).isEmpty();
+        }
+
+        @Test
+        void 주문은_있지만_일부_책만_필터링되어_조회() {
+            // given
+            Long memberId = 1L;
+            Pageable pageable = PageRequest.of(0, 10);
+            Order mockOrder1 = createMockOrder(1L);
+            Page<Order> orderPage = new PageImpl<>(List.of(mockOrder1), pageable, 1);
+
+            OrderedBook mockOb1 = createMockOrderedBook(mockOrder1, 101L, "Book A", OrderedBookStatusType.PAYMENT_COMPLETE);
+            OrderedBook mockOb2 = createMockOrderedBook(mockOrder1, 102L, "Book B", OrderedBookStatusType.PAYMENT_READY);
+
+            when(orderRepository.findMemberOrders(memberId, pageable)).thenReturn(orderPage);
+            when(orderedBookRepository.findAllByOrderIn(any())).thenReturn(List.of(mockOb1, mockOb2));
+
+            // when
+            Page<OrderHistoryResponse> result = orderHistoryService.findMemberOrderHistory(memberId, pageable);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent().getFirst().orderedBooks()).hasSize(1);
+            assertThat(result.getContent().getFirst().orderedBooks().getFirst().bookTitle()).isEqualTo("Book A");
         }
     }
 }

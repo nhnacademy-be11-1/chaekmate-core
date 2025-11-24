@@ -26,7 +26,7 @@ public class OrderHistoryService {
     private final OrderedBookRepository orderedBookRepository;
 
     public Page<OrderHistoryResponse> findMemberOrderHistory(Long memberId, Pageable pageable) {
-        Page<Order> ordersPage = orderRepository.findByMemberId(memberId, pageable);
+        Page<Order> ordersPage = orderRepository.findMemberOrders(memberId, pageable);
         return convertToOrderHistoryResponsePage(ordersPage, pageable);
     }
 
@@ -45,6 +45,8 @@ public class OrderHistoryService {
         List<OrderedBook> allOrderedBooks = orderedBookRepository.findAllByOrderIn(orders);
 
         Map<Long, List<OrderedBookHistoryResponse>> orderedBooksByOrderId = allOrderedBooks.stream()
+                .filter(book -> book.getUnitStatus() != shop.chaekmate.core.order.entity.type.OrderedBookStatusType.PAYMENT_READY
+                        && book.getUnitStatus() != shop.chaekmate.core.order.entity.type.OrderedBookStatusType.PAYMENT_FAILED)
                 .collect(Collectors.groupingBy(
                         orderedBook -> orderedBook.getOrder().getId(),
                         Collectors.mapping(OrderedBookHistoryResponse::from, Collectors.toList())

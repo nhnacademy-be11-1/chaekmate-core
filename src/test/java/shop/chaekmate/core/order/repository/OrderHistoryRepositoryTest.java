@@ -20,6 +20,7 @@ import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.type.PlatformType;
 import shop.chaekmate.core.member.repository.MemberRepository;
 import shop.chaekmate.core.order.entity.Order;
+import shop.chaekmate.core.order.entity.OrderedBook;
 
 import java.time.LocalDate;
 
@@ -38,16 +39,40 @@ class OrderHistoryRepositoryTest {
     private MemberRepository memberRepository;
     @Autowired
     private BookRepository bookRepository;
+    @Autowired
+    private OrderedBookRepository orderedBookRepository;
 
     private Member member1;
-    private Order order1;
+    private Order order1, order2;
+    private Book book1;
 
     @BeforeEach
     void setUp() {
         member1 = memberRepository.save(new Member("id1", "pwd", "tester", "010-1234-5678", "test@email.com", LocalDate.now(), PlatformType.LOCAL));
-        bookRepository.save(Book.builder().title("A Book").isbn("1").author("a").description("d").index("i").isSaleEnd(false).isWrappable(true).price(1000).salesPrice(900).stock(1).views(1).publisher("p").publishedAt(
+        book1 = bookRepository.save(Book.builder().title("A Book").isbn("1").author("a").description("d").index("i").isSaleEnd(false).isWrappable(true).price(1000).salesPrice(900).stock(1).views(1).publisher("p").publishedAt(
                 LocalDateTime.now()).build());
+
         order1 = orderRepository.save(Order.createOrderReady(member1, "order123", "tester", "010-1234-5678", "test@email.com", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 10000));
+        OrderedBook ob1 = OrderedBook.createOrderDetailReady(order1, book1, 1, 1000, 900, 100, null, 0, null, 0, 0, 900);
+        ob1.markPaymentCompleted();
+        orderedBookRepository.save(ob1);
+
+        order2 = orderRepository.save(Order.createOrderReady(member1, "order456", "tester2", "010-4567-8901", "test2@email.com", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 20000));
+        OrderedBook ob2 = OrderedBook.createOrderDetailReady(order2, book1, 1, 1000, 900, 100, null, 0, null, 0, 0, 900);
+        orderedBookRepository.save(ob2); // Stays as PAYMENT_READY
+    }
+
+    @Test
+    void 회원_주문_조회_성공() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<Order> result = orderRepository.findMemberOrders(member1.getId(), pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().getFirst().getId()).isEqualTo(order1.getId());
     }
 
     @Test
@@ -61,6 +86,18 @@ class OrderHistoryRepositoryTest {
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().getFirst().getId()).isEqualTo(order1.getId());
+    }
+
+    @Test
+    void 비회원_주문_조회시_잘못된_상태의_주문은_필터링된다() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<Order> result = orderRepository.searchNonMemberOrder("order456", "tester2", "010-4567-8901", pageable);
+
+        // then
+        assertThat(result.getTotalElements()).isZero();
     }
 
     @Test
