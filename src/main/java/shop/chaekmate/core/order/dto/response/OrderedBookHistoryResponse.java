@@ -15,7 +15,9 @@ public record OrderedBookHistoryResponse(
         Integer wrapperPrice,
         Long issuedCouponId,
         Integer couponDiscount,
-        Integer pointUsed
+        Integer pointUsed,
+        String unitStatus,
+        Long totalPrice
 ) {
     public static OrderedBookHistoryResponse from(OrderedBook ob) {
 
@@ -48,7 +50,9 @@ public record OrderedBookHistoryResponse(
                 wrapperPrice,
                 issuedCouponId,
                 couponDiscount,
-                pointUsed
+                pointUsed,
+                ob.getUnitStatus().name(),
+                ob.getTotalPrice()
         );
     }
 }

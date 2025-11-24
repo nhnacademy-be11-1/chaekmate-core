@@ -17,6 +17,7 @@ import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.order.dto.response.OrderHistoryResponse;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 
@@ -74,6 +75,8 @@ class OrderHistoryServiceTest {
             when(orderedBook.getBook()).thenReturn(book);
             when(orderedBook.getQuantity()).thenReturn(1);
             when(orderedBook.getFinalUnitPrice()).thenReturn(100);
+            when(orderedBook.getTotalPrice()).thenReturn(120L);
+            when(orderedBook.getUnitStatus()).thenReturn(OrderedBookStatusType.PAYMENT_COMPLETE);
             return orderedBook;
         }
 
