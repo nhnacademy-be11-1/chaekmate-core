@@ -71,10 +71,11 @@ public class ReviewService {
         );
     }
 
-    //Review 페이지네이션 조회 기능
+
+    //도서별 Review 페이지네이션 조회 기능
     @Transactional(readOnly = true)
-    public Page<ReadReviewResponse> readAllReviewsByPage(Pageable pageable) {
-        return reviewRepository.findAll(pageable)
+    public Page<ReadReviewResponse> readReviewsByBookId(Long bookId, Pageable pageable) {
+        return reviewRepository.findByOrderedBook_Book_Id(bookId, pageable)
                 .map(review -> new ReadReviewResponse(
                         review.getId(),
                         review.getMember().getId(),
