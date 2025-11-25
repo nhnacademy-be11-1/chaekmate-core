@@ -214,7 +214,7 @@ class PaymentServiceTest {
                 invocation -> invocation.getArgument(0));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
-                orderNumber, "고객 환불", 29800L, canceledBooks);
+                paymentKey, orderNumber, "고객 환불", 29800L, canceledBooks);
 
         PaymentCancelResponse result = paymentService.cancel(memberId, request);
 
@@ -247,6 +247,7 @@ class PaymentServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
+                paymentKey,
                 orderNumber,
                 "고객 요청에 의한 부분 환불",
                 15000L,
@@ -284,6 +285,7 @@ class PaymentServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
+                paymentKey,
                 orderNumber,
                 "전체 취소 요청",
                 null,
@@ -374,6 +376,7 @@ class PaymentServiceTest {
         when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.empty());
 
         PaymentCancelRequest request = new PaymentCancelRequest(
+                paymentKey,
                 orderNumber,
                 "주문번호를 찾을 수 없음",
                 10000L,
@@ -400,6 +403,7 @@ class PaymentServiceTest {
         when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
+                paymentKey,
                 orderNumber,
                 "잘못된 금액 테스트",
                 0L,
@@ -425,6 +429,7 @@ class PaymentServiceTest {
         when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
+                paymentKey,
                 orderNumber,
                 "금액 초과 테스트",
                 20000L,
@@ -452,6 +457,7 @@ class PaymentServiceTest {
         when(paymentRepository.findByOrderNumber(orderNumber)).thenReturn(Optional.of(payment));
 
         PaymentCancelRequest request = new PaymentCancelRequest(
+                paymentKey,
                 orderNumber,
                 "이미 취소된 결제 재시도 테스트",
                 10000L,
@@ -479,6 +485,7 @@ class PaymentServiceTest {
 
         // 1차 부분 취소 10000
         PaymentCancelRequest firstCancel = new PaymentCancelRequest(
+                paymentKey,
                 orderNumber,
                 "1차 부분취소",
                 15000L,
@@ -498,6 +505,7 @@ class PaymentServiceTest {
 
         // 2차 부분 취소 -> 전체취소
         PaymentCancelRequest secondCancel = new PaymentCancelRequest(
+                paymentKey,
                 orderNumber,
                 "2차 부분취소",
                 5000L,
