@@ -17,7 +17,7 @@ import shop.chaekmate.core.book.entity.QBook;
 
 import java.util.List;
 import shop.chaekmate.core.book.entity.QBookImage;
-import shop.chaekmate.core.order.entity.QReview;
+import shop.chaekmate.core.review.entity.QReview;
 
 @Repository
 @RequiredArgsConstructor
