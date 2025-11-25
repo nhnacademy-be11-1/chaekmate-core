@@ -6,5 +6,8 @@ import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
 
 public interface OrderedBookRepository extends JpaRepository<OrderedBook, Long> {
+    List<OrderedBook> findAllByOrderIn(List<Order> orders);
+
+    List<OrderedBook> findAllByOrder(Order order);
     List<OrderedBook> findByOrder(Order order);
 }

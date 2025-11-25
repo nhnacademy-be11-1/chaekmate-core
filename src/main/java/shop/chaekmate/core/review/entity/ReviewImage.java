@@ -33,6 +33,6 @@ public class ReviewImage extends BaseEntity {
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "image_url", nullable = false)
     private String imageUrl;
 }

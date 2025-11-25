@@ -146,4 +146,17 @@ public class SwaggerConfig {
                 .pathsToMatch("/payments/**", "/admin/payments/histories/**")
                 .build();
     }
+
+    @Bean
+    public GroupedOpenApi orderApi() {
+        return GroupedOpenApi.builder()
+                .group("Order API")
+                .addOpenApiCustomizer(openApi -> openApi
+                        .info(new Info()
+                                .title("주문 관련 API")
+                                .description("주문 관련 기능")
+                                .version("v1.0")))
+                .pathsToMatch("/orders/**", "/admin/orders/**")
+                .build();
+    }
 }

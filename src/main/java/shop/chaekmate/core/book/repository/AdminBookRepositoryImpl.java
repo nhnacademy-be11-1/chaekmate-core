@@ -43,7 +43,6 @@ public class AdminBookRepositoryImpl {
         if (req.getKeyword() != null && !req.getKeyword().isBlank()) {
             builder.and(
                     book.title.containsIgnoreCase(req.getKeyword())
-                            // 저자 동시 검색 .or(book.author.containsIgnoreCase(req.getKeyword()))
             );
         }
 

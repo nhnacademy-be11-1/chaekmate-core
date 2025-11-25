@@ -40,9 +40,23 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "ordered_book_id", nullable = false)
     private OrderedBook orderedBook;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(nullable = false)
     private String comment;
 
     @Column(nullable = false)
     private int rating;
+
+    public static Review createReview(Member member, OrderedBook orderedBook, String comment, Integer rating) {
+        Review review = new Review();
+        review.member = member;
+        review.orderedBook = orderedBook;
+        review.comment = comment;
+        review.rating = rating;
+        return review;
+    }
+
+    public void updateReview(String comment, Integer rating) {
+        this.comment = comment;
+        this.rating = rating;
+    }
 }
