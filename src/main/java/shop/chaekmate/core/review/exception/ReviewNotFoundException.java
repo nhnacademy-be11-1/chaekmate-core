@@ -7,4 +7,3 @@ public class ReviewNotFoundException extends CoreException {
         super(ReviewErrorCode.REVIEW_NOT_FOUND);
     }
 }
-
