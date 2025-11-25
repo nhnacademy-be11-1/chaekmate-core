@@ -18,7 +18,6 @@ import shop.chaekmate.core.payment.event.PaymentEventPublisher;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 import shop.chaekmate.core.payment.provider.PaymentProvider;
 import shop.chaekmate.core.payment.provider.PaymentProviderFactory;
-import shop.chaekmate.core.payment.repository.PaymentHistoryRepository;
 import shop.chaekmate.core.payment.repository.PaymentRepository;
 
 @Slf4j
@@ -30,7 +29,6 @@ public class PaymentService {
     private final PaymentEventPublisher eventPublisher;
     private final PaymentErrorService paymentErrorService;
     private final PaymentRepository paymentRepository;
-    private final PaymentHistoryRepository paymentHistoryRepository;
     private final OrderService orderService;
 
 
@@ -72,6 +70,7 @@ public class PaymentService {
 
     @Transactional
     public PaymentCancelResponse cancel(Long memberId, PaymentCancelRequest request) {
+
         // 결제사 취소 API 연동 취소 시 결제 키 필요(현재는 x)
         log.info("[결제 취소 요청] 주문번호={}, 금액={}, 사유={}",
                 request.orderNumber(), request.cancelAmount(), request.cancelReason());
@@ -79,23 +78,14 @@ public class PaymentService {
         Payment payment = paymentRepository.findByOrderNumber(request.orderNumber())
                 .orElseThrow(NotFoundOrderNumberException::new);
 
-        LocalDateTime now = LocalDateTime.now();
+        PaymentProvider provider = providerFactory.getProvider(payment.getPaymentType());
 
-        long canceledAmount = payment.cancelOrPartial(request.cancelAmount());
+        PaymentCancelResponse response = provider.cancel(request);
 
-        PaymentHistory history = PaymentHistory.canceled(payment, canceledAmount, request.cancelReason(), now);
-        paymentHistoryRepository.save(history);
-
-        PaymentCancelResponse response = new PaymentCancelResponse(
-                payment.getOrderNumber(),
-                request.cancelReason(),
-                canceledAmount,
-                now,
-                request.canceledBooks()
-        );
+        orderService.applyOrderCancel(response);
 
         eventPublisher.publishPaymentCanceled(response);
-        log.info("[ 결제 취소 완료 및 이벤트 발행 ] 주문번호={}, 취소금액={}", response.orderNumber(), response.canceledAmount());
+        log.info("[ 결제 취소 완료 및 이벤트 발행 ] 주문번호={}, 취소금액={}, 취소 포인트={}", response.orderNumber(), response.canceledCash(), response.canceledPoint());
 
         return response;
     }

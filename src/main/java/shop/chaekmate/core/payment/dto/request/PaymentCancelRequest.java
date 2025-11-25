@@ -25,7 +25,7 @@ public record PaymentCancelRequest(
 
         @Schema(description = "취소 금액 (입력하지 않으면 전체 취소)", example = "29800")
         @Positive(message = "취소 금액은 0보다 커야 합니다.")
-        Long cancelAmount,
+        long cancelAmount,
 
         @Schema(description = "취소할 도서 목록")
         @NotEmpty(message = "취소할 도서는 1개 이상이어야 합니다.")

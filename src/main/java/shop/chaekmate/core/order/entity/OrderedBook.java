@@ -131,11 +131,6 @@ public class OrderedBook extends BaseEntity {
         this.unitStatus = OrderedBookStatusType.DELIVERED;
     }
 
-    // 취소 요청
-    public void markCancelRequest() {
-        this.unitStatus = OrderedBookStatusType.CANCEL_REQUEST;
-    }
-
     // 취소 완료
     public void markCanceled() {
         this.unitStatus = OrderedBookStatusType.CANCELED;
