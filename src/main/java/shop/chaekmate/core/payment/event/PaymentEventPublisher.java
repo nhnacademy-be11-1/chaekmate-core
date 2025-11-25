@@ -15,7 +15,6 @@ public class PaymentEventPublisher {
     public void publishPaymentApproved(PaymentApproveResponse response) {
         publisher.publishEvent(new PaymentApprovedEvent(response));
     }
-
     public void publishPaymentCanceled(PaymentCancelResponse response) {
         publisher.publishEvent(new PaymentCanceledEvent(response));
     }

@@ -156,7 +156,7 @@ public class SwaggerConfig {
                                 .title("주문 관련 API")
                                 .description("주문 관련 기능")
                                 .version("v1.0")))
-                .pathsToMatch("/orders/**", "/admin/orders/**")
+                .pathsToMatch("/orders/**")
                 .build();
     }
 }

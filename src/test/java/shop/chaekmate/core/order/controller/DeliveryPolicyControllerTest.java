@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static shop.chaekmate.core.common.TestRequestPostProcessors.asAdmin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -46,6 +47,7 @@ class DeliveryPolicyControllerTest {
         DeliveryPolicyRequest request = new DeliveryPolicyRequest(30000, 5000);
 
         mockMvc.perform(post("/admin/delivery-policy")
+                        .with(asAdmin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -60,11 +62,13 @@ class DeliveryPolicyControllerTest {
         DeliveryPolicyRequest request2 = new DeliveryPolicyRequest(50000, 3000);
 
         mockMvc.perform(post("/admin/delivery-policy")
+                        .with(asAdmin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request1)))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/admin/delivery-policy")
+                        .with(asAdmin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request2)))
                 .andExpect(status().isCreated())
@@ -91,6 +95,7 @@ class DeliveryPolicyControllerTest {
         mockMvc.perform(get("/admin/delivery-policy")
                         .param("page", "0")
                         .param("size", "20")
+                        .with(asAdmin())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content").isArray())

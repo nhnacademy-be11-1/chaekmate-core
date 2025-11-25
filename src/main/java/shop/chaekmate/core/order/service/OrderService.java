@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.book.exception.BookNotFoundException;
+import shop.chaekmate.core.book.exception.InsufficientStockException;
 import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
@@ -25,6 +26,7 @@ import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import shop.chaekmate.core.order.repository.WrapperRepository;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
+import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 import shop.chaekmate.core.point.exception.MemberNotFoundException;
 
 @Service
@@ -41,6 +43,16 @@ public class OrderService {
     @Transactional
     public OrderSaveResponse createOrder(Long memberId, OrderSaveRequest request) {
 
+        //예외 검증
+        for (OrderedBookSaveRequest item : request.orderedBooks()) {
+
+            Book book = bookRepository.findById(item.bookId()).orElseThrow(BookNotFoundException::new);
+
+            if (!book.hasStock(item.quantity())) {
+                throw new InsufficientStockException();
+            }
+        }
+
         //주문번호
         String orderNumber = NanoIdUtils.randomNanoId();
 
@@ -50,7 +62,6 @@ public class OrderService {
         if (memberId != null) {
             member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         }
-
 
         List<Long> bookIds = request.orderedBooks().stream()
                 .map(OrderedBookSaveRequest::bookId)
@@ -126,4 +137,51 @@ public class OrderService {
         return new OrderSaveResponse(orderNumber, request.totalPrice());
     }
 
+    @Transactional(readOnly = true)
+    public void verifyOrderStock(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> items = orderedBookRepository.findByOrder(order);
+
+        for (OrderedBook item : items) {
+            Book book = item.getBook();
+
+            if (!book.hasStock(item.getQuantity())) {
+                log.info("Order stock for order number {} has unexpected quantity", orderNumber);
+                throw new InsufficientStockException();
+            }
+        }
+    }
+
+    @Transactional
+    public void applyPaymentSuccess(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder((order));
+
+        for (OrderedBook item : orderedBooks) {
+            item.markPaymentCompleted();
+
+            Book book = item.getBook();
+            book.decreaseStock(item.getQuantity());
+            log.info("책 주문 상태 {} {}", book.getId(), item.getUnitStatus());
+        }
+
+        order.markPaymentSuccess();
+        log.info("결제 및 주문 완료");
+    }
+
+    @Transactional
+    public void applyPaymentFail(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder((order));
+
+        for (OrderedBook item : orderedBooks) {
+            item.markPaymentFailed();
+        }
+
+        order.markPaymentFailed();
+        log.info("결제 및 주문 실패");
+    }
 }

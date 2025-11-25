@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import shop.chaekmate.core.common.annotation.RequiredAdmin;
 import shop.chaekmate.core.order.controller.docs.WrapperControllerDocs;
 import shop.chaekmate.core.order.dto.request.WrapperRequest;
 import shop.chaekmate.core.order.dto.request.WrapperDto;
@@ -24,8 +25,8 @@ public class WrapperController implements WrapperControllerDocs {
 
     private final WrapperService wrapperService;
 
-    //admin
     // 추가
+    @RequiredAdmin
     @PostMapping("/admin/wrappers")
     public ResponseEntity<WrapperResponse> createWrapper(@Valid @RequestBody WrapperRequest wrapperRequest) {
         WrapperDto dto = new WrapperDto(wrapperRequest.name(), wrapperRequest.price());
@@ -34,6 +35,7 @@ public class WrapperController implements WrapperControllerDocs {
     }
 
     //수정
+    @RequiredAdmin
     @PutMapping("/admin/wrappers/{id}")
     public ResponseEntity<WrapperResponse> modifyWrapper(@PathVariable(name = "id") Long wrapperId,
                                          @Valid @RequestBody WrapperRequest wrapperRequest) {
@@ -43,6 +45,7 @@ public class WrapperController implements WrapperControllerDocs {
     }
 
     //삭제
+    @RequiredAdmin
     @DeleteMapping("/admin/wrappers/{id}")
     public ResponseEntity<Void> deleteWrapper(@PathVariable(name = "id") Long id) {
         wrapperService.deleteWrapper(id);
