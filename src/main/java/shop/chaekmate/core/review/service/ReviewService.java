@@ -47,8 +47,8 @@ public class ReviewService {
 
         return new CreateReviewResponse(
                 saved.getId(),
-                saved.getMemberId().getId(),
-                saved.getOrderedBookId().getId(),
+                saved.getMember().getId(),
+                saved.getOrderedBook().getId(),
                 saved.getComment(),
                 saved.getRating()
         );
@@ -62,8 +62,8 @@ public class ReviewService {
 
         return new ReadReviewResponse(
                 review.getId(),
-                review.getMemberId().getId(),
-                review.getOrderedBookId().getId(),
+                review.getMember().getId(),
+                review.getOrderedBook().getId(),
                 review.getComment(),
                 review.getRating(),
                 review.getCreatedAt(),
@@ -77,8 +77,8 @@ public class ReviewService {
         return reviewRepository.findAll(pageable)
                 .map(review -> new ReadReviewResponse(
                         review.getId(),
-                        review.getMemberId().getId(),
-                        review.getOrderedBookId().getId(),
+                        review.getMember().getId(),
+                        review.getOrderedBook().getId(),
                         review.getComment(),
                         review.getRating(),
                         review.getCreatedAt(),
@@ -97,8 +97,8 @@ public class ReviewService {
 
         return new UpdateReviewResponse(
                 review.getId(),
-                review.getMemberId().getId(),
-                review.getOrderedBookId().getId(),
+                review.getMember().getId(),
+                review.getOrderedBook().getId(),
                 review.getComment(),
                 review.getRating()
         );

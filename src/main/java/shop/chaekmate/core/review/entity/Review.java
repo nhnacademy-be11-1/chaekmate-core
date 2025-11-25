@@ -34,13 +34,13 @@ public class Review extends BaseEntity {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member memberId;
+    private Member member;
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "ordered_book_id", nullable = false)
-    private OrderedBook orderedBookId;
+    private OrderedBook orderedBook;
 
-    @Column(columnDefinition = "comment", nullable = false)
+    @Column(nullable = false)
     private String comment;
 
     @Column(nullable = false)
@@ -48,8 +48,8 @@ public class Review extends BaseEntity {
 
     public static Review createReview(Member member, OrderedBook orderedBook, String comment, Integer rating) {
         Review review = new Review();
-        review.memberId = member;
-        review.orderedBookId = orderedBook;
+        review.member = member;
+        review.orderedBook = orderedBook;
         review.comment = comment;
         review.rating = rating;
         return review;

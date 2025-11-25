@@ -29,7 +29,7 @@ import static shop.chaekmate.core.book.entity.QBookCategory.bookCategory;
 import static shop.chaekmate.core.book.entity.QBookTag.bookTag;
 import static shop.chaekmate.core.order.entity.QOrder.order;
 import static shop.chaekmate.core.order.entity.QOrderedBook.orderedBook;
-import static shop.chaekmate.core.order.entity.QReview.review;
+import static shop.chaekmate.core.review.entity.QReview.review;
 
 @Repository
 @RequiredArgsConstructor
