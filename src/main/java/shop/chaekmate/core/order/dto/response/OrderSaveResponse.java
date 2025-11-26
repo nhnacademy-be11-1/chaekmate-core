@@ -1,4 +1,4 @@
-package shop.chaekmate.core.order.dto.response;// package: shop.chaekmate.core.order.dto.response;
+package shop.chaekmate.core.order.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

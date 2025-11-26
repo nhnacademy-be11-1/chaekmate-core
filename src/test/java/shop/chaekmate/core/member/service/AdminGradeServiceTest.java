@@ -16,12 +16,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.test.context.ActiveProfiles;
 import shop.chaekmate.core.member.dto.request.CreateGradeRequest;
 import shop.chaekmate.core.member.dto.request.UpdateGradeRequest;
 import shop.chaekmate.core.member.entity.Grade;
 import shop.chaekmate.core.member.exception.GradeNotFoundException;
 import shop.chaekmate.core.member.repository.GradeRepository;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class AdminGradeServiceTest {
@@ -55,7 +57,7 @@ class AdminGradeServiceTest {
     void 등급_수정_성공() {
         Long gradeId = 1L;
 
-        Grade grade = spy(new Grade("브론즈", (byte) 1, 0));
+        Grade grade = spy(new Grade("브론즈", (byte) 1, 100));
         UpdateGradeRequest req = new UpdateGradeRequest("실버", (byte) 3, 10000);
 
         given(gradeRepository.findById(gradeId)).willReturn(Optional.of(grade));
@@ -86,8 +88,12 @@ class AdminGradeServiceTest {
     void 등급_삭제_성공() {
         Long gradeId = 1L;
 
+        Grade grade = spy(new Grade("브론즈", (byte) 1, 100));
+
+        given(gradeRepository.findById(gradeId)).willReturn(Optional.of(grade));
+
         adminGradeService.deleteGrade(gradeId);
 
-        verify(gradeRepository).deleteById(gradeId);
+        verify(gradeRepository).delete(grade);
     }
 }

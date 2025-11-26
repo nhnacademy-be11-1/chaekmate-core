@@ -8,5 +8,5 @@ public interface PaymentAbortedResponseBase extends PaymentResponse {
 
     String message();
 
-    LocalDateTime approvedAt();
+    LocalDateTime abortedAt();
 }

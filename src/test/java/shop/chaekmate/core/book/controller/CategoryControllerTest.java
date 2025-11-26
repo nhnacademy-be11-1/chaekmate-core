@@ -9,10 +9,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,6 +37,15 @@ class CategoryControllerTest {
     private ObjectMapper objectMapper;
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    CacheManager cacheManager;
+
+    void clearCache() {
+        cacheManager.getCacheNames().forEach(name ->
+                Objects.requireNonNull(cacheManager.getCache(name)).clear()
+        );
+    }
 
     @Test
     void 페이지네이션으로_카테고리_조회_요청_성공() throws Exception {
@@ -70,6 +81,8 @@ class CategoryControllerTest {
         mockMvc.perform(get("/categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].name").value("Test Category"));
+
+        clearCache();
     }
 
     @Test

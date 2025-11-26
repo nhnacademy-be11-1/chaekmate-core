@@ -1,4 +1,4 @@
-package shop.chaekmate.core.order.entity;
+package shop.chaekmate.core.review.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -18,6 +18,11 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 import shop.chaekmate.core.member.entity.Member;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
+import shop.chaekmate.core.order.entity.OrderedBook;
 
 @Getter
 @Table(name = "review")
@@ -44,4 +49,21 @@ public class Review extends BaseEntity {
 
     @Column(nullable = false)
     private int rating;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewImage> reviewImages = new ArrayList<>();
+
+    public static Review createReview(Member member, OrderedBook orderedBook, String comment, Integer rating) {
+        Review review = new Review();
+        review.member = member;
+        review.orderedBook = orderedBook;
+        review.comment = comment;
+        review.rating = rating;
+        return review;
+    }
+
+    public void updateReview(String comment, Integer rating) {
+        this.comment = comment;
+        this.rating = rating;
+    }
 }

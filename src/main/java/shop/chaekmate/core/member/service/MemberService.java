@@ -61,6 +61,9 @@ public class MemberService {
                 platformType
         );
         Member savedMember = memberRepository.save(member);
+        Grade grade = gradeRepository.findByUpgradeStandardAmount(0).orElseThrow(GradeConfigurationException::new);
+        MemberGradeHistory memberGradeHistory = new MemberGradeHistory(member, grade, "회원가입");
+        memberGradeHistoryRepository.save(memberGradeHistory);
 
         MemberResponse memberResponse = new MemberResponse(
                 savedMember.getId(),

@@ -17,7 +17,7 @@ import shop.chaekmate.core.book.entity.QBook;
 
 import java.util.List;
 import shop.chaekmate.core.book.entity.QBookImage;
-import shop.chaekmate.core.order.entity.QReview;
+import shop.chaekmate.core.review.entity.QReview;
 
 @Repository
 @RequiredArgsConstructor
@@ -43,7 +43,6 @@ public class AdminBookRepositoryImpl {
         if (req.getKeyword() != null && !req.getKeyword().isBlank()) {
             builder.and(
                     book.title.containsIgnoreCase(req.getKeyword())
-                            // 저자 동시 검색 .or(book.author.containsIgnoreCase(req.getKeyword()))
             );
         }
 
