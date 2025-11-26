@@ -10,10 +10,7 @@ import shop.chaekmate.core.common.dto.ErrorResponse;
 
 
 import io.jsonwebtoken.JwtException;
-import shop.chaekmate.core.member.exception.AddressLimitExceededException;
-import shop.chaekmate.core.member.exception.DuplicatedEmailException;
-import shop.chaekmate.core.member.exception.DuplicatedLoginIdException;
-import shop.chaekmate.core.member.exception.MemberErrorCode;
+import shop.chaekmate.core.member.exception.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -71,5 +68,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAddressLimitExceededException(AddressLimitExceededException e) {
         log.warn("[AddressLimitExceededException] {}", e.getMessage());
         return ResponseEntity.status(e.getErrorCode().getStatus()).body(ErrorResponse.from(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(GradeConfigurationException.class)
+    public ResponseEntity<ErrorResponse> handleGradeConfigurationException(GradeConfigurationException e) {
+        log.error("[GradeConfigurationException] {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.from(
+                e.getErrorCode(),
+                "현재 시스템 설정 문제로 인해 회원가입이 불가능합니다. 잠시 후 다시 시도해주세요."
+        );
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(response);
     }
 }

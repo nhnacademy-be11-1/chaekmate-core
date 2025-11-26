@@ -1,9 +1,11 @@
 package shop.chaekmate.core.common;
 
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
+@ActiveProfiles("test")
 public final class TestRequestPostProcessors {
 
     private TestRequestPostProcessors() {}
