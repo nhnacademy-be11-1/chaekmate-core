@@ -73,6 +73,9 @@ public class OrderedBook extends BaseEntity {
     @Column(nullable = false)
     private OrderedBookStatusType unitStatus;
 
+    @Column(length = 255)
+    private String reason;
+
     public static OrderedBook createOrderDetailReady(
             Order order,
             Book book,
@@ -144,5 +147,9 @@ public class OrderedBook extends BaseEntity {
     // 반품 완료
     public void markReturned() {
         this.unitStatus = OrderedBookStatusType.RETURNED;
+    }
+
+    public void updateReason(String reason) {
+        this.reason = reason;
     }
 }

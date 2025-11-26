@@ -117,42 +117,45 @@ public class TossPaymentProvider implements PaymentProvider {
         int pointCancelAmount = calculatePointCancelAmount(payment, cancelAmount, cashCancelAmount);
 
         log.info("[TOSS] 취소할 금액 분배 - cashCancel={}, pointCancel={}", cashCancelAmount, pointCancelAmount);
+        LocalDateTime canceledAt = LocalDateTime.now();
 
-        // 현금만 취소 요청
-        Map<String, Object> body = new HashMap<>(Map.of(
-                "cancelReason", request.cancelReason(),
-                "cancelAmount", cashCancelAmount
-        ));
+        if(cashCancelAmount>0){
+            // 현금만 취소 요청
+            Map<String, Object> body = new HashMap<>(Map.of(
+                    "cancelReason", request.cancelReason(),
+                    "cancelAmount", cashCancelAmount
+            ));
 
-        JsonNode apiResponse;
+            JsonNode apiResponse;
 
-        try {
-            apiResponse = webClient.post()
-                    .uri(tossBaseUrl + "/payments/" + request.paymentKey() + "/cancel")
-                    .header("Authorization", getAuthorization())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(body)
-                    .retrieve()
-                    .bodyToMono(JsonNode.class)
-                    .block();
+            try {
+                apiResponse = webClient.post()
+                        .uri(tossBaseUrl + "/payments/" + request.paymentKey() + "/cancel")
+                        .header("Authorization", getAuthorization())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(body)
+                        .retrieve()
+                        .bodyToMono(JsonNode.class)
+                        .block();
 
-        } catch (WebClientResponseException e) {
-            String errorMessage = parseErrorMessage(e);
-            log.error("[TOSS] 결제 취소 실패 - paymentKey={}, 사유={}", request.paymentKey(), errorMessage);
-            throw new IllegalStateException(errorMessage);
+            } catch (WebClientResponseException e) {
+                String errorMessage = parseErrorMessage(e);
+                log.error("[TOSS] 결제 취소 실패 - paymentKey={}, 사유={}", request.paymentKey(), errorMessage);
+                throw new IllegalStateException(errorMessage);
+            }
+
+            if (apiResponse == null) {
+                throw new IllegalStateException("Toss 서버에서 빈 응답이 도착했습니다.");
+            }
+
+            String status = apiResponse.get("status").asText();
+            JsonNode cancelNode = apiResponse.get("cancels").get(0);
+            long tossCanceledAmount = cancelNode.get("cancelAmount").asLong();
+            canceledAt = OffsetDateTime.parse(cancelNode.get("canceledAt").asText()).toLocalDateTime();
+
+            log.info("[TOSS] TOSS 취소 성공 - paymentKey={}, pgCanceled={}, status={} canceledAt={}", payment.getPaymentKey(),
+                    tossCanceledAmount, status, canceledAt);
         }
-
-        if (apiResponse == null) {
-            throw new IllegalStateException("Toss 서버에서 빈 응답이 도착했습니다.");
-        }
-
-        String status = apiResponse.get("status").asText();
-        JsonNode cancelNode = apiResponse.get("cancels").get(0);
-        long tossCanceledAmount = cancelNode.get("cancelAmount").asLong();
-        LocalDateTime canceledAt = OffsetDateTime.parse(cancelNode.get("canceledAt").asText()).toLocalDateTime();
-
-        log.info("[TOSS] TOSS 취소 성공 - paymentKey={}, pgCanceled={}, status={} canceledAt={}", payment.getPaymentKey(),
-                tossCanceledAmount, status, canceledAt);
 
         payment.applyCancel(cashCancelAmount, pointCancelAmount);
 

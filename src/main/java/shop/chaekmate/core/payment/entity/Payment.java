@@ -40,7 +40,7 @@ public class Payment extends BaseEntity {
     @Column(name = "payment_type", nullable = false, length = 30)
     private PaymentMethodType paymentType;
 
-    @Column(name = "payment_key", length = 200)
+    @Column(length = 200)
     private String paymentKey;
 
     @Enumerated(STRING)
@@ -53,6 +53,9 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private int pointUsed;
 
+    @Column(nullable = false)
+    private boolean deliveryFeeAdjusted = false;
+
     // 성공
     public static Payment createApproved(String orderNumber, String paymentKey, PaymentMethodType type,
                                          long totalAmount, int pointUsed) {
@@ -63,6 +66,7 @@ public class Payment extends BaseEntity {
         payment.totalAmount = totalAmount;
         payment.paymentStatus = PaymentStatusType.APPROVED;
         payment.pointUsed = pointUsed;
+        payment.deliveryFeeAdjusted = false;
         return payment;
     }
 
@@ -75,7 +79,12 @@ public class Payment extends BaseEntity {
         payment.paymentType = type;
         payment.totalAmount = totalAmount;
         payment.paymentStatus = PaymentStatusType.ABORTED;
+        payment.deliveryFeeAdjusted = false;
         return payment;
+    }
+
+    public void markDeliveryFeeAdjusted() {
+        this.deliveryFeeAdjusted = true;
     }
 
     public void applyCancel(long cashCancelAmount, int pointCancelAmount) {
