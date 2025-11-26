@@ -18,6 +18,7 @@ import shop.chaekmate.core.review.entity.Review;
 import shop.chaekmate.core.review.exception.MemberNotFoundException;
 import shop.chaekmate.core.review.exception.OrderedBookNotFoundException;
 import shop.chaekmate.core.review.exception.ReviewNotFoundException;
+import shop.chaekmate.core.review.repository.ReviewImageRepository;
 import shop.chaekmate.core.review.repository.ReviewRepository;
 
 @Service
@@ -26,6 +27,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
     private final OrderedBookRepository orderedBookRepository;
+    private final ReviewImageRepository reviewImageRepository;
 
     //Review 생성 기능
     @Transactional
@@ -109,6 +111,8 @@ public class ReviewService {
     public void deleteReviewById(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewNotFoundException::new);
+
+        reviewImageRepository.deleteByReview(review); // 리뷰 이미지 삭제 추가
         reviewRepository.delete(review);
     }
 
