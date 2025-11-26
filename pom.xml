@@ -29,6 +29,15 @@
     <properties>
         <java.version>21</java.version>
     </properties>
+    <repositories>
+        <repository>
+            <id>chaekmate-logstorage-repo</id>
+            <url>https://raw.githubusercontent.com/nhnacademy-be11-1/chaekmate-logstorage/main/maven-repo</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -160,7 +169,11 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.chaekmate</groupId>
+            <artifactId>chaekmate-logstorage</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
