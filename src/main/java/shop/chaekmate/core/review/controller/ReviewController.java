@@ -44,13 +44,6 @@ public class ReviewController implements ReviewControllerDocs {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/reviews/paged")
-    public ResponseEntity<PageResponse<ReadReviewResponse>> readAllReviewsByPage(
-            @PageableDefault Pageable pageable
-    ) {
-        return ResponseEntity.ok(PageResponse.from(reviewService.readAllReviewsByPage(pageable)));
-    }
-
     @PutMapping("/reviews/{id}")
     public ResponseEntity<UpdateReviewResponse> updateReview(
             @PathVariable(name = "id") Long reviewId,
@@ -59,6 +52,14 @@ public class ReviewController implements ReviewControllerDocs {
         UpdateReviewResponse response = reviewService.updateReview(reviewId, request);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/books/{bookId}/reviews")
+    public ResponseEntity<PageResponse<ReadReviewResponse>> readReviewsByBookId(
+            @PathVariable("bookId") Long bookId,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        return ResponseEntity.ok(PageResponse.from(reviewService.readReviewsByBookId(bookId, pageable)));
+    }
+
 
     @DeleteMapping("/reviews/{id}")
     public ResponseEntity<Void> deleteReview(
