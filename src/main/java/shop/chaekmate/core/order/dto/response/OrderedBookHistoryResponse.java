@@ -3,6 +3,7 @@ package shop.chaekmate.core.order.dto.response;
 import shop.chaekmate.core.order.entity.OrderedBook;
 
 public record OrderedBookHistoryResponse(
+        Long orderedBookId,
         Long bookId,
         String bookTitle,
         Integer quantity,
@@ -38,6 +39,7 @@ public record OrderedBookHistoryResponse(
         Integer pointUsed = ob.getPointUsed() != null ? ob.getPointUsed() : 0;
 
         return new OrderedBookHistoryResponse(
+                ob.getId(),
                 ob.getBook().getId(),
                 ob.getBook().getTitle(),
                 ob.getQuantity(),

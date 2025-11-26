@@ -18,6 +18,10 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.common.entity.BaseEntity;
 import shop.chaekmate.core.member.entity.Member;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import shop.chaekmate.core.order.entity.OrderedBook;
 
 @Getter
@@ -40,11 +44,14 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "ordered_book_id", nullable = false)
     private OrderedBook orderedBook;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String comment;
 
     @Column(nullable = false)
     private int rating;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewImage> reviewImages = new ArrayList<>();
 
     public static Review createReview(Member member, OrderedBook orderedBook, String comment, Integer rating) {
         Review review = new Review();
