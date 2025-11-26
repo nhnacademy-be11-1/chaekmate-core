@@ -65,6 +65,7 @@ public class OrderService {
             member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         }
 
+
         List<Long> bookIds = request.orderedBooks().stream()
                 .map(OrderedBookSaveRequest::bookId)
                 .toList();

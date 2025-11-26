@@ -58,13 +58,20 @@ public interface ReviewControllerDocs {
     );
 
     @Operation(
-            summary = "리뷰 페이지네이션 조회",
-            description = "모든 리뷰를 페이지네이션으로 조회합니다.",
+            summary = "도서별 리뷰 페이지네이션 조회",
+            description = "특정 도서의 리뷰를 페이지네이션으로 조회합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "페이지네이션 조회 성공")
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+                    @ApiResponse(responseCode = "404", description = "해당 도서를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    ResponseEntity<PageResponse<ReadReviewResponse>> readAllReviewsByPage(Pageable pageable);
+    ResponseEntity<PageResponse<ReadReviewResponse>> readReviewsByBookId(
+            @Parameter(description = "조회할 도서 ID", example = "1")
+            @PathVariable("bookId") Long bookId,
+            @Parameter(description = "페이징 정보 (page: 페이지 번호, size: 페이지 크기)", example = "page=0&size=10")
+            Pageable pageable
+    );
 
     @Operation(
             summary = "리뷰 수정",
