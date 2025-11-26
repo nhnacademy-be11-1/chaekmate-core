@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import shop.chaekmate.core.member.dto.request.CreateAddressRequest;
 import shop.chaekmate.core.member.dto.response.AddressResponse;
 import shop.chaekmate.core.member.entity.Member;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.*;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class AddressServiceTest {
