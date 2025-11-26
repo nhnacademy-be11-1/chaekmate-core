@@ -73,7 +73,7 @@ public class AdminBookRepositoryImpl {
                                         .where(firstImage.book.eq(book))
                         ))
                 )
-                .leftJoin(review).on(review.orderedBookId.book.eq(book))
+                .leftJoin(review).on(review.orderedBook.book.eq(book))
                 .where(builder)
                 .groupBy(book.id, book.title, book.author, firstImage.imageUrl)
                 .orderBy(orderSpecifier)

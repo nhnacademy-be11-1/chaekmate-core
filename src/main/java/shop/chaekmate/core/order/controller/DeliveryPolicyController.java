@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import shop.chaekmate.core.common.annotation.RequiredAdmin;
 import shop.chaekmate.core.order.controller.docs.DeliveryControllerDocs;
 import shop.chaekmate.core.order.dto.request.DeliveryPolicyDto;
 import shop.chaekmate.core.order.dto.request.DeliveryPolicyRequest;
@@ -24,6 +25,7 @@ public class DeliveryPolicyController implements DeliveryControllerDocs {
 
     private final DeliveryPolicyService deliveryPolicyService;
 
+    @RequiredAdmin
     @PostMapping("/admin/delivery-policy")
     public ResponseEntity<DeliveryPolicyResponse> createDeliveryPolicy(
             @Valid @RequestBody DeliveryPolicyRequest request) {
@@ -32,6 +34,7 @@ public class DeliveryPolicyController implements DeliveryControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @RequiredAdmin
     @GetMapping("/admin/delivery-policy")
     public ResponseEntity<Page<DeliveryPolicyHistoryResponse>> getDeliveryPolicies(
             @PageableDefault(size = 15) Pageable pageable) {
