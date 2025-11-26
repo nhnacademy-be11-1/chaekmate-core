@@ -1,9 +1,5 @@
 # Core/Eureka Server Port (prod) : "배포설명" 확인
 
-# Core Server Port
-server:
-  port: ${PORT_NUMBER}
-
 # Eureka Server URL
 eureka:
   client:
