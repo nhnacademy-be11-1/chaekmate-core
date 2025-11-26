@@ -1,31 +1,42 @@
 package shop.chaekmate.core.payment.event;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import shop.chaekmate.core.book.entity.Book;
+import shop.chaekmate.core.order.entity.Order;
+import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.repository.OrderRepository;
+import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import shop.chaekmate.core.order.service.OrderService;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
+import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class PaymentEventListener {
 
+//    private final OrderRepository orderRepository;
+//    private final OrderedBookRepository orderedBookRepository;
     private final OrderService orderService;
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    // 결제 성공
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handlePaymentApproved(PaymentApprovedEvent event) {
         PaymentApproveResponse res = event.approveResponse();
+
         log.info("[EVENT] 결제 승인 수신 - 주문ID: {}", res.orderNumber());
-        
-        //주문 로직 작성
-        orderService.saveOrder(res);
+        // 이메일 전송
+        // 두레이 알림
     }
-
-
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handlePaymentAborted(String orderNumber) {
+        orderService.applyPaymentFail(orderNumber);
+    }
     /*
     주문 내역 클릭
     주문 내역에는 하나의 주문번호 안에 여러 품목들이 있음
@@ -37,10 +48,12 @@ public class PaymentEventListener {
     3. 포인트 반환
      */
 
+    // 결제 취소 및 환불
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentCanceled(PaymentCanceledEvent event) {
         PaymentCancelResponse res = event.cancelResponse();
         log.info("[EVENT] 결제 취소 수신 - 주문ID: {}", res.orderNumber());
+
         // 주문 상태 변경
 
     }

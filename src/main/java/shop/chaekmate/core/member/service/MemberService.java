@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.chaekmate.core.member.dto.request.CreateMemberGradeHistoryRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.dto.response.MemberResponse;
+import shop.chaekmate.core.member.entity.Grade;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.MemberGradeHistory;
 import shop.chaekmate.core.member.entity.type.PlatformType;
@@ -30,16 +32,38 @@ public class MemberService {
 
     @Transactional
     public void createMember(CreateMemberRequest request) {
+        String password;
+        PlatformType platformType;
+
+        // PAYCO 회원가입 여부 확인 (loginId가 UUID 형식이면 PAYCO 회원가입)
+        boolean isPaycoSignup = request.loginId().matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+
+        if (isPaycoSignup) {
+            // PAYCO 회원가입: password 값은 무시하고 랜덤 password 생성
+            password = encoder.encode(generateRandomPassword());
+            platformType = PlatformType.PAYCO;
+        } else {
+            // 일반 회원가입: password가 필수
+            if (request.password() == null || request.password().isEmpty()) {
+                throw new InvalidMemberRequestException();
+            }
+            password = encoder.encode(request.password());
+            platformType = PlatformType.LOCAL;
+        }
+
         Member member = new Member(
                 request.loginId(),
-                encoder.encode(request.password()),
+                password,
                 request.name(),
                 request.phone(),
                 request.email(),
                 request.birthDate(),
-                PlatformType.LOCAL
+                platformType
         );
         Member savedMember = memberRepository.save(member);
+        Grade grade = gradeRepository.findByUpgradeStandardAmount(0).orElseThrow(GradeConfigurationException::new);
+        MemberGradeHistory memberGradeHistory = new MemberGradeHistory(member, grade, "회원가입");
+        memberGradeHistoryRepository.save(memberGradeHistory);
 
         MemberResponse memberResponse = new MemberResponse(
                 savedMember.getId(),
@@ -54,6 +78,16 @@ public class MemberService {
 
         // 회원가입 이벤트 발행
         eventPublisher.publishMemberCreated(memberResponse);
+    }
+
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        StringBuilder password = new StringBuilder();
+        java.util.Random random = new java.util.Random();
+        for (int i = 0; i < 20; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return password.toString();
     }
 
     public boolean isDuplicateLoginId(String loginId) {
@@ -73,17 +107,32 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
+    public MemberResponse getMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        return MemberResponse.from(member);
+    }
+
+    @Transactional(readOnly = true)
     public GradeResponse getMemberGrade(Long memberId) {
         MemberGradeHistory memberGradeHistory = memberGradeHistoryRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
                 .orElseThrow(MemberGradeHistoryNotFoundException::new);
+        Long gradeId = memberGradeHistory.getGrade().getId();
         String name = memberGradeHistory.getGrade().getName();
         Byte pointRate = memberGradeHistory.getGrade().getPointRate();
         int upgradeStandardAmount = memberGradeHistory.getGrade().getUpgradeStandardAmount();
 
-        return new GradeResponse(name, pointRate, upgradeStandardAmount);
+        return new GradeResponse(gradeId, name, pointRate, upgradeStandardAmount);
     }
 
     public List<GradeResponse> getAllGrades() {
-        return gradeRepository.findAll().stream().map(GradeResponse::from).toList();
+        return gradeRepository.findAllByOrderByPointRate().stream().map(GradeResponse::from).toList();
+    }
+
+    @Transactional
+    public void createMemberGradeHistory(CreateMemberGradeHistoryRequest request) {
+        Member member = memberRepository.findById(request.memberId()).orElseThrow(MemberNotFoundException::new);
+        Grade grade = gradeRepository.findByName(request.gradeName()).orElseThrow(GradeNotFoundException::new);
+        String reason = request.reason();
+        memberGradeHistoryRepository.save(new MemberGradeHistory(member, grade, reason));
     }
 }

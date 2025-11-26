@@ -1,10 +1,11 @@
 package shop.chaekmate.core.payment.service;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.chaekmate.core.order.service.OrderService;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
 import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
 import shop.chaekmate.core.payment.dto.response.base.PaymentResponse;
@@ -30,19 +31,23 @@ public class PaymentService {
     private final PaymentErrorService paymentErrorService;
     private final PaymentRepository paymentRepository;
     private final PaymentHistoryRepository paymentHistoryRepository;
+    private final OrderService orderService;
 
-    @Transactional
-    public PaymentResponse approve(PaymentApproveRequest request) {
+
+    public PaymentResponse approve(Long memberId, PaymentApproveRequest request) {
         log.info("[결제 승인 요청] 주문번호={}, 결제수단={}, 결제금액={}, 포인트사용={}",
                 request.orderNumber(), request.paymentType(), request.amount(), request.pointUsed());
 
         PaymentProvider provider = providerFactory.getProvider(request.paymentType());
 
         try {
+            orderService.verifyOrderStock(request.orderNumber());
+
             PaymentApproveResponse response = provider.approve(request);
 
-            // todo 수정부분 eventResponse 추가해야함
-            // 이벤트 발행 -> 주문 서비스 이동
+            orderService.applyPaymentSuccess(response.orderNumber());
+
+            // 이벤트 발행
             eventPublisher.publishPaymentApproved(response);
             log.info("[결제 승인 완료 및 이벤트 발행] 주문번호={}, 상태={}", response.orderNumber(), response.status());
 
@@ -50,22 +55,23 @@ public class PaymentService {
 
         } catch (Exception e) {
             log.error("[결제 승인 실패] 주문번호={}, 사유={}", request.orderNumber(), e.getMessage());
-            String[] error = e.getMessage().split(":");
 
+            String msg = e.getMessage();
+            if (msg == null || !msg.contains(":")) {
+                msg = "UNKNOWN:" + (msg == null ? "결제 요청 중 오류가 발생했습니다." : msg);
+            }
+
+            String[] error = msg.split(":", 2);
             //실패 로그 저장 - 새 트랜잭션으로 분리
-            paymentErrorService.saveAbortedPayment(request, e.getMessage());
+            paymentErrorService.saveAbortedPayment(request, msg);
 
             // 오류 응답 반환
-            return new PaymentAbortedResponse(
-                    error[0],
-                    error[1],
-                    OffsetDateTime.now()
-            );
+            return new PaymentAbortedResponse(error[0], error[1], LocalDateTime.now());
         }
     }
 
     @Transactional
-    public PaymentCancelResponse cancel(PaymentCancelRequest request) {
+    public PaymentCancelResponse cancel(Long memberId, PaymentCancelRequest request) {
         // 결제사 취소 API 연동 취소 시 결제 키 필요(현재는 x)
         log.info("[결제 취소 요청] 주문번호={}, 금액={}, 사유={}",
                 request.orderNumber(), request.cancelAmount(), request.cancelReason());
@@ -73,7 +79,7 @@ public class PaymentService {
         Payment payment = paymentRepository.findByOrderNumber(request.orderNumber())
                 .orElseThrow(NotFoundOrderNumberException::new);
 
-        OffsetDateTime now = OffsetDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
         long canceledAmount = payment.cancelOrPartial(request.cancelAmount());
 

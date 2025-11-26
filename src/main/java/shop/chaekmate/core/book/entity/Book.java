@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.book.dto.request.BookUpdateRequest;
+import shop.chaekmate.core.book.exception.InsufficientStockException;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -97,5 +98,18 @@ public class Book extends BaseEntity {
         this.isWrappable = request.isWrappable();
         this.isSaleEnd = request.isSaleEnd();
         this.stock = request.stock();
+    }
+
+    // 재고 체크
+    public boolean hasStock(int quantity) {
+        return this.stock >= quantity;
+    }
+
+    // 재고 처리
+    public void decreaseStock(int qty) {
+        if (this.stock < qty) {
+            throw new InsufficientStockException();
+        }
+        this.stock -= qty;
     }
 }

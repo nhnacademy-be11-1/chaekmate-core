@@ -20,17 +20,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.entity.Grade;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.entity.MemberGradeHistory;
 import shop.chaekmate.core.member.entity.type.PlatformType;
+import shop.chaekmate.core.member.event.MemberEventPublisher;
 import shop.chaekmate.core.member.exception.MemberGradeHistoryNotFoundException;
 import shop.chaekmate.core.member.repository.GradeRepository;
 import shop.chaekmate.core.member.repository.MemberGradeHistoryRepository;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class MemberServiceTest {
@@ -44,6 +47,9 @@ class MemberServiceTest {
     @Mock
     GradeRepository gradeRepository;
 
+    @Mock
+    MemberEventPublisher memberEventPublisher;
+
     @InjectMocks
     MemberService memberService;
 
@@ -53,6 +59,10 @@ class MemberServiceTest {
                 "test", "password", "username", "01012345678", "j@test.com",
                 LocalDate.of(2003, 5, 1)
         );
+
+        Grade grade = spy(new Grade("브론즈", (byte) 1, 0));
+
+        given(gradeRepository.findByUpgradeStandardAmount(0)).willReturn(Optional.of(grade));
 
         given(memberRepository.save(any(Member.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
@@ -146,7 +156,7 @@ class MemberServiceTest {
         Grade general = new Grade("일반");
         Grade royal = new Grade("로얄");
 
-        given(gradeRepository.findAll())
+        given(gradeRepository.findAllByOrderByPointRate())
                 .willReturn(List.of(general, royal));
 
         List<GradeResponse> result = memberService.getAllGrades();

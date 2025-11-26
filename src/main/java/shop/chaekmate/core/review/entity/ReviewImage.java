@@ -1,4 +1,4 @@
-package shop.chaekmate.core.order.entity;
+package shop.chaekmate.core.review.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -35,4 +35,9 @@ public class ReviewImage extends BaseEntity {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String imageUrl;
+
+    public ReviewImage(Review review, String imageUrl) {
+        this.review = review;
+        this.imageUrl = imageUrl;
+    }
 }

@@ -4,7 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -52,9 +52,9 @@ class PaymentHistoryControllerTest {
                 Payment.createApproved("test_order_number_3", "test_payment_key_random3", PaymentMethodType.POINT,
                         0L, 10000)
         );
-        paymentHistoryRepository.save(PaymentHistory.approved(payment1, 29800L, OffsetDateTime.now()));
-        paymentHistoryRepository.save(PaymentHistory.approved(payment2, 15000L, OffsetDateTime.now()));
-        paymentHistoryRepository.save(PaymentHistory.approved(payment3, 10000L, OffsetDateTime.now()));
+        paymentHistoryRepository.save(PaymentHistory.approved(payment1, 29800L, LocalDateTime.now()));
+        paymentHistoryRepository.save(PaymentHistory.approved(payment2, 15000L, LocalDateTime.now()));
+        paymentHistoryRepository.save(PaymentHistory.approved(payment3, 10000L, LocalDateTime.now()));
 
         mockMvc.perform(get("/admin/payments/histories")
                         .param("page", "0")
@@ -82,9 +82,9 @@ class PaymentHistoryControllerTest {
                         5000)
         );
 
-        paymentHistoryRepository.save(PaymentHistory.approved(toss1, 10000L, OffsetDateTime.now()));
-        paymentHistoryRepository.save(PaymentHistory.approved(toss2, 20000L, OffsetDateTime.now()));
-        paymentHistoryRepository.save(PaymentHistory.approved(point, 5000L, OffsetDateTime.now()));
+        paymentHistoryRepository.save(PaymentHistory.approved(toss1, 10000L, LocalDateTime.now()));
+        paymentHistoryRepository.save(PaymentHistory.approved(toss2, 20000L, LocalDateTime.now()));
+        paymentHistoryRepository.save(PaymentHistory.approved(point, 5000L, LocalDateTime.now()));
 
         mockMvc.perform(get("/admin/payments/histories")
                         .param("paymentType", PaymentMethodType.TOSS.name())
@@ -99,8 +99,8 @@ class PaymentHistoryControllerTest {
 
     @Test
     void 모든_결제수단_기간별_조회() throws Exception {
-        OffsetDateTime start = OffsetDateTime.now().minusDays(5);
-        OffsetDateTime end = OffsetDateTime.now().plusDays(1);
+        LocalDateTime start = LocalDateTime.now().minusDays(5);
+        LocalDateTime end = LocalDateTime.now().plusDays(1);
 
         Payment toss = paymentRepository.save(
                 Payment.createApproved("test_order_number1", "test_payment_key_random1", PaymentMethodType.TOSS, 18000L,
@@ -111,8 +111,8 @@ class PaymentHistoryControllerTest {
                         12000)
         );
 
-        paymentHistoryRepository.save(PaymentHistory.approved(toss, 18000L, OffsetDateTime.now().minusDays(2)));
-        paymentHistoryRepository.save(PaymentHistory.approved(point, 12000L, OffsetDateTime.now().minusDays(1)));
+        paymentHistoryRepository.save(PaymentHistory.approved(toss, 18000L, LocalDateTime.now().minusDays(2)));
+        paymentHistoryRepository.save(PaymentHistory.approved(point, 12000L, LocalDateTime.now().minusDays(1)));
 
         mockMvc.perform(get("/admin/payments/histories")
                         .param("start", start.toLocalDate().toString())
@@ -128,8 +128,8 @@ class PaymentHistoryControllerTest {
 
     @Test
     void 결제수단_기간별_조회() throws Exception {
-        OffsetDateTime start = OffsetDateTime.now().minusDays(7);
-        OffsetDateTime end = OffsetDateTime.now().plusDays(1);
+        LocalDateTime start = LocalDateTime.now().minusDays(7);
+        LocalDateTime end = LocalDateTime.now().plusDays(1);
 
         Payment toss1 = paymentRepository.save(
                 Payment.createApproved("test_order_number1", "test_payment_key_random1", PaymentMethodType.TOSS, 10000L,
@@ -145,9 +145,9 @@ class PaymentHistoryControllerTest {
         );
 
 
-        paymentHistoryRepository.save(PaymentHistory.approved(toss1, 10000L, OffsetDateTime.now().minusDays(5)));
-        paymentHistoryRepository.save(PaymentHistory.approved(toss2, 20000L, OffsetDateTime.now().minusDays(2)));
-        paymentHistoryRepository.save(PaymentHistory.approved(point, 5000L, OffsetDateTime.now().minusDays(3)));
+        paymentHistoryRepository.save(PaymentHistory.approved(toss1, 10000L, LocalDateTime.now().minusDays(5)));
+        paymentHistoryRepository.save(PaymentHistory.approved(toss2, 20000L, LocalDateTime.now().minusDays(2)));
+        paymentHistoryRepository.save(PaymentHistory.approved(point, 5000L, LocalDateTime.now().minusDays(3)));
 
         mockMvc.perform(get("/admin/payments/histories")
                         .param("paymentType", PaymentMethodType.POINT.name())

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,11 +12,14 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
+
 import shop.chaekmate.core.payment.dto.PaymentHistoryDto;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
 import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
@@ -48,15 +50,13 @@ class PaymentHistoryServiceTest {
         start = LocalDateTime.of(2025, 11, 1, 0, 0);
         end = LocalDateTime.of(2025, 11, 10, 23, 59);
 
-        var offset = java.time.ZoneOffset.ofHours(9);
-
         tossApproved = new PaymentHistoryDto(
                 "ORDER_NUMBER1",
                 PaymentMethodType.TOSS,
                 PaymentStatusType.APPROVED,
                 12000L,
                 null,
-                OffsetDateTime.of(2025, 11, 3, 10, 0, 0, 0, offset)
+                LocalDateTime.of(2025, 11, 3, 10, 0)
         );
         tossCanceled = new PaymentHistoryDto(
                 "ORDER_NUMBER2",
@@ -64,7 +64,7 @@ class PaymentHistoryServiceTest {
                 PaymentStatusType.CANCELED,
                 15000L,
                 "사용자 취소",
-                java.time.OffsetDateTime.of(2025, 11, 6, 15, 0, 0, 0, offset)
+                LocalDateTime.of(2025, 11, 6, 15, 0)
         );
         pointApproved = new PaymentHistoryDto(
                 "ORDER_NUMBER3",
@@ -72,7 +72,7 @@ class PaymentHistoryServiceTest {
                 PaymentStatusType.APPROVED,
                 20000L,
                 null,
-                java.time.OffsetDateTime.of(2025, 11, 4, 18, 0, 0, 0, offset)
+                LocalDateTime.of(2025, 11, 4, 18, 0)
         );
     }
 
@@ -80,6 +80,7 @@ class PaymentHistoryServiceTest {
     void 전체_결제_내역_조회() {
         Page<PaymentHistoryDto> mockPage =
                 new PageImpl<>(List.of(tossApproved, tossCanceled, pointApproved), pageable, 3);
+
         when(paymentHistoryRepository.findHistoriesByFilter(null, null, null, null, pageable))
                 .thenReturn(mockPage);
 
@@ -104,7 +105,9 @@ class PaymentHistoryServiceTest {
 
     @Test
     void 결제수단별_전체_조회() {
-        Page<PaymentHistoryDto> mockPage = new PageImpl<>(List.of(tossApproved, tossCanceled), pageable, 2);
+        Page<PaymentHistoryDto> mockPage =
+                new PageImpl<>(List.of(tossApproved, tossCanceled), pageable, 2);
+
         when(paymentHistoryRepository.findHistoriesByFilter(PaymentMethodType.TOSS, null, null, null, pageable))
                 .thenReturn(mockPage);
 
@@ -123,7 +126,9 @@ class PaymentHistoryServiceTest {
 
     @Test
     void 모든_결제수단_기간별_조회() {
-        Page<PaymentHistoryDto> mockPage = new PageImpl<>(List.of(tossApproved, pointApproved), pageable, 2);
+        Page<PaymentHistoryDto> mockPage =
+                new PageImpl<>(List.of(tossApproved, pointApproved), pageable, 2);
+
         when(paymentHistoryRepository.findHistoriesByFilter(null, null, start, end, pageable))
                 .thenReturn(mockPage);
 
@@ -137,8 +142,8 @@ class PaymentHistoryServiceTest {
                         .containsExactlyInAnyOrder(PaymentMethodType.TOSS, PaymentMethodType.POINT),
                 () -> assertThat(result.getContent())
                         .allMatch(dto ->
-                                dto.occurredAt().toLocalDateTime().isAfter(start.minusSeconds(1)) &&
-                                        dto.occurredAt().toLocalDateTime().isBefore(end.plusSeconds(1))
+                                dto.occurredAt().isAfter(start.minusSeconds(1)) &&
+                                        dto.occurredAt().isBefore(end.plusSeconds(1))
                         )
         );
 
@@ -148,7 +153,9 @@ class PaymentHistoryServiceTest {
 
     @Test
     void 결제수단_기간별_조회() {
-        Page<PaymentHistoryDto> mockPage = new PageImpl<>(List.of(tossApproved, tossCanceled), pageable, 2);
+        Page<PaymentHistoryDto> mockPage =
+                new PageImpl<>(List.of(tossApproved, tossCanceled), pageable, 2);
+
         when(paymentHistoryRepository.findHistoriesByFilter(PaymentMethodType.TOSS, null, start, end, pageable))
                 .thenReturn(mockPage);
 
@@ -161,8 +168,8 @@ class PaymentHistoryServiceTest {
                         .allMatch(dto -> dto.paymentType() == PaymentMethodType.TOSS),
                 () -> assertThat(result.getContent())
                         .allMatch(dto ->
-                                dto.occurredAt().toLocalDateTime().isAfter(start.minusSeconds(1)) &&
-                                        dto.occurredAt().toLocalDateTime().isBefore(end.plusSeconds(1))
+                                dto.occurredAt().isAfter(start.minusSeconds(1)) &&
+                                        dto.occurredAt().isBefore(end.plusSeconds(1))
                         )
         );
 
@@ -172,7 +179,9 @@ class PaymentHistoryServiceTest {
 
     @Test
     void 결제상태별_조회() {
-        Page<PaymentHistoryDto> mockPage = new PageImpl<>(List.of(tossCanceled), pageable, 1);
+        Page<PaymentHistoryDto> mockPage =
+                new PageImpl<>(List.of(tossCanceled), pageable, 1);
+
         when(paymentHistoryRepository.findHistoriesByFilter(null, PaymentStatusType.CANCELED, null, null, pageable))
                 .thenReturn(mockPage);
 

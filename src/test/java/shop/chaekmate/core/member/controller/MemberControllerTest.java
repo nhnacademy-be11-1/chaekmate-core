@@ -136,7 +136,7 @@ class MemberControllerTest {
     @Test
     void 회원_등급_조회_성공() throws Exception {
         Long memberId = 1L;
-        GradeResponse grade = new GradeResponse("일반", (byte) 1, 0);
+        GradeResponse grade = new GradeResponse(1L, "일반", (byte) 1, 0);
 
         given(memberService.getMemberGrade(memberId)).willReturn(grade);
 
@@ -150,10 +150,10 @@ class MemberControllerTest {
     @Test
     void 전체_등급_목록_조회_성공() throws Exception {
         var grades = List.of(
-                new GradeResponse("일반", (byte) 1, 0),
-                new GradeResponse("로얄", (byte) 2, 100_000),
-                new GradeResponse("골드", (byte) 3, 300_000),
-                new GradeResponse("플래티넘", (byte) 5, 500_000)
+                new GradeResponse(1L, "일반", (byte) 1, 0),
+                new GradeResponse(2L, "로얄", (byte) 2, 100_000),
+                new GradeResponse(3L, "골드", (byte) 3, 300_000),
+                new GradeResponse(3L, "플래티넘", (byte) 5, 500_000)
         );
 
         given(memberService.getAllGrades()).willReturn(grades);

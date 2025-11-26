@@ -3,6 +3,7 @@ package shop.chaekmate.core.order.controller;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static shop.chaekmate.core.common.TestRequestPostProcessors.asAdmin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
@@ -42,6 +43,7 @@ class WrapperControllerTest {
         WrapperRequest request = new WrapperRequest("테스트 포장지", 1000);
 
         mockMvc.perform(post("/admin/wrappers")
+                        .with(asAdmin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -56,6 +58,7 @@ class WrapperControllerTest {
         WrapperRequest request = new WrapperRequest("수정된 포장지", 2000);
 
         mockMvc.perform(put("/admin/wrappers/{id}", wrapper.getId())
+                        .with(asAdmin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -67,7 +70,8 @@ class WrapperControllerTest {
     void 포장지_삭제_성공() throws Exception {
         Wrapper wrapper = wrapperRepository.save(new Wrapper("테스트 포장지", 1000));
 
-        mockMvc.perform(delete("/admin/wrappers/{id}", wrapper.getId()))
+        mockMvc.perform(delete("/admin/wrappers/{id}", wrapper.getId())
+                        .with(asAdmin()))
                 .andExpect(status().isNoContent());
 
         Optional<Wrapper> deleteWrapper = wrapperRepository.findById(wrapper.getId());

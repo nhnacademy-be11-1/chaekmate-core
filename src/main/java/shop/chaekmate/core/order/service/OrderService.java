@@ -1,17 +1,187 @@
 package shop.chaekmate.core.order.service;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import shop.chaekmate.core.book.entity.Book;
+import shop.chaekmate.core.book.exception.BookNotFoundException;
+import shop.chaekmate.core.book.exception.InsufficientStockException;
+import shop.chaekmate.core.book.repository.BookRepository;
+import shop.chaekmate.core.member.entity.Member;
+import shop.chaekmate.core.member.repository.MemberRepository;
+import shop.chaekmate.core.order.dto.request.OrderSaveRequest;
+import shop.chaekmate.core.order.dto.request.OrderedBookSaveRequest;
+import shop.chaekmate.core.order.dto.response.OrderSaveResponse;
+import shop.chaekmate.core.order.entity.Order;
+import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.entity.Wrapper;
+import shop.chaekmate.core.order.exception.WrapperNotFoundException;
+import shop.chaekmate.core.order.repository.OrderRepository;
+import shop.chaekmate.core.order.repository.OrderedBookRepository;
+import shop.chaekmate.core.order.repository.WrapperRepository;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
+import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
+import shop.chaekmate.core.point.exception.MemberNotFoundException;
 
-@Slf4j
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class OrderService {
 
-    public void saveOrder(PaymentApproveResponse paymentApproveResponse) {
-        log.info("[ORDER] 결제 승인으로 주문 생성 - orderId={}, amount={}",
-                paymentApproveResponse.orderNumber(), paymentApproveResponse.totalAmount());
+    private final MemberRepository memberRepository;
+    private final BookRepository bookRepository;
+    private final WrapperRepository wrapperRepository;
+    private final OrderRepository orderRepository;
+    private final OrderedBookRepository orderedBookRepository;
 
-        // 실제로는 Order 엔티티 생성 + 저장
+    @Transactional
+    public OrderSaveResponse createOrder(Long memberId, OrderSaveRequest request) {
+
+        //예외 검증
+        for (OrderedBookSaveRequest item : request.orderedBooks()) {
+
+            Book book = bookRepository.findById(item.bookId()).orElseThrow(BookNotFoundException::new);
+
+            if (!book.hasStock(item.quantity())) {
+                throw new InsufficientStockException();
+            }
+        }
+
+        //주문번호
+        String orderNumber = NanoIdUtils.randomNanoId();
+
+        // null -> 비회원
+        Member member = null;
+
+        if (memberId != null) {
+            member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        }
+
+        List<Long> bookIds = request.orderedBooks().stream()
+                .map(OrderedBookSaveRequest::bookId)
+                .toList();
+
+        List<Long> wrapperIds = request.orderedBooks().stream()
+                .map(OrderedBookSaveRequest::wrapperId)
+                .filter(Objects::nonNull)
+                .toList();
+
+        Map<Long, Book> bookMap = bookRepository.findAllById(bookIds)
+                .stream()
+                .collect(Collectors.toMap(Book::getId, b -> b));
+
+        Map<Long, Wrapper> wrapperMap = wrapperIds.isEmpty()
+                ? Map.of()
+                : wrapperRepository.findAllById(wrapperIds)
+                        .stream()
+                        .collect(Collectors.toMap(Wrapper::getId, w -> w));
+
+        Order order = Order.createOrderReady(
+                member,
+                orderNumber,
+                request.ordererName(),
+                request.ordererPhone(),
+                request.ordererEmail(),
+                request.recipientName(),
+                request.recipientPhone(),
+                request.zipcode(),
+                request.streetName(),
+                request.detail(),
+                request.deliveryRequest(),
+                request.deliveryAt(),
+                request.deliveryFee(),
+                request.totalPrice()
+        );
+
+        Order savedOrder = orderRepository.save(order);
+
+        for (OrderedBookSaveRequest obRequest : request.orderedBooks()) {
+
+            Book book = bookMap.get(obRequest.bookId());
+            if (book == null) {
+                throw new BookNotFoundException();
+            }
+
+            Wrapper wrapper = null;
+            if (obRequest.wrapperId() != null) {
+                wrapper = wrapperMap.get(obRequest.wrapperId());
+                if (wrapper == null) {
+                    throw new WrapperNotFoundException();
+                }
+            }
+
+            OrderedBook orderedBook = OrderedBook.createOrderDetailReady(
+                    savedOrder,
+                    book,
+                    obRequest.quantity(),
+                    obRequest.originalPrice(),
+                    obRequest.salesPrice(),
+                    obRequest.discountPrice(),
+                    wrapper,
+                    obRequest.wrapperPrice(),
+                    obRequest.issuedCouponId(),
+                    obRequest.couponDiscount(),
+                    obRequest.pointUsed(),
+                    obRequest.finalUnitPrice()
+            );
+
+            orderedBookRepository.save(orderedBook);
+        }
+
+        return new OrderSaveResponse(orderNumber, request.totalPrice());
+    }
+
+    @Transactional(readOnly = true)
+    public void verifyOrderStock(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> items = orderedBookRepository.findByOrder(order);
+
+        for (OrderedBook item : items) {
+            Book book = item.getBook();
+
+            if (!book.hasStock(item.getQuantity())) {
+                log.info("Order stock for order number {} has unexpected quantity", orderNumber);
+                throw new InsufficientStockException();
+            }
+        }
+    }
+
+    @Transactional
+    public void applyPaymentSuccess(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder((order));
+
+        for (OrderedBook item : orderedBooks) {
+            item.markPaymentCompleted();
+
+            Book book = item.getBook();
+            book.decreaseStock(item.getQuantity());
+            log.info("책 주문 상태 {} {}", book.getId(), item.getUnitStatus());
+        }
+
+        order.markPaymentSuccess();
+        log.info("결제 및 주문 완료");
+    }
+
+    @Transactional
+    public void applyPaymentFail(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder((order));
+
+        for (OrderedBook item : orderedBooks) {
+            item.markPaymentFailed();
+        }
+
+        order.markPaymentFailed();
+        log.info("결제 및 주문 실패");
     }
 }

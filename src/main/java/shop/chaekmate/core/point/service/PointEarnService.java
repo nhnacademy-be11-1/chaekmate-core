@@ -82,6 +82,12 @@ public class PointEarnService {
 
         Long memberId = order.getMember().getId();
 
+        // 비회원 주문인 경우 포인트 적립하지 않음
+        if (order.getMember() == null) {
+            log.info("[포인트 적립] 비회원 주문이므로 포인트 적립하지 않음 - 주문번호: {}", orderNumber);
+            return null;
+        }
+
         if (!memberRepository.existsById(memberId)) {
             throw new MemberNotFoundException();
         }
@@ -109,7 +115,7 @@ public class PointEarnService {
     @Transactional (readOnly = true)
     public Grade getCurrentGrade(Long memberId) {
         Optional<MemberGradeHistory> latedstGradeHistory =
-                memberGradeHistoryRepository.findFirstByMemberIdOrderByCreatedAtDesc(memberId);
+                memberGradeHistoryRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId);
 
         if(latedstGradeHistory.isPresent()) {
             return latedstGradeHistory.get().getGrade();

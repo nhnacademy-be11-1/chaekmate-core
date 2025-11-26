@@ -47,15 +47,12 @@ public class PaymentHistoryRepositoryImpl implements PaymentHistoryRepositoryCus
             condition.and(ph.paymentStatus.eq(paymentStatus));
         }
 
-        ZoneOffset offset = OffsetDateTime.now().getOffset();
-
-
         if (start != null && end != null) {
-            condition.and(ph.occurredAt.between(start.atOffset(offset), end.atOffset(offset)));
+            condition.and(ph.occurredAt.between(start, end));
         } else if (start != null) {
-            condition.and(ph.occurredAt.goe(start.atOffset(offset)));
+            condition.and(ph.occurredAt.goe(start));
         } else if (end != null) {
-            condition.and(ph.occurredAt.loe(end.atOffset(offset)));
+            condition.and(ph.occurredAt.loe(end));
         }
 
         List<PaymentHistoryDto> results = queryFactory
