@@ -77,7 +77,7 @@ class WrapperServiceTest {
     @Test
     void 포장지_수정_성공() {
         when(wrapperRepository.findById(anyLong())).thenReturn(Optional.of(wrapper));
-        when(wrapperRepository.existsByName(anyString())).thenReturn(false);
+        when(wrapperRepository.existsByNameAndIdNot(anyString(),anyLong())).thenReturn(false);
 
         WrapperResponse response = wrapperService.modifyWrapper(1L, new WrapperDto("수정된 포장지", 3000));
 
@@ -88,19 +88,19 @@ class WrapperServiceTest {
         );
 
         verify(wrapperRepository, times(1)).findById(anyLong());
-        verify(wrapperRepository, times(1)).existsByName(anyString());
+        verify(wrapperRepository, times(1)).existsByNameAndIdNot(anyString(),anyLong());
     }
 
     @Test
     void 포장지_수정_실패_이름_중복() {
         when(wrapperRepository.findById(anyLong())).thenReturn(Optional.of(wrapper));
-        when(wrapperRepository.existsByName(anyString())).thenReturn(true);
+        when(wrapperRepository.existsByNameAndIdNot(anyString(),anyLong())).thenReturn(true);
 
         WrapperDto dto = new WrapperDto("수정된 포장지", 2000);
         assertThrows(DuplicatedWrapperNameException.class, () -> wrapperService.modifyWrapper(1L, dto));
 
         verify(wrapperRepository, times(1)).findById(anyLong());
-        verify(wrapperRepository, times(1)).existsByName(anyString());
+        verify(wrapperRepository, times(1)).existsByNameAndIdNot(anyString(),anyLong());
     }
 
     @Test

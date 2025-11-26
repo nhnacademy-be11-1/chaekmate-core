@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.chaekmate.core.order.service.OrderService;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
 import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
 import shop.chaekmate.core.payment.dto.response.base.PaymentResponse;
@@ -30,8 +31,9 @@ public class PaymentService {
     private final PaymentErrorService paymentErrorService;
     private final PaymentRepository paymentRepository;
     private final PaymentHistoryRepository paymentHistoryRepository;
+    private final OrderService orderService;
 
-    @Transactional
+
     public PaymentResponse approve(Long memberId, PaymentApproveRequest request) {
         log.info("[결제 승인 요청] 주문번호={}, 결제수단={}, 결제금액={}, 포인트사용={}",
                 request.orderNumber(), request.paymentType(), request.amount(), request.pointUsed());
@@ -39,10 +41,13 @@ public class PaymentService {
         PaymentProvider provider = providerFactory.getProvider(request.paymentType());
 
         try {
+            orderService.verifyOrderStock(request.orderNumber());
+
             PaymentApproveResponse response = provider.approve(request);
 
-            // todo 수정부분 eventResponse 추가해야함
-            // 이벤트 발행 -> 주문 서비스 이동
+            orderService.applyPaymentSuccess(response.orderNumber());
+
+            // 이벤트 발행
             eventPublisher.publishPaymentApproved(response);
             log.info("[결제 승인 완료 및 이벤트 발행] 주문번호={}, 상태={}", response.orderNumber(), response.status());
 
@@ -53,18 +58,15 @@ public class PaymentService {
 
             String msg = e.getMessage();
             if (msg == null || !msg.contains(":")) {
-                msg = "UNKNOWN:결제 요청 중 오류가 발생했습니다.";
+                msg = "UNKNOWN:" + (msg == null ? "결제 요청 중 오류가 발생했습니다." : msg);
             }
 
             String[] error = msg.split(":", 2);
             //실패 로그 저장 - 새 트랜잭션으로 분리
             paymentErrorService.saveAbortedPayment(request, msg);
+
             // 오류 응답 반환
-            return new PaymentAbortedResponse(
-                    error[0],
-                    error[1],
-                    LocalDateTime.now()
-            );
+            return new PaymentAbortedResponse(error[0], error[1], LocalDateTime.now());
         }
     }
 

@@ -26,12 +26,11 @@ public class PointEventListener {
     private final PointHistoryService pointHistoryService;
     private final OrderRepository orderRepository;
 
-    @TransactionalEventListener(
-            phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentApproved(PaymentApprovedEvent event) {
         PaymentApproveResponse response = event.approveResponse();
         log.info("[포인트 이벤트] 결제 승인 이벤트 수신 - 주문번호: {}, 금액: {}, 사용포인트: {}",
-                response.orderNumber(), response.totalAmount());
+                response.orderNumber(), response.totalAmount(), response.pointUsed());
 
         try {
             // 포인트 사용(차감) 처리
@@ -40,8 +39,9 @@ public class PointEventListener {
                         .orElseThrow(() -> new IllegalStateException("주문을 찾을 수 없습니다: " + response.orderNumber()));
 
                 // 비회원 주문인 경우 포인트 차감하지 않음
-                if (order.getMember() != null) {
-                    Long memberId = order.getMember().getId();
+                Long memberId = order.getMember().getId();
+
+                if (memberId != null) {
 
                     CreatePointHistoryRequest spendRequest = new CreatePointHistoryRequest(
                             null,
@@ -54,20 +54,19 @@ public class PointEventListener {
                     pointHistoryService.spendPointHistory(memberId, spendRequest);
                     log.info("[포인트 이벤트] 포인트 차감 완료 - 주문번호: {}, 차감포인트: {}",
                             response.orderNumber(), response.pointUsed());
+
+                    // 포인트 적립 처리
+                    pointEarnService.earnPointForOrder(
+                            response.orderNumber(),
+                            response.totalAmount()
+                    );
+
+                    log.info("[포인트 이벤트] 포인트 적립 완료 - 주문번호: {}", response.orderNumber());
                 } else {
                     log.warn("[포인트 이벤트] 비회원 주문이므로 포인트 차감하지 않음 - 주문번호: {}",
                             response.orderNumber());
                 }
             }
-
-            // 포인트 적립 처리
-            pointEarnService.earnPointForOrder(
-                    response.orderNumber(),
-                    response.totalAmount()
-            );
-
-            log.info("[포인트 이벤트] 포인트 적립 완료 - 주문번호: {}", response.orderNumber());
-
         } catch (Exception e) {
             // 포인트 적립 실패 시 로그만 남기고 예외를 던지지 않음
             // - 결제는 이미 완료되었으므로 포인트 적립 실패가 결제를 롤백하면 안 됨
@@ -75,8 +74,7 @@ public class PointEventListener {
                     response.orderNumber(), e.getMessage(), e);
         }
     }
-    @TransactionalEventListener(
-            phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMemberCreated(MemberCreatedEvent event) {
         MemberResponse memberResponse = event.memberResponse();
         log.info("[포인트 이벤트] 회원가입 이벤트 수신 - 회원ID: {}, 로그인ID: {}",

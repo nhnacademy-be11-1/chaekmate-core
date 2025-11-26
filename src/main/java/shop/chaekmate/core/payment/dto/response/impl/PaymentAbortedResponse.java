@@ -13,7 +13,7 @@ public record PaymentAbortedResponse(
         @Schema(description = "에러 메시지")
         String message,
 
-        @Schema(description = "결제 승인 시각")
-        LocalDateTime approvedAt
+        @Schema(description = "결제 실패 시각")
+        LocalDateTime abortedAt
 
 ) implements PaymentAbortedResponseBase {}

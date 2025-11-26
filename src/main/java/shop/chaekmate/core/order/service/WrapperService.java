@@ -33,8 +33,7 @@ public class WrapperService {
     public WrapperResponse modifyWrapper(Long id, WrapperDto wrapperDto) {
         Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(WrapperNotFoundException::new);
 
-        if (!wrapper.equalsName(wrapperDto.name())
-                && wrapperRepository.existsByName(wrapperDto.name())) {
+        if (wrapperRepository.existsByNameAndIdNot(wrapperDto.name(), id)) {
             throw new DuplicatedWrapperNameException();
         }
 

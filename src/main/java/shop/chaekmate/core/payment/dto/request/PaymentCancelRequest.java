@@ -10,9 +10,9 @@ import shop.chaekmate.core.order.dto.request.CanceledBooksRequest;
 
 @Schema(description = "결제 취소 요청")
 public record PaymentCancelRequest(
-//        // 결제 사 연동 시 필요(포인트 null)
-//        @Schema(description = "결제 키 (결제사에서 전달받은 고유 키, 포인트 결제 시 null)")
-//        String paymentKey,
+        // 결제 사 연동 시 필요(포인트 null)
+        @Schema(description = "결제 키 (결제사에서 전달받은 고유 키, 포인트 결제 시 null)")
+        String paymentKey,
 
         @Schema(description = "주문 번호")
         @NotBlank(message = "주문 번호는 필수 입력 값입니다.")

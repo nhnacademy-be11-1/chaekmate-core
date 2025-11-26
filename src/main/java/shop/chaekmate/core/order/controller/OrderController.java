@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import shop.chaekmate.core.order.controller.docs.OrderControllerDocs;
 import shop.chaekmate.core.order.dto.request.OrderSaveRequest;
 import shop.chaekmate.core.order.dto.response.OrderSaveResponse;
 import shop.chaekmate.core.order.service.OrderService;
@@ -15,7 +16,7 @@ import shop.chaekmate.core.order.service.OrderService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/orders")
-public class OrderController {
+public class OrderController implements OrderControllerDocs {
 
     private final OrderService orderService;
 
