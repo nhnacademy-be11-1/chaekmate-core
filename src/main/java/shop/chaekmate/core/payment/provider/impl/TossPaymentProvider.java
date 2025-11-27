@@ -105,16 +105,14 @@ public class TossPaymentProvider implements PaymentProvider {
     @Transactional
     @Override
     public PaymentCancelResponse cancel(PaymentCancelRequest request) {
-        log.info("[TOSS] 결제 취소 요청 - paymentKey={}, 취소금액={}, 사유={}",
-                request.paymentKey(), request.cancelAmount(), request.cancelReason());
+        log.info("[TOSS] 결제 취소 요청 - paymentKey={}, 취소금액={}, 취소포인트={}, 사유={}",
+                request.paymentKey(), request.cancelAmount(), request.pointCancelAmount(), request.cancelReason());
 
         Payment payment = paymentRepository.findByOrderNumberAndPaymentKey(request.orderNumber(), request.paymentKey())
                 .orElseThrow(NotFoundPaymentKeyException::new);
 
-        long cancelAmount = request.cancelAmount();
-
-        long cashCancelAmount = calculateCashCancelAmount(payment, cancelAmount);
-        int pointCancelAmount = calculatePointCancelAmount(payment, cancelAmount, cashCancelAmount);
+        long cashCancelAmount = request.cancelAmount();
+        int pointCancelAmount = request.pointCancelAmount();
 
         log.info("[TOSS] 취소할 금액 분배 - cashCancel={}, pointCancel={}", cashCancelAmount, pointCancelAmount);
         LocalDateTime canceledAt = LocalDateTime.now();
@@ -173,23 +171,6 @@ public class TossPaymentProvider implements PaymentProvider {
                 canceledAt,
                 request.canceledBooks()
         );
-    }
-
-    // 현금 취소 계산
-    private long calculateCashCancelAmount(Payment payment, long cancelAmount) {
-        long cash = payment.getTotalAmount();
-        return Math.min(cancelAmount, cash);
-    }
-
-    // 포인트 취소 계산
-    private int calculatePointCancelAmount(Payment payment, long cancelAmount, long cashCancelAmount) {
-        long pointCancel = cancelAmount - cashCancelAmount;
-
-        if (pointCancel > payment.getPointUsed()) {
-            throw new ExceedCancelAmountException();
-        }
-
-        return (int) pointCancel;
     }
 
 

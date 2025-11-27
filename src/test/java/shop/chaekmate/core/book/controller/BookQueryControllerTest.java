@@ -87,21 +87,21 @@ class BookQueryControllerTest {
 
         // book1: 2 orders by 2 members, 2 reviews
         Order order1 = orderRepository.save(Order.createOrderReady(member1, "order1", "n", "p", "e", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 9000));
-        OrderedBook ob1 = orderedBookRepository.save(OrderedBook.createOrderDetailReady(order1, book1, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000));
+        OrderedBook ob1 = orderedBookRepository.save(OrderedBook.createOrderDetailReady(order1, book1, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000, 9000));
         reviewRepository.save(Review.createReview(member1, ob1, "good book", 5));
 
         Order order2 = orderRepository.save(Order.createOrderReady(member2, "order2", "n", "p", "e", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 9000));
-        OrderedBook ob2 = orderedBookRepository.save(OrderedBook.createOrderDetailReady(order2, book1, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000));
+        OrderedBook ob2 = orderedBookRepository.save(OrderedBook.createOrderDetailReady(order2, book1, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000,9000));
         reviewRepository.save(Review.createReview(member2, ob2, "nice book", 4));
 
         // book3: 1 order by 1 member, 1 review
         Order order3 = orderRepository.save(Order.createOrderReady(member1, "order3", "n", "p", "e", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 9000));
-        OrderedBook ob3 = orderedBookRepository.save(OrderedBook.createOrderDetailReady(order3, book3, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000));
+        OrderedBook ob3 = orderedBookRepository.save(OrderedBook.createOrderDetailReady(order3, book3, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000,9000));
         reviewRepository.save(Review.createReview(member1, ob3, "fun", 3));
 
         // book4: 1 order by 1 member, no reviews
         Order order4 = orderRepository.save(Order.createOrderReady(member2, "order4", "n", "p", "e", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 9000));
-        orderedBookRepository.save(OrderedBook.createOrderDetailReady(order4, book4, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000));
+        orderedBookRepository.save(OrderedBook.createOrderDetailReady(order4, book4, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000,9000));
     }
 
     @Test

@@ -88,7 +88,8 @@ public class OrderedBook extends BaseEntity {
             Long issuedCouponId,
             Integer couponDiscount,
             Integer pointUsed,
-            int finalUnitPrice
+            int finalUnitPrice,
+            long totalPrice
     ) {
         OrderedBook ob = new OrderedBook();
         ob.order = order;
@@ -107,7 +108,7 @@ public class OrderedBook extends BaseEntity {
         ob.pointUsed = pointUsed;
 
         ob.finalUnitPrice = finalUnitPrice;
-        ob.totalPrice = (long) finalUnitPrice * quantity;
+        ob.totalPrice = totalPrice;
 
         ob.unitStatus = OrderedBookStatusType.PAYMENT_READY; // 결제전 기본 상태
 

@@ -23,7 +23,7 @@ import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
 import shop.chaekmate.core.order.entity.Wrapper;
 import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
-import shop.chaekmate.core.order.exception.WrapperNotFoundException;
+import shop.chaekmate.core.order.exception.NotFoundWrapperException;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import shop.chaekmate.core.order.repository.WrapperRepository;
@@ -115,7 +115,7 @@ public class OrderService {
             if (obRequest.wrapperId() != null) {
                 wrapper = wrapperMap.get(obRequest.wrapperId());
                 if (wrapper == null) {
-                    throw new WrapperNotFoundException();
+                    throw new NotFoundWrapperException();
                 }
             }
 
@@ -131,7 +131,8 @@ public class OrderService {
                     obRequest.issuedCouponId(),
                     obRequest.couponDiscount(),
                     obRequest.pointUsed(),
-                    obRequest.finalUnitPrice()
+                    obRequest.finalUnitPrice(),
+                    obRequest.totalPrice()
             );
 
             orderedBookRepository.save(orderedBook);

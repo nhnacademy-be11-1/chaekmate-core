@@ -8,7 +8,7 @@ import shop.chaekmate.core.order.dto.request.WrapperDto;
 import shop.chaekmate.core.order.dto.response.WrapperResponse;
 import shop.chaekmate.core.order.entity.Wrapper;
 import shop.chaekmate.core.order.exception.DuplicatedWrapperNameException;
-import shop.chaekmate.core.order.exception.WrapperNotFoundException;
+import shop.chaekmate.core.order.exception.NotFoundWrapperException;
 import shop.chaekmate.core.order.repository.WrapperRepository;
 
 @Service
@@ -31,7 +31,7 @@ public class WrapperService {
     //포장지 수정(이름+가격)
     @Transactional
     public WrapperResponse modifyWrapper(Long id, WrapperDto wrapperDto) {
-        Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(WrapperNotFoundException::new);
+        Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(NotFoundWrapperException::new);
 
         if (wrapperRepository.existsByNameAndIdNot(wrapperDto.name(), id)) {
             throw new DuplicatedWrapperNameException();
@@ -46,7 +46,7 @@ public class WrapperService {
     @Transactional
     public void deleteWrapper(Long id) {
         if (!wrapperRepository.existsById(id)) {
-            throw new WrapperNotFoundException();
+            throw new NotFoundWrapperException();
         }
 
         wrapperRepository.deleteById(id);
@@ -55,7 +55,7 @@ public class WrapperService {
     //포장지 단일 조회
     @Transactional(readOnly = true)
     public WrapperResponse getWrapperById(Long id) {
-        Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(WrapperNotFoundException::new);
+        Wrapper wrapper = wrapperRepository.findById(id).orElseThrow(NotFoundWrapperException::new);
         return new WrapperResponse(wrapper.getId(), wrapper.getName(), wrapper.getPrice());
     }
 

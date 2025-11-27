@@ -9,7 +9,7 @@ import shop.chaekmate.core.order.dto.request.DeliveryPolicyDto;
 import shop.chaekmate.core.order.dto.response.DeliveryPolicyHistoryResponse;
 import shop.chaekmate.core.order.dto.response.DeliveryPolicyResponse;
 import shop.chaekmate.core.order.entity.DeliveryPolicy;
-import shop.chaekmate.core.order.exception.DeliveryPolicyNotFoundException;
+import shop.chaekmate.core.order.exception.NotFoundDeliveryPolicyException;
 import shop.chaekmate.core.order.exception.DuplicatedDeliveryPolicyException;
 import shop.chaekmate.core.order.repository.DeliveryPolicyRepository;
 
@@ -54,7 +54,7 @@ public class DeliveryPolicyService {
     @Transactional(readOnly = true)
     public DeliveryPolicyResponse getPolicy() {
         DeliveryPolicy policy = deliveryPolicyRepository.findByDeletedAtIsNull()
-                .orElseThrow(DeliveryPolicyNotFoundException::new);
+                .orElseThrow(NotFoundDeliveryPolicyException::new);
 
         return new DeliveryPolicyResponse(policy.getId(), policy.getFreeStandardAmount(), policy.getDeliveryFee());
     }

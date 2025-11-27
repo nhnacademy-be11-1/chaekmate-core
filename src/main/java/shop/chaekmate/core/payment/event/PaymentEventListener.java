@@ -25,12 +25,11 @@ public class PaymentEventListener {
 //    private final OrderedBookRepository orderedBookRepository;
     private final OrderService orderService;
     // 결제 성공
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentApproved(PaymentApprovedEvent event) {
         PaymentApproveResponse res = event.approveResponse();
 
         log.info("[EVENT] 결제 승인 수신 - 주문ID: {}", res.orderNumber());
-        // 이메일 전송
         // 두레이 알림
     }
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

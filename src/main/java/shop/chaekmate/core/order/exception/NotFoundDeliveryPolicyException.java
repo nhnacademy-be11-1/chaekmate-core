@@ -2,9 +2,9 @@ package shop.chaekmate.core.order.exception;
 
 import shop.chaekmate.core.common.exception.CoreException;
 
-public class DeliveryPolicyNotFoundException extends CoreException {
+public class NotFoundDeliveryPolicyException extends CoreException {
 
-    public DeliveryPolicyNotFoundException() {
+    public NotFoundDeliveryPolicyException() {
         super(DeliveryPolicyErrorCode.NOT_FOUND);
     }
 }

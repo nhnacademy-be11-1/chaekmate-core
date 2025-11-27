@@ -12,10 +12,12 @@ import shop.chaekmate.core.order.dto.request.CanceledBooksRequest;
 import shop.chaekmate.core.order.entity.DeliveryPolicy;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.exception.NotFoundDeliveryPolicyException;
 import shop.chaekmate.core.order.repository.DeliveryPolicyRepository;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import shop.chaekmate.core.order.service.OrderService;
+import shop.chaekmate.core.payment.dto.request.CancelAmountResult;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
 import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
 import shop.chaekmate.core.payment.dto.response.base.PaymentResponse;
@@ -43,7 +45,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
 
-
+    @Transactional
     public PaymentResponse approve(Long memberId, PaymentApproveRequest request) {
         log.info("[결제 승인 요청] 주문번호={}, 결제수단={}, 결제금액={}, 포인트사용={}",
                 request.orderNumber(), request.paymentType(), request.amount(), request.pointUsed());
@@ -82,41 +84,60 @@ public class PaymentService {
 
     @Transactional
     public PaymentCancelResponse cancel(Long memberId, PaymentCancelRequest request) {
-
-        // 결제사 취소 API 연동 취소 시 결제 키 필요(현재는 x)
+        // 결제사 취소 API 연동 취소 시 결제 키 필요
         log.info("[결제 취소 요청] 주문번호={}, 금액={}, 사유={}",
                 request.orderNumber(), request.cancelAmount(), request.cancelReason());
 
         Payment payment = paymentRepository.findByOrderNumber(request.orderNumber())
                 .orElseThrow(NotFoundOrderNumberException::new);
 
-        List<OrderedBook> cancelTargets =
-                orderedBookRepository.findAllById(
-                        request.canceledBooks()
-                                .stream()
-                                .map(CanceledBooksRequest::orderedBookId)
-                                .toList()
-                );
+        // 취소 품목
+        List<OrderedBook> cancelBooks = canceledBooks(request);
 
-        // 3) 취소 대상 금액 계산 (라인 단위)
-        long cancelItemsTotal = calculateCanceledItems(cancelTargets, request);
+        // 사유 입력
+        cancelBooks.forEach(ob -> ob.updateReason(request.cancelReason()));
 
-        // 4) 남은 주문 금액 계산
-        long remainAmount = calculateRemainAmount(payment.getOrderNumber(), cancelItemsTotal);
+        CancelAmountResult cancelTotal = calculateCancelAmounts(cancelBooks);
+        // 결제된 현금 행 합
+        long cancelCash = cancelTotal.cancelCash();
+        // 결제된 포인트 행 합
+        int cancelPoint  = cancelTotal.cancelPoint();
 
-        DeliveryPolicy policy = deliveryPolicyRepository.findPolicyAt(payment.getCreatedAt())
-                .orElseThrow(() -> new IllegalStateException("결제 시점 배송정책을 찾을 수 없습니다."));
+        // 남은 주문 금액 계산
+        long remainAmount = calculateRemainAmount(payment.getOrderNumber(), cancelCash+cancelPoint);
 
-        long finalCancelAmount = applyDeliveryPolicy(payment, remainAmount, policy, cancelItemsTotal);
+        boolean fullCancel = (remainAmount == 0);
 
-        PaymentCancelRequest finalRequest =
-                new PaymentCancelRequest(
-                        request.paymentKey(),
-                        request.orderNumber(),
-                        request.cancelReason(),
-                        finalCancelAmount,    // 배송비 제외된 최종 금액
-                        request.canceledBooks()
-                );
+        long cashCancelAmount;
+        int pointCancelAmount;
+
+        if (fullCancel) {
+            // 전체 취소
+            cashCancelAmount = payment.getTotalAmount();
+            pointCancelAmount = payment.getPointUsed();
+        } else {
+            // 부분 취소 (배송비 반영)
+            DeliveryPolicy policy = deliveryPolicyRepository.findPolicyAt(payment.getCreatedAt())
+                    .orElseThrow(NotFoundDeliveryPolicyException::new);
+
+            long adjustedAmount = applyDeliveryPolicy(payment, remainAmount, policy, cancelCash+cancelPoint);
+
+            // 현금 취소 금액 계산
+            cashCancelAmount = Math.min(payment.getTotalAmount(), adjustedAmount);
+
+            // 포인트 취소 금액 계산
+            pointCancelAmount = (int) (adjustedAmount - cashCancelAmount);
+        }
+
+        // provider로 넘길 최종 요청
+        PaymentCancelRequest finalRequest = new PaymentCancelRequest(
+                payment.getPaymentKey(),
+                request.orderNumber(),
+                request.cancelReason(),
+                cashCancelAmount,
+                pointCancelAmount,
+                request.canceledBooks()
+        );
 
         PaymentProvider provider = providerFactory.getProvider(payment.getPaymentType());
 
@@ -125,34 +146,32 @@ public class PaymentService {
         orderService.applyOrderCancel(response);
 
         eventPublisher.publishPaymentCanceled(response);
-        log.info("[ 결제 취소 완료 및 이벤트 발행 ] 주문번호={}, 취소금액={}, 취소 포인트={}", response.orderNumber(), response.canceledCash(), response.canceledPoint());
+        log.info("[ 결제 취소 완료 및 이벤트 발행 ] 주문번호={}, 취소금액={}, 취소 포인트={}", response.orderNumber(), response.canceledCash(),
+                response.canceledPoint());
 
         return response;
     }
 
-    private long calculateCanceledItems(List<OrderedBook> cancelTargets, PaymentCancelRequest request) {
+    private List<OrderedBook> canceledBooks(PaymentCancelRequest request) {
+        return orderedBookRepository.findAllById(
+                request.canceledBooks()
+                        .stream()
+                        .map(CanceledBooksRequest::orderedBookId)
+                        .toList()
+        );
+    }
 
-        long total = 0;
+    private CancelAmountResult calculateCancelAmounts(List<OrderedBook> cancelBooks) {
 
-        Map<Long, Integer> cancelQtyMap = request.canceledBooks().stream()
-                .collect(Collectors.toMap(
-                        CanceledBooksRequest::orderedBookId,
-                        CanceledBooksRequest::canceledQuantity
-                ));
+        long cancelCash = cancelBooks.stream()
+                .mapToLong(OrderedBook::getTotalPrice)
+                .sum();
 
-        for (OrderedBook ob : cancelTargets) {
+        int cancelPoint = cancelBooks.stream()
+                .mapToInt(OrderedBook::getPointUsed)
+                .sum();
 
-            int qty = cancelQtyMap.getOrDefault(ob.getId(), 0);
-
-            if (qty <= 0 || qty > ob.getQuantity()) {
-                throw new IllegalStateException("취소 수량이 잘못되었습니다.");
-            }
-
-            long itemTotal = ob.getFinalUnitPrice() * qty;
-            total += itemTotal;
-        }
-
-        return total;
+        return new CancelAmountResult(cancelCash, cancelPoint);
     }
 
 
@@ -161,13 +180,8 @@ public class PaymentService {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(NotFoundOrderNumberException::new);
 
-        List<OrderedBook> allBooks = orderedBookRepository.findByOrder(order);
-
-        long totalBookAmount = allBooks.stream()
-                .mapToLong(ob -> ob.getFinalUnitPrice() * ob.getQuantity())
-                .sum();
-
-        long remainAmount = totalBookAmount - cancelItemsTotal;
+        // 남은 결제 금액 (배송비 포함)
+        long remainAmount = order.getTotalPrice() - cancelItemsTotal;
 
         if (remainAmount < 0) {
             throw new IllegalStateException("취소 금액이 주문 금액을 초과합니다.");
@@ -177,26 +191,27 @@ public class PaymentService {
     }
 
     private long applyDeliveryPolicy(Payment payment, long remainAmount, DeliveryPolicy policy, long cancelItemsTotal) {
-        // 1) 이미 한 번 배송비가 깨져서 제외된 적이 있다면,
-        //    이번 취소에서는 배송비 계산 X
+        // 이미 한 번 배송비가 깨져서 제외된 적이 있다면, 이번 취소에서는 배송비 계산 X
         if (payment.isDeliveryFeeAdjusted()) {
             return cancelItemsTotal;
         }
 
-        // 2) 이번 취소로 인해 남은 금액이 무료배송 기준보다 작아짐 → 배송비 제외해야 함
+        // 이번 취소로 인해 남은 금액이 무료배송 기준보다 작아짐 -> 배송비 제외해야 함
         if (remainAmount < policy.getFreeStandardAmount()) {
 
-            long adjusted = cancelItemsTotal - policy.getDeliveryFee();
+            long adjusted = (cancelItemsTotal - policy.getDeliveryFee());
 
-            if (adjusted < 0) adjusted = 0;
+            if (adjusted < 0) {
+                adjusted = 0;
+            }
 
-            // 배송비 조정은 딱 한 번만
+            // 배송비 조정은 한 번만
             payment.markDeliveryFeeAdjusted();
 
             return adjusted;
         }
 
-        // 3) 여전히 무료배송 조건 유지 → 배송비 제외 안 함
+        // 여전히 무료배송 조건 유지 -> 배송비 제외 안 함
         return cancelItemsTotal;
     }
 }

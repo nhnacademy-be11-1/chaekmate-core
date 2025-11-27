@@ -10,6 +10,7 @@ import shop.chaekmate.core.order.dto.response.OrderHistoryResponse;
 import shop.chaekmate.core.order.dto.response.OrderedBookHistoryResponse;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 
@@ -45,8 +46,8 @@ public class OrderHistoryService {
         List<OrderedBook> allOrderedBooks = orderedBookRepository.findAllByOrderIn(orders);
 
         Map<Long, List<OrderedBookHistoryResponse>> orderedBooksByOrderId = allOrderedBooks.stream()
-                .filter(book -> book.getUnitStatus() != shop.chaekmate.core.order.entity.type.OrderedBookStatusType.PAYMENT_READY
-                        && book.getUnitStatus() != shop.chaekmate.core.order.entity.type.OrderedBookStatusType.PAYMENT_FAILED)
+                .filter(book -> book.getUnitStatus() != OrderedBookStatusType.PAYMENT_READY
+                        && book.getUnitStatus() != OrderedBookStatusType.PAYMENT_FAILED)
                 .collect(Collectors.groupingBy(
                         orderedBook -> orderedBook.getOrder().getId(),
                         Collectors.mapping(OrderedBookHistoryResponse::from, Collectors.toList())
