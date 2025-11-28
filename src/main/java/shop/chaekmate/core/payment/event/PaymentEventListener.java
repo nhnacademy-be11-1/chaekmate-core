@@ -53,7 +53,5 @@ public class PaymentEventListener {
         PaymentCancelResponse res = event.cancelResponse();
         log.info("[EVENT] 결제 취소 수신 - 주문ID: {}", res.orderNumber());
 
-        // 주문 상태 변경
-
     }
 }
