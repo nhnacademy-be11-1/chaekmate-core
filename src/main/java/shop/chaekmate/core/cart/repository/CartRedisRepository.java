@@ -71,6 +71,25 @@ public class CartRedisRepository {
         return Objects.nonNull(value) ? value.toString() : null;
     }
 
+    /**
+     * 장바구니 내 아이템 종류 개수를 조회함
+     *
+     * <p>참고:
+     * - HLEN은 hash의 모든 field 개수를 반환하므로, ownerId field 제외
+     * - 전체 field 개수 - 1 (ownerId) = 실제 도서 아이템 개수
+     *
+     * @param cartId 장바구니 ID
+     * @return 장바구니 내 도서 종류 개수
+     */
+    public int getCartItemSize(String cartId) {
+        String key = CART_PREFIX + cartId;
+        long size = this.hashOperations.size(key);  // HLEN
+
+        // 실제 아이템 (종류) 개수 반환
+        // - size == 0 --> 장바구니가 비어있거나 존재하지 않음
+        return (size > 0) ? (int) (size-1) : 0;
+    }
+
     /* =========================== 장바구니 아이템 =========================== */
 
     /**
@@ -93,6 +112,8 @@ public class CartRedisRepository {
      * @param bookId 도서 ID
      * @return 수량, 없으면 null
      */
+
+    // 실제 사용X
     public Integer getCartItem(String cartId, Long bookId) {
         String key = CART_PREFIX + cartId;
         String bookField = BOOK_PREFIX + bookId;
