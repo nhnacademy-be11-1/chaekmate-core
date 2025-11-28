@@ -1,6 +1,5 @@
 package shop.chaekmate.core.cart.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +19,7 @@ import shop.chaekmate.core.cart.dto.response.CartItemListAdvancedResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemListResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemUpdateResponse;
+import shop.chaekmate.core.cart.dto.response.CartItemCountResponse;
 import shop.chaekmate.core.cart.exception.BookInsufficientStockException;
 import shop.chaekmate.core.cart.exception.CartItemNotFoundException;
 import shop.chaekmate.core.cart.exception.CartNotFoundException;
@@ -55,6 +55,7 @@ public class CartService {
     public CartItemListResponse addCartItem(CartItemCreateDto dto) {
 
         // 장바구니 조회
+        // 존재하지 않는 경우, 장바구니 생성
         String cartId = this.resolveOrCreateCartId(dto);
 
         // 도서 재고 검증
@@ -94,12 +95,8 @@ public class CartService {
     @Transactional(readOnly = true)
     public CartItemListAdvancedResponse getCartItemsWithBookInfo(CartOwner dto) {
         // 장바구니 조회
-        String cartId = this.resolveCartId(dto);
-
-        // 장바구니가 없으면 빈 목록 반환
-        if (Objects.isNull(cartId)) {
-            return new CartItemListAdvancedResponse(null, Collections.emptyList());
-        }
+        // 존재하지 않는 경우, 장바구니 생성
+        String cartId = this.resolveOrCreateCartId(dto);
 
         // 장바구니 아이템 전체 조회
         // - bookId --> quantity
@@ -198,6 +195,30 @@ public class CartService {
         }
 
         this.cartRedisRepository.deleteAllCartItems(cartId);
+    }
+
+    /**
+     * 장바구니 내 모든 아이템 개수를 반환함
+     *
+     * @param dto bookId 및 새로운 quantity를 포함한 DTO
+     * @return 장바구니 아이템 (종류) 개수 결과 응답 DTO
+     */
+    @Transactional(readOnly = true)
+    public CartItemCountResponse getCartItemCount(CartOwner dto) {
+        // 장바구니 조회
+        String cartId = this.resolveCartId(dto);
+
+        // 장바구니가 없는 경우
+        if (Objects.isNull(cartId)) {
+            // 예외 발생 대신 0개 응답이 더 자연스러움
+            return new CartItemCountResponse(0);
+        }
+
+        // 장바구니 내 모든 아이템 개수 계산
+        // - 도서 종류 개수 반환
+        // -- 예시: 책A 2권, 책B 3권 --> 2 종류 --> count = 2
+        int count =  this.cartRedisRepository.getCartItemSize(cartId);
+        return new CartItemCountResponse(count);
     }
 
     /**
