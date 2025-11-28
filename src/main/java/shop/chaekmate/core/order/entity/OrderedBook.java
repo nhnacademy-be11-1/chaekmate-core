@@ -73,6 +73,9 @@ public class OrderedBook extends BaseEntity {
     @Column(nullable = false)
     private OrderedBookStatusType unitStatus;
 
+    @Column(length = 255)
+    private String reason;
+
     public static OrderedBook createOrderDetailReady(
             Order order,
             Book book,
@@ -85,7 +88,8 @@ public class OrderedBook extends BaseEntity {
             Long issuedCouponId,
             Integer couponDiscount,
             Integer pointUsed,
-            int finalUnitPrice
+            int finalUnitPrice,
+            long totalPrice
     ) {
         OrderedBook ob = new OrderedBook();
         ob.order = order;
@@ -104,7 +108,7 @@ public class OrderedBook extends BaseEntity {
         ob.pointUsed = pointUsed;
 
         ob.finalUnitPrice = finalUnitPrice;
-        ob.totalPrice = (long) finalUnitPrice * quantity;
+        ob.totalPrice = totalPrice;
 
         ob.unitStatus = OrderedBookStatusType.PAYMENT_READY; // 결제전 기본 상태
 
@@ -131,11 +135,6 @@ public class OrderedBook extends BaseEntity {
         this.unitStatus = OrderedBookStatusType.DELIVERED;
     }
 
-    // 취소 요청
-    public void markCancelRequest() {
-        this.unitStatus = OrderedBookStatusType.CANCEL_REQUEST;
-    }
-
     // 취소 완료
     public void markCanceled() {
         this.unitStatus = OrderedBookStatusType.CANCELED;
@@ -149,5 +148,9 @@ public class OrderedBook extends BaseEntity {
     // 반품 완료
     public void markReturned() {
         this.unitStatus = OrderedBookStatusType.RETURNED;
+    }
+
+    public void updateReason(String reason) {
+        this.reason = reason;
     }
 }

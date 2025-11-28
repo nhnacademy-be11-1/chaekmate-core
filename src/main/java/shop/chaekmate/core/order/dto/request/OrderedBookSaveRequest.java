@@ -42,6 +42,10 @@ public record OrderedBookSaveRequest(
 
         @Schema(description = "이 상품의 최종 단가", example = "10500")
         @Positive(message = "최종 단가는 0보다 커야 합니다.")
-        int finalUnitPrice
+        int finalUnitPrice,
+
+        @Schema(description = "이 상품의 최종 가격", example = "10500")
+        @Positive(message = "최종 단가는 0보다 커야 합니다.")
+        int totalPrice
 
 ) { }

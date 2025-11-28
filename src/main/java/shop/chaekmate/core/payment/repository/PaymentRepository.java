@@ -6,4 +6,6 @@ import shop.chaekmate.core.payment.entity.Payment;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByOrderNumber(String orderNumber);
+
+    Optional<Payment> findByOrderNumberAndPaymentKey(String orderNumber, String paymentKey);
 }

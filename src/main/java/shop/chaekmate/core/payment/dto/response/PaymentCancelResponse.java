@@ -16,8 +16,11 @@ public record PaymentCancelResponse(
         @Schema(description = "취소 사유", example = "사용자 요청으로 인한 환불")
         String cancelReason,
 
-        @Schema(description = "취소된 금액")
-        long canceledAmount,
+        @Schema(description = "취소된 현금 금액")
+        long canceledCash,
+
+        @Schema(description = "취소된 포인트 금액")
+        int canceledPoint,
 
         @Schema(description = "취소 완료 시각")
         LocalDateTime canceledAt,

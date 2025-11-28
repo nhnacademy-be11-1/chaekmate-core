@@ -26,7 +26,7 @@ import shop.chaekmate.core.order.dto.request.WrapperDto;
 import shop.chaekmate.core.order.dto.response.WrapperResponse;
 import shop.chaekmate.core.order.entity.Wrapper;
 import shop.chaekmate.core.order.exception.DuplicatedWrapperNameException;
-import shop.chaekmate.core.order.exception.WrapperNotFoundException;
+import shop.chaekmate.core.order.exception.NotFoundWrapperException;
 import shop.chaekmate.core.order.repository.WrapperRepository;
 
 @ActiveProfiles("test")
@@ -116,7 +116,7 @@ class WrapperServiceTest {
     void 포장지_삭제_실패_존재x() {
         when(wrapperRepository.existsById(anyLong())).thenReturn(false);
 
-        assertThrows(WrapperNotFoundException.class, () -> wrapperService.deleteWrapper(1L));
+        assertThrows(NotFoundWrapperException.class, () -> wrapperService.deleteWrapper(1L));
 
         verify(wrapperRepository, never()).deleteById(any());
     }
@@ -140,7 +140,7 @@ class WrapperServiceTest {
     void 포장지_단일_조회_실패_존재x() {
         when(wrapperRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(WrapperNotFoundException.class, () -> wrapperService.getWrapperById(1L));
+        assertThrows(NotFoundWrapperException.class, () -> wrapperService.getWrapperById(1L));
 
         verify(wrapperRepository, times(1)).findById(anyLong());
     }

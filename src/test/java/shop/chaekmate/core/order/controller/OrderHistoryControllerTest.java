@@ -57,7 +57,7 @@ class OrderHistoryControllerTest {
         Book book = bookRepository.save(Book.builder().title("A Book").isbn("1").author("a").description("d").index("i").isSaleEnd(false).isWrappable(true).price(1000).salesPrice(900).stock(1).views(1).publisher("p").publishedAt(LocalDateTime.now()).build());
         order = orderRepository.save(Order.createOrderReady(member, "order123", "tester", "010-1234-5678", "test@email.com", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 10000));
 
-        OrderedBook orderedBook = OrderedBook.createOrderDetailReady(order, book, 1, 1000, 900, 100, null, 0, null, 0, 0, 900);
+        OrderedBook orderedBook = OrderedBook.createOrderDetailReady(order, book, 1, 1000, 900, 100, null, 0, null, 0, 0, 900,900);
         orderedBook.markPaymentCompleted();
         orderedBookRepository.save(orderedBook);
     }

@@ -6,11 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
+import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
+import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.entity.Payment;
 import shop.chaekmate.core.payment.entity.PaymentHistory;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
 import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
+import shop.chaekmate.core.payment.exception.ExceedCancelAmountException;
+import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 import shop.chaekmate.core.payment.provider.PaymentProvider;
 import shop.chaekmate.core.payment.repository.PaymentHistoryRepository;
 import shop.chaekmate.core.payment.repository.PaymentRepository;
@@ -50,6 +54,40 @@ public class PointPaymentProvider implements PaymentProvider {
                 request.pointUsed(),
                 PaymentStatusType.APPROVED.name(),
                 now
+        );
+    }
+
+    @Transactional
+    @Override
+    public PaymentCancelResponse cancel(PaymentCancelRequest request) {
+        log.info("[POINT] 포인트 결제 취소 요청 - orderNumber={}, 취소금액={}, 사유={}",
+                request.orderNumber(), request.cancelAmount(), request.cancelReason());
+
+        Payment payment = paymentRepository.findByOrderNumber(request.orderNumber()).orElseThrow(NotFoundOrderNumberException::new);
+
+        int cancelAmount = (int) request.cancelAmount();
+
+        if (cancelAmount > payment.getPointUsed()) {
+            throw new ExceedCancelAmountException();
+        }
+
+        payment.applyCancel(0, cancelAmount);
+
+        LocalDateTime canceledAt = LocalDateTime.now();
+
+        paymentHistoryRepository.save(
+                (payment.getPaymentStatus() == PaymentStatusType.CANCELED)
+                        ? PaymentHistory.canceled(payment, cancelAmount, request.cancelReason(), canceledAt)
+                        : PaymentHistory.partialCanceled(payment, cancelAmount, request.cancelReason(), canceledAt)
+        );
+
+        return new PaymentCancelResponse(
+                payment.getOrderNumber(),
+                request.cancelReason(),
+                0L,                  // 현금 취소 없음
+                cancelAmount,  // 환급 포인트
+                canceledAt,
+                request.canceledBooks()
         );
     }
 }

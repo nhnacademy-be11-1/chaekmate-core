@@ -1,4 +1,4 @@
-package shop.chaekmate.core.order.repository;
+package shop.chaekmate.core.order.repository.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPAExpressions;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
+import shop.chaekmate.core.order.repository.OrderRepositoryCustom;
 
 import static shop.chaekmate.core.order.entity.QOrder.order;
 import static shop.chaekmate.core.order.entity.QOrderedBook.orderedBook;
@@ -45,7 +46,8 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
         JPAQuery<Order> query = queryFactory
                 .selectFrom(order)
-                .where(builder);
+                .where(builder)
+                .orderBy(order.createdAt.desc());
 
         List<Order> content = query
                 .offset(pageable.getOffset())
@@ -68,7 +70,8 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
         JPAQuery<Order> query = queryFactory
                 .selectFrom(order)
-                .where(builder);
+                .where(builder)
+                .orderBy(order.createdAt.desc());
 
         List<Order> content = query
                 .offset(pageable.getOffset())

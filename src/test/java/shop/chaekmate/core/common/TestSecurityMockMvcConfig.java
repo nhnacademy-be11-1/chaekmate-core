@@ -8,7 +8,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-
 @TestConfiguration
 @ActiveProfiles("test")
 public class TestSecurityMockMvcConfig {

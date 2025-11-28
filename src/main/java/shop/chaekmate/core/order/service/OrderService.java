@@ -15,17 +15,19 @@ import shop.chaekmate.core.book.exception.InsufficientStockException;
 import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.repository.MemberRepository;
+import shop.chaekmate.core.order.dto.request.CanceledBooksRequest;
 import shop.chaekmate.core.order.dto.request.OrderSaveRequest;
 import shop.chaekmate.core.order.dto.request.OrderedBookSaveRequest;
 import shop.chaekmate.core.order.dto.response.OrderSaveResponse;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
 import shop.chaekmate.core.order.entity.Wrapper;
-import shop.chaekmate.core.order.exception.WrapperNotFoundException;
+import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
+import shop.chaekmate.core.order.exception.NotFoundWrapperException;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import shop.chaekmate.core.order.repository.WrapperRepository;
-import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
+import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 import shop.chaekmate.core.point.exception.MemberNotFoundException;
 
@@ -62,6 +64,7 @@ public class OrderService {
         if (memberId != null) {
             member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         }
+
 
         List<Long> bookIds = request.orderedBooks().stream()
                 .map(OrderedBookSaveRequest::bookId)
@@ -112,7 +115,7 @@ public class OrderService {
             if (obRequest.wrapperId() != null) {
                 wrapper = wrapperMap.get(obRequest.wrapperId());
                 if (wrapper == null) {
-                    throw new WrapperNotFoundException();
+                    throw new NotFoundWrapperException();
                 }
             }
 
@@ -128,7 +131,8 @@ public class OrderService {
                     obRequest.issuedCouponId(),
                     obRequest.couponDiscount(),
                     obRequest.pointUsed(),
-                    obRequest.finalUnitPrice()
+                    obRequest.finalUnitPrice(),
+                    obRequest.totalPrice()
             );
 
             orderedBookRepository.save(orderedBook);
@@ -147,7 +151,6 @@ public class OrderService {
             Book book = item.getBook();
 
             if (!book.hasStock(item.getQuantity())) {
-                log.info("Order stock for order number {} has unexpected quantity", orderNumber);
                 throw new InsufficientStockException();
             }
         }
@@ -184,4 +187,52 @@ public class OrderService {
         order.markPaymentFailed();
         log.info("결제 및 주문 실패");
     }
+
+    @Transactional
+    public void applyOrderCancel(PaymentCancelResponse response) {
+
+        Order order = orderRepository.findByOrderNumber(response.orderNumber())
+                .orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder(order);
+
+        Map<Long, Integer> canceledMap = response.canceledBooks().stream()
+                .collect(Collectors.toMap(
+                        CanceledBooksRequest::orderedBookId,
+                        CanceledBooksRequest::canceledQuantity
+                ));
+
+        for (OrderedBook item : orderedBooks) {
+
+            long id = item.getId();
+
+            // 취소 요청에 포함x
+            if (!canceledMap.containsKey(id)) {
+                continue;
+            }
+
+            int qty = canceledMap.get(id);
+
+            // 주문 상품 상태 변경
+            item.markCanceled();
+
+            // 재고 복구
+            Book book = item.getBook();
+            book.increaseStock(qty);
+
+            log.info("[ORDER] 취소 처리 - orderedBookId={}, bookId={}, qty={}",
+                    id, book.getId(), qty);
+        }
+
+        // 전부 취소 이면
+        boolean allCanceled = orderedBooks.stream()
+                .allMatch(ob -> ob.getUnitStatus() == OrderedBookStatusType.CANCELED);
+
+        // 취소로 변경
+        if (allCanceled) {
+            order.markCanceled();
+        }
+        // 아님 그대로 유지
+    }
+
 }
