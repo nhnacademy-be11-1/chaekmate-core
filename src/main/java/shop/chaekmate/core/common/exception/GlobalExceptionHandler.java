@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCoreException(CoreException e) {
         log.warn("[CoreException Failed] {}", e.getMessage());
         BaseErrorCode errorCode = e.getErrorCode();
-        Log.Error(e, e.getErrorCode().getStatus().value(), "{}", e.getErrorCode().getMessage());
+        Log.Error(e, e.getErrorCode().getStatus().value());
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode));
     }
 
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleJwtException(JwtException e) {
         log.warn("[JwtException Failed] {}", e.getMessage());
         BaseErrorCode errorCode = CommonErrorCode.UNAUTHORIZED;
-        Log.Error(e, errorCode.getStatus().value(), "{}", errorCode.getMessage());
+        Log.Error(e, errorCode.getStatus().value());
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, e.getMessage()));
     }
 
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         log.warn("[Validation Failed] {}", e.getMessage());
         FieldError fieldError = e.getBindingResult().getFieldErrors().getFirst();
         String message = fieldError.getDefaultMessage();
-        Log.Error(e, 400, "{}", message);
+        Log.Error(e, 400);
 
         BaseErrorCode errorCode = CommonErrorCode.BAD_REQUEST;
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, message));
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
         log.error("[Unexpected Exception]", e);
         BaseErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
-        Log.Error(e, errorCode.getStatus().value(), "{}", errorCode.getMessage());
+        Log.Error(e, errorCode.getStatus().value());
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode));
     }
 
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDuplicatedLoginIdException(DuplicatedLoginIdException e) {
         log.warn("[DuplicatedLoginIdException] {}", e.getMessage());
         MemberErrorCode errorCode = MemberErrorCode.DUPLICATED_LOGIN_ID;
-        Log.Error(e, errorCode.getStatus().value(), "{}", errorCode.getMessage());
+        Log.Error(e, errorCode.getStatus().value());
 
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, e.getMessage()));
     }
@@ -68,21 +68,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDuplicatedEmailException(DuplicatedEmailException e) {
         log.warn("[DuplicatedEmailException] {}", e.getMessage());
         MemberErrorCode errorCode = MemberErrorCode.DUPLICATED_EMAIL;
-        Log.Error(e, errorCode.getStatus().value(), "{}", errorCode.getMessage());
+        Log.Error(e, errorCode.getStatus().value());
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.from(errorCode, e.getMessage()));
     }
 
     @ExceptionHandler(AddressLimitExceededException.class)
     public ResponseEntity<ErrorResponse> handleAddressLimitExceededException(AddressLimitExceededException e) {
         log.warn("[AddressLimitExceededException] {}", e.getMessage());
-        Log.Error(e, e.getErrorCode().getStatus().value(), "{}", e.getMessage());
+        Log.Error(e, e.getErrorCode().getStatus().value());
         return ResponseEntity.status(e.getErrorCode().getStatus()).body(ErrorResponse.from(e.getErrorCode()));
     }
 
     @ExceptionHandler(GradeConfigurationException.class)
     public ResponseEntity<ErrorResponse> handleGradeConfigurationException(GradeConfigurationException e) {
         log.error("[GradeConfigurationException] {}", e.getMessage());
-        Log.Error(e, e.getErrorCode().getStatus().value(), "{}", e.getMessage());
+        Log.Error(e, e.getErrorCode().getStatus().value());
 
         ErrorResponse response = ErrorResponse.from(
                 e.getErrorCode(),
