@@ -66,24 +66,18 @@ public class OrderService {
         }
 
 
-        List<Long> bookIds = request.orderedBooks().stream()
-                .map(OrderedBookSaveRequest::bookId)
-                .toList();
-
-        List<Long> wrapperIds = request.orderedBooks().stream()
-                .map(OrderedBookSaveRequest::wrapperId)
-                .filter(Objects::nonNull)
-                .toList();
-
-        Map<Long, Book> bookMap = bookRepository.findAllById(bookIds)
-                .stream()
+        Map<Long, Book> bookMap = bookRepository.findAllById(
+                        request.orderedBooks().stream().map(OrderedBookSaveRequest::bookId).toList()
+                ).stream()
                 .collect(Collectors.toMap(Book::getId, b -> b));
 
-        Map<Long, Wrapper> wrapperMap = wrapperIds.isEmpty()
-                ? Map.of()
-                : wrapperRepository.findAllById(wrapperIds)
-                        .stream()
-                        .collect(Collectors.toMap(Wrapper::getId, w -> w));
+        Map<Long, Wrapper> wrapperMap = wrapperRepository.findAllById(
+                        request.orderedBooks().stream()
+                                .map(OrderedBookSaveRequest::wrapperId)
+                                .filter(Objects::nonNull)
+                                .toList()
+                ).stream()
+                .collect(Collectors.toMap(Wrapper::getId, w -> w));
 
         Order order = Order.createOrderReady(
                 member,
@@ -139,6 +133,12 @@ public class OrderService {
         }
 
         return new OrderSaveResponse(orderNumber, request.totalPrice());
+    }
+
+    @Transactional(readOnly = true)
+    public Order getOrderEntity(String orderNumber) {
+        return orderRepository.findByOrderNumberFetch(orderNumber)
+                .orElseThrow(NotFoundOrderNumberException::new);
     }
 
     @Transactional(readOnly = true)
