@@ -21,6 +21,7 @@ public class RabbitProperties {
         private String name;
     }
 
+    @Getter
     @Setter
     public static class Queues {
         private String queueNameOdd;

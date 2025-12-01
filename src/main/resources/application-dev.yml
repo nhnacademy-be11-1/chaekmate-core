@@ -43,11 +43,8 @@ logging:
     org.springframework.amqp.rabbit.core.RabbitTemplate: debug # RabbitMQ 로깅
 
 # Spring Boot Actuator 서버 상태(헬스) 모니터링
+
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info
   health:
     db:
       enabled: true
@@ -55,4 +52,3 @@ management:
       enabled: true
     rabbit:
       enabled: true
-
