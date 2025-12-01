@@ -14,6 +14,4 @@ public interface PaymentProvider {
 
     PaymentCancelResponse cancel(PaymentCancelRequest request);
 
-    //환불 로직
-    // PaymentRefundResponse refund(PaymentRefundRequest request);
 }
