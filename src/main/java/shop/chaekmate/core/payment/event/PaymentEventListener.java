@@ -14,6 +14,9 @@ import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import shop.chaekmate.core.order.service.OrderService;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
+import shop.chaekmate.core.payment.event.PaymentAbortedEvent;
+import shop.chaekmate.core.payment.event.PaymentApprovedEvent;
+import shop.chaekmate.core.payment.event.PaymentCanceledEvent;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 
 @Component
@@ -34,8 +37,9 @@ public class PaymentEventListener {
         // 두레이 알림
     }
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handlePaymentAborted(String orderNumber) {
-        orderService.applyPaymentFail(orderNumber);
+    public void handlePaymentAborted(PaymentAbortedEvent event) {
+        log.info("[EVENT] 결제 실패 수신 - 주문ID: {}", event.orderNumber());
+        orderService.applyPaymentFail(event.orderNumber());
     }
     /*
     주문 내역 클릭
@@ -54,7 +58,7 @@ public class PaymentEventListener {
         PaymentCancelResponse res = event.cancelResponse();
         log.info("[EVENT] 결제 취소 수신 - 주문ID: {}", res.orderNumber());
 
-        // 주문 상태 변경
-
+        // 주문 상태 변경 및 재고 복구
+        orderService.applyPaymentCancel(res.orderNumber());
     }
 }
