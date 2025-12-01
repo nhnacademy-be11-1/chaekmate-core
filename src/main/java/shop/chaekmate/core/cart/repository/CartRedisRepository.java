@@ -184,7 +184,7 @@ public class CartRedisRepository {
                 continue;
             }
 
-            Long bookId = Long.parseLong(field.substring(5));   // "bookId:{bookId}" → {bookId}
+            Long bookId = Long.parseLong(field.substring(5));
 
             Object value = entry.getValue();
             Integer quantity;
