@@ -25,7 +25,6 @@ import shop.chaekmate.core.payment.entity.Payment;
 import shop.chaekmate.core.payment.entity.PaymentHistory;
 import shop.chaekmate.core.payment.entity.type.PaymentMethodType;
 import shop.chaekmate.core.payment.entity.type.PaymentStatusType;
-import shop.chaekmate.core.payment.exception.ExceedCancelAmountException;
 import shop.chaekmate.core.payment.exception.NotFoundPaymentKeyException;
 import shop.chaekmate.core.payment.provider.PaymentProvider;
 import shop.chaekmate.core.payment.repository.PaymentHistoryRepository;

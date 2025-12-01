@@ -235,4 +235,19 @@ public class OrderService {
         // 아님 그대로 유지
     }
 
+//    @Transactional
+//    public void applyPaymentRefund(String orderNumber) {
+//        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
+//
+//        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder((order));
+//
+//        for (OrderedBook item : orderedBooks) {
+//            item.markPaymentFailed();
+//        }
+//
+//        order.markPaymentFailed();
+//        log.info("결제 및 주문 실패");
+//    }
+
+
 }
