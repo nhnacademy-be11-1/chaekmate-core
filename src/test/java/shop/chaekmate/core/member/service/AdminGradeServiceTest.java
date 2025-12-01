@@ -25,6 +25,7 @@ import shop.chaekmate.core.member.repository.GradeRepository;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class AdminGradeServiceTest {
 
@@ -76,9 +77,8 @@ class AdminGradeServiceTest {
         Long gradeId = 1L;
 
         given(gradeRepository.findById(gradeId)).willReturn(Optional.empty());
-
-        assertThatThrownBy(() -> adminGradeService.updateGrade(gradeId,
-                new UpdateGradeRequest("실버", (byte) 3, 10000)))
+        UpdateGradeRequest req = new UpdateGradeRequest("실버", (byte) 3, 10000);
+        assertThatThrownBy(() -> adminGradeService.updateGrade(gradeId, req))
                 .isInstanceOf(GradeNotFoundException.class);
 
         verify(gradeRepository, never()).save(any());

@@ -12,5 +12,7 @@ public record BookListResponse(
         String imageUrl
 ) {
     @QueryProjection
-    public BookListResponse {}
+    public BookListResponse {
+        // Querydsl에서 DTO를 안전하게 쿼리 결과로 매핑하기 위한 생성자
+    }
 }

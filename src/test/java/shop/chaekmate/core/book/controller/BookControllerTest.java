@@ -236,7 +236,10 @@ class BookControllerTest {
 
     @Test
     void 도서_삭제_성공() throws Exception {
-        // 삭제 수정 테스트 반영 필요
+        mockMvc.perform(delete("/books/{bookId}", book.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
     }
 
     @Test
