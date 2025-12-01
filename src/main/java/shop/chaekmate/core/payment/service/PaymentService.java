@@ -65,8 +65,14 @@ public class PaymentService {
             //실패 로그 저장 - 새 트랜잭션으로 분리
             paymentErrorService.saveAbortedPayment(request, msg);
 
-            // 오류 응답 반환
-            return new PaymentAbortedResponse(error[0], error[1], LocalDateTime.now());
+            // 오류 응답 생성
+            PaymentAbortedResponse response = new PaymentAbortedResponse(error[0], error[1], LocalDateTime.now());
+
+            // 이벤트 발행
+            eventPublisher.publishPaymentAborted(request.orderNumber(), response);
+            log.info("[결제 실패 완료 및 이벤트 발행] 주문번호={}, 에러코드={}", request.orderNumber(), error[0]);
+
+            return response;
         }
     }
 
