@@ -56,3 +56,7 @@ management:
     rabbit:
       enabled: true
 
+# ===== RabbitMQ 회원 설정 (Dev) =====
+rabbitmq:
+  member:
+    exchange: dev-cm-member-fanout-exchange
