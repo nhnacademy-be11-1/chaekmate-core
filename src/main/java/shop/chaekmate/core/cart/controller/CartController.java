@@ -21,6 +21,7 @@ import shop.chaekmate.core.cart.dto.CartItemReadDto;
 import shop.chaekmate.core.cart.dto.CartItemUpdateDto;
 import shop.chaekmate.core.cart.dto.request.CartItemCreateRequest;
 import shop.chaekmate.core.cart.dto.request.CartItemUpdateRequest;
+import shop.chaekmate.core.cart.dto.response.CartItemCountResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemListAdvancedResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemListResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemUpdateResponse;
@@ -96,6 +97,38 @@ public class CartController {
         );
 
         CartItemListAdvancedResponse response = this.cartService.getCartItemsWithBookInfo(dto);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 장바구니 아이템 개수 조회
+     * - 장바구니에 담긴 도서 종류의 개수를 반환함
+     *
+     * <p>회원의 경우 X-Member-Id 헤더를 통해, 비회원의 경우 Guest-Id 쿠키를 통해
+     * 장바구니를 식별하며, 동일한 도서의 수량과 무관하게 도서 종류만 카운트함</p>
+     *
+     * <p>동일한 도서의 수량과 무관하게 도서 종류만 카운트함</p>
+     *
+     * <p>예시: 책A 2권, 책B 3권 → count = 2</p>
+     *
+     * @param memberId  회원 식별자(헤더), 없으면 비회원으로 간주
+     * @param guestId   비회원 식별자(쿠키), 회원일 경우 무시됨
+     * @return          장바구니 내 도서 종류 개수 응답
+     */
+    @GetMapping("/carts/item-count")
+    public ResponseEntity<CartItemCountResponse> getCartItemCount(
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
+            @CookieValue(name = "Guest-Id", required = false) String guestId)
+    {
+        String resolvedGuestId = (Objects.isNull(memberId)) ? guestId : null;
+
+        CartItemReadDto dto = new CartItemReadDto(
+                memberId,
+                resolvedGuestId
+        );
+
+        CartItemCountResponse response = this.cartService.getCartItemCount(dto);
 
         return ResponseEntity.ok(response);
     }

@@ -112,4 +112,9 @@ public class Book extends BaseEntity {
         }
         this.stock -= qty;
     }
+
+    // 재고 복구 (취소 시)
+    public void increaseStock(int qty) {
+        this.stock += qty;
+    }
 }

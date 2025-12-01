@@ -184,4 +184,24 @@ public class OrderService {
         order.markPaymentFailed();
         log.info("결제 및 주문 실패");
     }
+
+    @Transactional
+    public void applyPaymentCancel(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder((order));
+
+        for (OrderedBook item : orderedBooks) {
+            item.markCanceled();
+
+            // 재고 복구
+            Book book = item.getBook();
+            book.increaseStock(item.getQuantity());
+            log.info("책 주문 취소 및 재고 복구 - 책ID: {}, 수량: {}, 상태: {}",
+                    book.getId(), item.getQuantity(), item.getUnitStatus());
+        }
+
+        order.markCanceled();
+        log.info("결제 취소 및 주문 취소 완료 - 주문번호: {}", orderNumber);
+    }
 }
