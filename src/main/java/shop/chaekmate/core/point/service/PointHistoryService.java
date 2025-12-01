@@ -1,6 +1,8 @@
 package shop.chaekmate.core.point.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -111,7 +113,14 @@ public class PointHistoryService {
     //포인트 history 조회 (전체)
     @Transactional(readOnly = true)
     public Page<PointHistoryResponse> getPointHistory(Pageable pageable) {
-        return pointHistoryRepository.findAll(pageable)
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        return pointHistoryRepository.findAll(sortedPageable)
                 .map(point -> new PointHistoryResponse(
                         point.getId(),
                         point.getMember().getId(),
@@ -129,7 +138,13 @@ public class PointHistoryService {
         memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
 
-        return pointHistoryRepository.findByMemberId(memberId, pageable)
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        return pointHistoryRepository.findByMemberId(memberId, sortedPageable)
                 .map(point -> new MemberPointHistoryResponse(
                         point.getMember().getId(),
                         point.getType(),
