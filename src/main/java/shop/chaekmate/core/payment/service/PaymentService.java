@@ -191,6 +191,11 @@ public class PaymentService {
 
         long remainAmount = remainCash + remainPoint;
 
+        // 남은 금액 = 배송비 => 전체취소 처리
+        if (remainAmount == deliveryFee) {
+            return 0;
+        }
+
         // 배송비가 이미 한 번 빠진 상태라면
         if (payment.isDeliveryFeeAdjusted() && remainAmount <= deliveryFee) {
             return 0;
