@@ -50,8 +50,18 @@ management:
         include: health, info
 
 rabbitmq:
-  exchange:
-    name: cm-book-exchange
-  queues:
-    queue-name:  cm-book-1 # cm-book-2, cm-book-3
-    routing-key:  cm-book-key-1 # cm-book-key-2, cm-book-key-3
+  book:
+    exchange:
+      name: cm-book-exchange
+    queues:
+      queue-name: cm-book-1 # cm-book-2, cm-book-3
+      routing-key: cm-book-key-1 # cm-book-key-2, cm-book-key-3
+
+  cart:
+    exchange:
+      name: cart.exchange
+    queues:
+      login-queue-name: cart.login.queue
+      logout-queue-name: cart.logout.queue
+      login-routing-key: cart.login
+      logout-routing-key: cart.logout
