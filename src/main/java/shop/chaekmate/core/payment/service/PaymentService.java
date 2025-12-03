@@ -1,8 +1,7 @@
 package shop.chaekmate.core.payment.service;
 
-import static java.time.temporal.ChronoUnit.DAYS;
-
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +13,7 @@ import shop.chaekmate.core.order.dto.response.ReturnBooksResponse;
 import shop.chaekmate.core.order.entity.DeliveryPolicy;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
 import shop.chaekmate.core.order.exception.NotFoundDeliveryPolicyException;
 import shop.chaekmate.core.order.repository.DeliveryPolicyRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
@@ -27,7 +27,7 @@ import shop.chaekmate.core.payment.dto.response.impl.PaymentAbortedResponse;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.entity.Payment;
 import shop.chaekmate.core.payment.entity.PaymentHistory;
-import shop.chaekmate.core.payment.entity.type.RefundReasonType;
+import shop.chaekmate.core.payment.entity.type.ReturnReasonType;
 import shop.chaekmate.core.payment.event.PaymentEventPublisher;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 import shop.chaekmate.core.payment.provider.PaymentProvider;
@@ -99,7 +99,7 @@ public class PaymentService {
         List<OrderedBook> cancelBooks = findBooks(request.canceledBooks());
 
         // 취소 사유 입력
-        updateReason(cancelBooks, request.cancelReason());
+        updateReason(cancelBooks, request.cancelReason(), LocalDateTime.now());
 
         // 취소 금액(현금/포인트) 계산
         CancelAmountResult cancelTotal = calculateAmounts(cancelBooks);
@@ -173,104 +173,95 @@ public class PaymentService {
 
     // 사용자 요청
     @Transactional
-    public ReturnBooksResponse requestRefund(ReturnBooksRequest request){
-        List<OrderedBook> returnBooks = findBooks(request.refundBooks());
+    public ReturnBooksResponse requestReturn(Long memberId, ReturnBooksRequest request){
+        List<OrderedBook> returnBooks = findBooks(request.returnBooks());
 
         LocalDateTime requestedAt = LocalDateTime.now();
-        validateRefundPeriod(returnBooks, request.refundReason(), requestedAt);
 
         // 사유
-        updateReason(returnBooks, request.refundReason().name());
+        updateReason(returnBooks, request.returnReason().name(), requestedAt);
+
+        // 사유 검증
+        validateReturnInfo(returnBooks, request.returnReason());
+
+        CancelAmountResult amounts = calculateAmounts(returnBooks);
+        DeliveryPolicy policy = getPolicy(requestedAt);
+
+        long returnFee = calculateReturnFee(request.returnReason(), policy);
 
         // 상태 변경
-        orderService.applyOrderReturnRequest(request.orderNumber(), returnBooks);
+        orderService.applyOrderReturnRequest(returnBooks);
+        long returnCash = amounts.cancelCash();
+        int returnPoint = amounts.cancelPoint();
 
-        //예상 환불 금액 계산
-        CancelAmountResult amounts = calculateAmounts(returnBooks);
-        long refundCash = amounts.cancelCash();
-        int refundPoint = amounts.cancelPoint();
-
-        //현재 배송 정책
-        DeliveryPolicy policy = getPolicy(requestedAt);
-        long returnFee = calculateReturnFee(request.refundReason(), policy);
-
-        // 반품비 차감 (현금 → 포인트 순)
-        long feeFromCash = Math.min(refundCash, returnFee);
-        refundCash -= feeFromCash;
-
-        long remainingFee = returnFee - feeFromCash;
-        if (remainingFee > 0) {
-            if (remainingFee > refundPoint) {
-                throw new IllegalStateException("반품비가 포인트 환불 금액보다 클 수 없습니다.");
-            }
-            refundPoint -= (int) remainingFee;
+        if(memberId != null){
+            returnPoint += (int)returnCash;
+            returnCash = 0;
         }
-
-        // 아직 승인 전이므로, 여기서는 “예상 값”으로만 응답
+        // 결제한 현금, 포인트, 배송차감액 보여주고 (비회원시 포인트x) 검증 여부에 따른 배송비 차감 여부 (회원시 포인트로 반환 된다 명시)
         return new ReturnBooksResponse(
                 request.orderNumber(),
-                refundCash,
-                refundPoint,
+                returnCash,
+                returnPoint,
                 returnFee,
                 requestedAt,
-                request.refundBooks()
+                request.returnBooks()
         );
     }
 
     // 관리자 승인
-//    @RequiredAdmin
     @Transactional
-    public ReturnBooksResponse approveRefund(ReturnBooksRequest request){
+    public ReturnBooksResponse approveReturn(ReturnBooksRequest request){
         Order order = orderService.getOrderEntity(request.orderNumber());
 
         Payment payment = paymentRepository.findByOrderNumber(request.orderNumber())
                 .orElseThrow(NotFoundOrderNumberException::new);
 
-        List<OrderedBook> refundBooks = findBooks(request.refundBooks());
+        List<OrderedBook> returnBooks = findBooks(request.returnBooks());
 
-        updateReason(refundBooks, request.refundReason().name());
+        // 반품 사유 및 일자 체크
+        validateReturnInfo(returnBooks, request.returnReason());
 
-        CancelAmountResult amounts = calculateAmounts(refundBooks);
+        // 반환 금액 계산 (현금/포인트)
+        CancelAmountResult returnTotal = calculateAmounts(returnBooks);
+        long returnCash = returnTotal.cancelCash();
+        int returnPoint = returnTotal.cancelPoint();
 
         // 현재 배송정책 기준 회수비 계산
-        LocalDateTime refundedAt = LocalDateTime.now();
-
-        DeliveryPolicy policy = getPolicy(refundedAt);
-        long returnFee = calculateReturnFee(request.refundReason(), policy);
-
-        // 최종 환불금액 계산
-        long refundCash = amounts.cancelCash();
-        int refundPoint = amounts.cancelPoint();
+        LocalDateTime returnedAt = LocalDateTime.now();
+        DeliveryPolicy policy = getPolicy(returnedAt);
+        long returnFee = calculateReturnFee(request.returnReason(), policy);
 
         // 반품비 처리 (현금 -> 포인트 순서)
-        long feeFromCash = Math.min(refundCash, returnFee);
-        refundCash -= feeFromCash;
+        long feeFromCash = Math.min(returnCash, returnFee);
+        returnCash -= feeFromCash;
 
         long remainingFee = returnFee - feeFromCash;
         if (remainingFee > 0) {
-            if (remainingFee > refundPoint) {
+            if (remainingFee > returnPoint) {
                 throw new IllegalStateException("반품비가 포인트 환불 금액보다 클 수 없습니다.");
             }
-            refundPoint -= (int) remainingFee;
+            returnPoint -= (int) remainingFee;
         }
 
         boolean isMember = order.getMember() != null;
         if (isMember) {
+            payment.applyCancel(returnCash, returnPoint);
+
             // (회원) 포인트 반환
-            refundPoint += (int)refundCash;
-            refundCash = 0;
+            returnPoint += (int)returnCash;
+            returnCash = 0;
 
-            payment.applyCancel(0, refundPoint);
-            boolean isFullRefund = isAllRefund(order, refundBooks);
+            boolean isFullReturn = isAllReturn(order, returnBooks);
 
-            if (isFullRefund) {
+            if (isFullReturn) {
                 // 전체 반품
                 paymentHistoryRepository.save(
                         PaymentHistory.canceled(
                                 payment,
-                                refundPoint,
-                                "REFUND_" + request.refundReason().name(),
-                                refundedAt
+                                returnPoint,
+                                request.returnReason().name(),
+                                returnedAt
                         )
                 );
             } else {
@@ -278,9 +269,9 @@ public class PaymentService {
                 paymentHistoryRepository.save(
                         PaymentHistory.partialCanceled(
                                 payment,
-                                refundPoint,
-                                "REFUND_" + request.refundReason().name(),
-                                refundedAt
+                                returnPoint,
+                                request.returnReason().name(),
+                                returnedAt
                         )
                 );
             }
@@ -290,27 +281,28 @@ public class PaymentService {
             PaymentCancelRequest pgRequest = new PaymentCancelRequest(
                     payment.getPaymentKey(),
                     request.orderNumber(),
-                    "REFUND_:"+request.refundReason().name(),
-                    refundCash,     //현금 환불 금액
+                    request.returnReason().name(),
+                    returnCash,     //현금 환불 금액
                     0,
-                    request.refundBooks()
+                    request.returnBooks()
             );
 
             PaymentProvider provider = providerFactory.getProvider(payment.getPaymentType());
             provider.cancel(pgRequest);
         }
 
-        orderService.applyOrderReturn(request.orderNumber(), refundBooks);
+        orderService.applyOrderReturn(request.orderNumber(), returnBooks);
 
         ReturnBooksResponse response = new ReturnBooksResponse(
                 request.orderNumber(),
-                refundCash,
-                refundPoint,
+                returnCash,
+                returnPoint,
                 returnFee,
-                refundedAt,
-                request.refundBooks()
+                returnedAt,
+                request.returnBooks()
         );
-        eventPublisher.publishRefundApproved(response);
+
+        eventPublisher.publishPaymentCanceled(new PaymentCancelResponse(request.orderNumber(), request.returnReason().name(), returnCash, returnPoint, returnedAt, request.returnBooks()));
 
         return response;
     }
@@ -322,8 +314,8 @@ public class PaymentService {
     }
 
     // 사유 입력
-    private void updateReason(List<OrderedBook> books, String reason) {
-        books.forEach(book -> book.updateReason(reason));
+    private void updateReason(List<OrderedBook> books, String reason, LocalDateTime requestedAt) {
+        books.forEach(book -> book.updateReason(reason, requestedAt));
     }
 
     // 취소 총 가격(현금/포인트) 계산
@@ -384,35 +376,54 @@ public class PaymentService {
     }
 
     // 환불 타입 배송비 체크
-    private long calculateReturnFee(RefundReasonType reason, DeliveryPolicy policy) {
+    private long calculateReturnFee(ReturnReasonType reason, DeliveryPolicy policy) {
         return reason.isCustomerFault() ? policy.getDeliveryFee() : 0;
     }
 
     // 남은 품목 확인
-    private boolean isAllRefund(Order order, List<OrderedBook> refundBooks) {
-        return order.getOrderedBooks().size() == refundBooks.size();
+    private boolean isAllReturn(Order order, List<OrderedBook> returnBooks) {
+
+        // 반품이 가능한 행(배송완료 상태)의 전체 수
+        long returnableCount = order.getOrderedBooks().stream()
+                .filter(ob -> ob.getUnitStatus() == OrderedBookStatusType.DELIVERED)
+                .count();
+
+        // 이번에 요청한 반품 행 중 실제로 반품 가능한 행만 카운트
+        long requestCount = returnBooks.stream()
+                .filter(ob -> ob.getUnitStatus() == OrderedBookStatusType.DELIVERED)
+                .count();
+
+
+        return returnableCount == requestCount;
     }
 
     // 출고일 기준 체크
-    private void validateRefundPeriod(List<OrderedBook> refundBooks, RefundReasonType reason, LocalDateTime refundedAt) {
+    private void validateReturnInfo(List<OrderedBook> books, ReturnReasonType reason) {
+        for (OrderedBook ob : books) {
 
-        for (OrderedBook ob : refundBooks) {
-            LocalDateTime shippedAt = ob.deliveredAt(); // 배송 도착
-
-            if (shippedAt == null) {
-                throw new IllegalStateException("배송 이력이 없는 상품은 반품할 수 없습니다.");
+            if (ob.getDeliveredAt() == null) {
+                throw new IllegalStateException("배송 완료 이전에는 환불을 요청할 수 없습니다.");
             }
 
-            long days = DAYS.between(
-                    shippedAt.toLocalDate(), refundedAt.toLocalDate()
+            if (ob.getRequestAt() == null) {
+                throw new IllegalStateException("환불 요청 시간이 유효하지 않습니다.");
+            }
+
+            long days = ChronoUnit.DAYS.between(
+                    ob.getDeliveredAt().toLocalDate(),
+                    ob.getRequestAt().toLocalDate()
             );
 
-            if (reason.isCustomerFault() && days > 10) {
-                throw new IllegalStateException("고객 귀책 사유 반품은 출고일 기준 10일 이내에만 가능합니다.");
-            }
-
-            if (!reason.isCustomerFault() && days > 30) {
-                throw new IllegalStateException("상품 파손/오배송 반품은 출고일 기준 30일 이내에만 가능합니다.");
+            if (reason.isCustomerFault()) {
+                // 고객 귀책 사유: 10일 이내만 가능
+                if (days > 10) {
+                    throw new IllegalStateException("단순변심/고객귀책 환불 가능 기간(10일)을 초과했습니다.");
+                }
+            } else {
+                // 판매자 귀책 사유: 30일 이내까지 가능
+                if (days > 30) {
+                    throw new IllegalStateException("파손/오배송 환불 가능 기간(30일)을 초과했습니다.");
+                }
             }
         }
     }

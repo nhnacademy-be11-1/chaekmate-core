@@ -87,7 +87,7 @@ public class PointPaymentProvider implements PaymentProvider {
                 0L,
                 cancelPoint,
                 canceledAt,
-                request.canceledBooks()
+                    request.canceledBooks()
         );
     }
 }
