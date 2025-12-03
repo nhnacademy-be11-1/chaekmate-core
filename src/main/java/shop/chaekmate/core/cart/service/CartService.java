@@ -12,6 +12,8 @@ import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.cart.dto.CartItemCreateDto;
 import shop.chaekmate.core.cart.dto.CartItemDeleteAllDto;
 import shop.chaekmate.core.cart.dto.CartItemDeleteDto;
+import shop.chaekmate.core.cart.dto.CartItemDeleteListDto;
+import shop.chaekmate.core.cart.dto.CartItemDeleteSimpleDto;
 import shop.chaekmate.core.cart.dto.CartItemUpdateDto;
 import shop.chaekmate.core.cart.dto.CartOwner;
 import shop.chaekmate.core.cart.dto.response.CartItemAdvancedResponse;
@@ -181,6 +183,37 @@ public class CartService {
         // 2. DB 삭제 (회원, Write-Through)
         if (Objects.nonNull(dto.memberId())) {
             this.cartSyncService.deleteCartItem(dto.memberId(), dto.bookId());
+        }
+    }
+
+    /**
+     * 결제 승인된 장바구니 아이템들을 일괄 삭제함 (Write-Through)
+     * <ul>
+     *     <li>회원: 1. Redis 일괄 삭제 → 2. DB 일괄 삭제</li>
+     *     <li>비회원: Redis만 삭제</li>
+     * </ul>
+     */
+    @Transactional
+    public void deleteCartItems(CartItemDeleteListDto dto) {
+        String cartId = this.resolveCartId(dto);
+
+        if (Objects.isNull(cartId)) {
+            throw new CartNotFoundException();
+        }
+
+        // 삭제할 bookId 리스트 추출
+        List<Long> bookIds = dto.items().stream()
+                .map(CartItemDeleteSimpleDto::bookId)
+                .toList();
+
+        // 1. Redis 일괄 삭제 (회원/비회원, 우선 삭제)
+        bookIds.forEach(bookId ->
+                this.cartRedisRepository.deleteCartItem(cartId, bookId)
+        );
+
+        // 2. DB 일괄 삭제 (회원, Write-Through)
+        if (Objects.nonNull(dto.memberId())) {
+            this.cartSyncService.deleteCartItems(dto.memberId(), bookIds);
         }
     }
 

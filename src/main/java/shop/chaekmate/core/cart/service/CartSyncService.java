@@ -86,6 +86,27 @@ public class CartSyncService {
     }
 
     /**
+     * 여러 장바구니 아이템을 DB에서 일괄 삭제함 (Soft Delete)
+     *
+     * @param memberId 회원 ID
+     * @param bookIds 도서 ID 리스트
+     */
+    @Transactional
+    public void deleteCartItems(Long memberId, List<Long> bookIds) {
+        if (Objects.isNull(bookIds) || bookIds.isEmpty()) {
+            return;
+        }
+
+        Cart cart = this.cartRepository.findByMemberId(memberId)
+                .orElse(null);
+
+        if (Objects.nonNull(cart)) {
+            this.cartItemRepository.deleteByCartIdAndBookIds(cart.getId(), bookIds);
+        }
+    }
+
+
+    /**
      * 장바구니 내 모든 아이템을 DB에서 삭제함 (Soft Delete)
      *
      * @param memberId 회원 ID
