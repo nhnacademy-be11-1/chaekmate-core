@@ -51,21 +51,25 @@ public class MemberController implements MemberControllerDocs {
     }
 
     @GetMapping("/{memberId}")
+    @Override
     public ResponseEntity<MemberResponse> getMember(@PathVariable Long memberId) {
         return ResponseEntity.ok(memberService.getMember(memberId));
     }
 
     @GetMapping("/{memberId}/grade")
+    @Override
     public ResponseEntity<GradeResponse> getMemberGrade(@PathVariable Long memberId) {
         return ResponseEntity.ok(memberService.getMemberGrade(memberId));
     }
 
     @GetMapping("/grades")
+    @Override
     public ResponseEntity<List<GradeResponse>> getAllGrades() {
         return ResponseEntity.ok(memberService.getAllGrades());
     }
 
     @PostMapping("/grades")
+    @Override
     public ResponseEntity<Void> createMemberGradeHistory(@RequestBody CreateMemberGradeHistoryRequest request) {
         memberService.createMemberGradeHistory(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
