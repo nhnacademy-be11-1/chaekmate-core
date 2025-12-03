@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.member.dto.response.MemberResponse;
-import shop.chaekmate.core.member.entity.Member;
 import shop.chaekmate.core.member.exception.MemberNotFoundException;
 import shop.chaekmate.core.member.repository.MemberRepository;
 
@@ -23,12 +22,6 @@ public class AdminMemberService {
     @Transactional(readOnly = true)
     public List<MemberResponse> getDeletedMembers() {
         return memberRepository.findDeletedMembers().stream().map(MemberResponse::from).toList();
-    }
-
-    @Transactional
-    public MemberResponse getMember(Long memberId) {
-        Member member = memberRepository.findByIdIncludingDeleted(memberId).orElseThrow(MemberNotFoundException::new);
-        return MemberResponse.from(member);
     }
 
     @Transactional

@@ -24,11 +24,6 @@ public class AdminMemberController {
         return ResponseEntity.ok(adminMemberService.getActiveMembers());
     }
 
-    @GetMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> getMemberById(@PathVariable("memberId") Long memberId) {
-        return ResponseEntity.ok(adminMemberService.getMember(memberId));
-    }
-
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> deleteMemberById(@PathVariable("memberId") Long memberId) {
         adminMemberService.deleteMember(memberId);
