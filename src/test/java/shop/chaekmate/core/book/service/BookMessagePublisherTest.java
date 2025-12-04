@@ -19,7 +19,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.test.context.ActiveProfiles;
 import shop.chaekmate.core.book.dto.rabbit.BookTaskMqMapping;
 import shop.chaekmate.core.book.dto.rabbit.EventType;
-import shop.chaekmate.core.common.config.RabbitProperties;
+import shop.chaekmate.core.common.config.RabbitBookProperties;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -34,10 +34,10 @@ class BookMessagePublisherTest {
     private DirectExchange exchange;
 
     @Mock
-    private RabbitProperties rabbitProperties;
+    private RabbitBookProperties rabbitBookProperties;
 
     @Mock
-    private RabbitProperties.Queues queues;
+    private RabbitBookProperties.Queues queues;
 
     private BookMessagePublisher publisher;
 
@@ -46,11 +46,11 @@ class BookMessagePublisherTest {
         MockitoAnnotations.openMocks(this);
 
         when(exchange.getName()).thenReturn("book.exchange");
-        when(rabbitProperties.getQueues()).thenReturn(queues);
+        when(rabbitBookProperties.getQueues()).thenReturn(queues);
         when(queues.getRoutingKey()).thenReturn("book.routingKey");
 
         publisher = new BookMessagePublisher(
-                rabbitProperties,
+                rabbitBookProperties,
                 rabbitTemplate,
                 exchange,
                 new Jackson2JsonMessageConverter()
