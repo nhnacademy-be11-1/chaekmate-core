@@ -17,8 +17,7 @@ public class OrderedBookStatusScheduler {
 
     private final OrderedBookRepository orderedBookRepository;
 
-//    @Scheduled(cron = "0 */30 * * * *") // 30분 마다
-    @Scheduled(fixedDelay = 1000L * 60 * 60 * 24 * 2) // 2일(48시간)마다
+    @Scheduled(cron = "0 0 9 * * *") // 매일 오전 9시
     @Transactional
     public void autoCompleteShippingBooks() {
 
