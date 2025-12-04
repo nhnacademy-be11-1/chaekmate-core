@@ -1,6 +1,7 @@
 package shop.chaekmate.core.payment.event;
 
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import shop.chaekmate.core.order.entity.OrderedBook;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import shop.chaekmate.core.order.service.OrderService;
+import shop.chaekmate.core.payment.client.CouponClient;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
@@ -21,17 +23,30 @@ import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 @RequiredArgsConstructor
 public class PaymentEventListener {
 
-//    private final OrderRepository orderRepository;
-//    private final OrderedBookRepository orderedBookRepository;
     private final OrderService orderService;
+    private final CouponClient couponClient;
     // 결제 성공
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentApproved(PaymentApprovedEvent event) {
         PaymentApproveResponse res = event.approveResponse();
 
-        log.info("[EVENT] 결제 승인 수신 - 주문ID: {}", res.orderNumber());
-        // 이메일 전송
+        Order order = orderService.getOrderEntity(res.orderNumber());
+
+        // 주문 내 쿠폰 목록 추출 (null 제외, 중복 제거)
+        List<Long> couponIds = order.getOrderedBooks().stream()
+                .map(OrderedBook::getIssuedCouponId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        // 쿠폰 일괄 사용 처리
+        if (!couponIds.isEmpty()) {
+            couponClient.useCouponsBulk(order.getMember().getId(), couponIds);
+            log.info("[EVENT] 쿠폰 {}개 일괄 사용 처리 완료", couponIds.size());
+        }
+
         // 두레이 알림
+
     }
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentAborted(String orderNumber) {
@@ -48,13 +63,10 @@ public class PaymentEventListener {
     3. 포인트 반환
      */
 
-    // 결제 취소 및 환불
+    // 결제 취소
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentCanceled(PaymentCanceledEvent event) {
         PaymentCancelResponse res = event.cancelResponse();
         log.info("[EVENT] 결제 취소 수신 - 주문ID: {}", res.orderNumber());
-
-        // 주문 상태 변경
-
     }
 }

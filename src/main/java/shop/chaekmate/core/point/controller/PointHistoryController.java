@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class PointHistoryController {
     // 모든 history 불러오기
     @GetMapping(path = "/admin/point-histories")
     public ResponseEntity<Page<PointHistoryResponse>> getPointHistory(
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<PointHistoryResponse> response = pointHistoryService.getPointHistory(pageable);
         return ResponseEntity.ok().body(response);
     }
@@ -32,7 +33,7 @@ public class PointHistoryController {
     @GetMapping(path = "/members/{memberId}/point-histories")
     public ResponseEntity<Page<MemberPointHistoryResponse>> getMemberPointHistory(
             @PathVariable("memberId") Long memberId,
-            @PageableDefault(size = 10) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("회원 {} 포인트 히스토리 조회", memberId);
         Page<MemberPointHistoryResponse> response = pointHistoryService.getPointHistoryByMemberId(memberId, pageable);
         return ResponseEntity.ok().body(response);

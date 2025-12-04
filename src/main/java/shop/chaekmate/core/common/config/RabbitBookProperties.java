@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "rabbitmq")
-public class RabbitProperties {
+@ConfigurationProperties(prefix = "rabbitmq.book")
+public class RabbitBookProperties {
 
     private Exchange exchange;
     private Queues queues;

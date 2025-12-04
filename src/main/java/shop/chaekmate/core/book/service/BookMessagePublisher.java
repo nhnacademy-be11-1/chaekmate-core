@@ -4,11 +4,12 @@ import java.util.Objects;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.rabbit.BookTaskMqMapping;
 import shop.chaekmate.core.book.dto.rabbit.EventType;
-import shop.chaekmate.core.common.config.RabbitProperties;
+import shop.chaekmate.core.common.config.RabbitBookProperties;
 
 @Service
 public class BookMessagePublisher {
@@ -19,8 +20,9 @@ public class BookMessagePublisher {
     private final String routingKey;
 
     public BookMessagePublisher(
-            RabbitProperties rabbitProperties,
-            RabbitTemplate rabbitTemplate, DirectExchange exchange,
+            RabbitBookProperties rabbitBookProperties,
+            RabbitTemplate rabbitTemplate,
+            @Qualifier("bookExchange") DirectExchange exchange, // @Qualifier 추가
             Jackson2JsonMessageConverter jsonMessageConverter,
             Environment env) {
 
@@ -29,8 +31,9 @@ public class BookMessagePublisher {
         this.exchange = exchange;
         int port = Integer.parseInt(Objects.requireNonNull(env.getProperty("server.port")));
         this.routingKey = (port % 2 == 1)
-                ? rabbitProperties.getQueues().getRoutingKeyOdd()
-                : rabbitProperties.getQueues().getRoutingKeyEven();
+                ? rabbitBookProperties.getQueues().getRoutingKeyOdd()
+                : rabbitBookProperties.getQueues().getRoutingKeyEven();
+
     }
 
     public <T> void sendBookTaskMessage(EventType eventType, T bookMqRequest){

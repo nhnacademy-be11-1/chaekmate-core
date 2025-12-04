@@ -17,8 +17,10 @@ spring:
     # DBCP2 설정 (커넥션 풀)
     type: org.apache.commons.dbcp2.BasicDataSource
     dbcp2:
-      max-total: 10
-      min-idle: 2
+      max-total: 200
+      min-idle: 200
+      max-idle: 200
+      initial-size: 200
       validation-query: SELECT 1
       test-on-borrow: true
 
@@ -26,20 +28,20 @@ spring:
     hibernate:
       # create , update 금지 , prod 에선 None 고려
       ddl-auto: none # validate 로 수정 (전체 entity  수정 후)
-    show-sql: true
+    show-sql: false # 운영 환경에서 SQL 표시 끄기
     properties:
       hibernate:
         format_sql: false
         use_sql_comments: false
         highlight_sql: false
-    open-in-view: false
+    open-in-view: false # OSIV 설정 ( 디폴트 true )
     database-platform: org.hibernate.dialect.MySQLDialect
 
 logging:
   level:
     org.hibernate.SQL: warn
     org.hibernate.orm.jdbc.bind: off
-    root: info
+    root: warn
 
 # Spring Boot Actuator 서버 상태(헬스) 모니터링
 management:
@@ -47,7 +49,11 @@ management:
     db:
       enabled: true
     redis:
-      enabled: false
+      enabled: true
     rabbit:
       enabled: true
 
+# ===== RabbitMQ 회원 설정 (Prod) =====
+rabbitmq:
+  member:
+    exchange: prod-cm-member-fanout-exchange

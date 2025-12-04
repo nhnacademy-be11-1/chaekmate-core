@@ -105,11 +105,21 @@ public class Book extends BaseEntity {
         return this.stock >= quantity;
     }
 
-    // 재고 처리
+    // 주문 재고 처리
     public void decreaseStock(int qty) {
-        if (this.stock < qty) {
+        // 0 이하 또는 재고 초과 구매 시
+        if (qty <= 0 || qty > this.stock) {
             throw new InsufficientStockException();
         }
         this.stock -= qty;
     }
+
+    // 취소 및 환불 재고 처리
+    public void increaseStock(int qty) {
+        if (qty <= 0) {
+            throw new InsufficientStockException();
+        }
+        this.stock += qty;
+    }
+
 }
