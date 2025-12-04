@@ -8,6 +8,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.event.DeliveryEventPublisher;
+import shop.chaekmate.core.order.event.ShippingCompletedEvent;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 
 @Service
@@ -16,6 +18,7 @@ import shop.chaekmate.core.order.repository.OrderedBookRepository;
 public class OrderedBookStatusScheduler {
 
     private final OrderedBookRepository orderedBookRepository;
+    private final DeliveryEventPublisher eventPublisher;
 
     @Scheduled(cron = "0 0 9 * * *") // 매일 오전 9시
     @Transactional
@@ -57,6 +60,7 @@ public class OrderedBookStatusScheduler {
 
             if (allDelivered) {
                 ob.getOrder().markDelivered();
+                eventPublisher.publishShippingCompleted(new ShippingCompletedEvent(ob.getOrder().getOrderNumber()));
                 log.info("[대표주문 배송완료] orderId={}", orderId);
             }
         }

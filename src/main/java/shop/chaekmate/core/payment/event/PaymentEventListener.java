@@ -14,9 +14,11 @@ import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import shop.chaekmate.core.order.service.OrderService;
 import shop.chaekmate.core.payment.client.CouponClient;
+import shop.chaekmate.core.payment.client.DoorayMessageType;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
+import shop.chaekmate.core.payment.service.DoorayService;
 
 @Component
 @Slf4j
@@ -25,6 +27,7 @@ public class PaymentEventListener {
 
     private final OrderService orderService;
     private final CouponClient couponClient;
+    private final DoorayService doorayService;
     // 결제 성공
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentApproved(PaymentApprovedEvent event) {
@@ -46,27 +49,53 @@ public class PaymentEventListener {
         }
 
         // 두레이 알림
+        doorayService.sendMessage(
+                res.orderNumber(),
+                List.of(DoorayMessageType.PAYMENT_SUCCESS)
+        );
 
     }
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentAborted(String orderNumber) {
-        orderService.applyPaymentFail(orderNumber);
+        doorayService.sendMessage(
+                orderNumber,
+                List.of(DoorayMessageType.PAYMENT_FAILED)
+        );
     }
-    /*
-    주문 내역 클릭
-    주문 내역에는 하나의 주문번호 안에 여러 품목들이 있음
-    그 중 개별 물품 취소 or 환불 클릭 사유 작성 버튼 클릭 시 -> 관리자 요청
-
-    관리자 페이지 호출
-    1. 주문한 책 상태 변경
-    2. 주문한 책 수량 올리기
-    3. 포인트 반환
-     */
 
     // 결제 취소
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentCanceled(PaymentCanceledEvent event) {
         PaymentCancelResponse res = event.cancelResponse();
-        log.info("[EVENT] 결제 취소 수신 - 주문ID: {}", res.orderNumber());
+
+        // 반품인지 구분
+        boolean isReturn = res.canceledCash() == 0 &&
+                (res.cancelReason().equals("CHANGE_OF_MIND") ||
+                        res.cancelReason().equals("ORDER_MISTAKE") ||
+                        res.cancelReason().equals("DELIVERY_FAILURE") ||
+                        res.cancelReason().equals("DAMAGED_GOODS") ||
+                        res.cancelReason().equals("WRONG_DELIVERY"));
+
+        if (isReturn) {
+            doorayService.sendMessage(
+                    res.orderNumber(),
+                    List.of(DoorayMessageType.RETURN_COMPLETED)
+            );
+
+        } else {
+            doorayService.sendMessage(
+                    res.orderNumber(),
+                    List.of(DoorayMessageType.PAYMENT_CANCELED)
+            );
+        }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleReturnRequested(ReturnRequestedEvent event) {
+        String orderNumber = event.response().orderNumber();
+        doorayService.sendMessage(
+                orderNumber,
+                List.of(DoorayMessageType.RETURN_REQUESTED)
+        );
     }
 }

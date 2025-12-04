@@ -7,8 +7,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.entity.Book;
@@ -24,8 +22,9 @@ import shop.chaekmate.core.order.dto.response.OrderSaveResponse;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
 import shop.chaekmate.core.order.entity.Wrapper;
-import shop.chaekmate.core.order.entity.type.OrderStatusType;
 import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
+import shop.chaekmate.core.order.event.DeliveryEventPublisher;
+import shop.chaekmate.core.order.event.ShippingStartedEvent;
 import shop.chaekmate.core.order.exception.NotFoundWrapperException;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
@@ -44,6 +43,7 @@ public class OrderService {
     private final WrapperRepository wrapperRepository;
     private final OrderRepository orderRepository;
     private final OrderedBookRepository orderedBookRepository;
+    private final DeliveryEventPublisher eventPublisher;
 
     @Transactional
     public OrderSaveResponse createOrder(Long memberId, OrderSaveRequest request) {
@@ -284,5 +284,6 @@ public class OrderService {
         order.markShipping();
 
         log.info("[ORDER] 개별 상품 배송 시작 - orderedBookId={}, orderNumber={}", orderedBookId, order.getOrderNumber());
+        eventPublisher.publishShippingStarted(new ShippingStartedEvent(order.getOrderNumber(),ob.getBook().getTitle()));
     }
 }

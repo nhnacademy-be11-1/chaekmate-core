@@ -24,4 +24,8 @@ public class PaymentEventPublisher {
     public void publishPaymentCanceled(PaymentCancelResponse response) {
         publisher.publishEvent(new PaymentCanceledEvent(response));
     }
+
+    public void publishReturnRequested(ReturnRequestedEvent event) {
+        publisher.publishEvent(event);
+    }
 }

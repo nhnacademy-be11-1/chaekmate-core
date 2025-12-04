@@ -29,6 +29,7 @@ import shop.chaekmate.core.payment.entity.Payment;
 import shop.chaekmate.core.payment.entity.PaymentHistory;
 import shop.chaekmate.core.payment.entity.type.ReturnReasonType;
 import shop.chaekmate.core.payment.event.PaymentEventPublisher;
+import shop.chaekmate.core.payment.event.ReturnRequestedEvent;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 import shop.chaekmate.core.payment.provider.PaymentProvider;
 import shop.chaekmate.core.payment.provider.PaymentProviderFactory;
@@ -80,6 +81,8 @@ public class PaymentService {
             String[] error = msg.split(":", 2);
             //실패 로그 저장 - 새 트랜잭션으로 분리
             paymentErrorService.saveAbortedPayment(request, msg);
+
+            orderService.applyPaymentFail(request.orderNumber());
 
             // 오류 응답 생성
             PaymentAbortedResponse response = new PaymentAbortedResponse(error[0], error[1], LocalDateTime.now());
@@ -205,7 +208,7 @@ public class PaymentService {
             returnCash = 0;
         }
         // 결제한 현금, 포인트, 배송차감액 보여주고 (비회원시 포인트x) 검증 여부에 따른 배송비 차감 여부 (회원시 포인트로 반환 된다 명시)
-        return new ReturnBooksResponse(
+        ReturnBooksResponse response = new ReturnBooksResponse(
                 request.orderNumber(),
                 returnCash,
                 returnPoint,
@@ -213,6 +216,10 @@ public class PaymentService {
                 requestedAt,
                 request.returnBooks()
         );
+
+        eventPublisher.publishReturnRequested(new ReturnRequestedEvent(response));
+
+        return response;
     }
 
     // 관리자 승인
