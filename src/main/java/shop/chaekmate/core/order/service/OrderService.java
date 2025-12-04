@@ -65,7 +65,6 @@ public class OrderService {
             member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         }
 
-
         List<Long> bookIds = request.orderedBooks().stream()
                 .map(OrderedBookSaveRequest::bookId)
                 .toList();
@@ -151,6 +150,7 @@ public class OrderService {
             Book book = item.getBook();
 
             if (!book.hasStock(item.getQuantity())) {
+                log.info("Order stock for order number {} has unexpected quantity", orderNumber);
                 throw new InsufficientStockException();
             }
         }
