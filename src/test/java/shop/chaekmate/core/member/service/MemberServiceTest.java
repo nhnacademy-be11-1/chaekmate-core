@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import shop.chaekmate.core.event.MemberRabbitEventPublisher;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.entity.Grade;
@@ -49,6 +50,9 @@ class MemberServiceTest {
 
     @Mock
     MemberEventPublisher memberEventPublisher;
+
+    @Mock
+    MemberRabbitEventPublisher memberRabbitEventPublisher;
 
     @InjectMocks
     MemberService memberService;
