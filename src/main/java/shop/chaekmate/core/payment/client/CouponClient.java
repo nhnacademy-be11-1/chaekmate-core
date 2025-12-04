@@ -7,10 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(
-        name = "chaekmate-coupon",
-        url = "${chaekmate.coupon.url}"
-)
+@FeignClient(name = "chaekmate-coupon")
 public interface CouponClient {
 
     @PostMapping("/issued-coupons/use/bulk")
