@@ -10,6 +10,7 @@ class CoreApplicationTests {
 
     @Test
     void contextLoads() {
+        // 메인 컨텍스트 로딩 테스트
     }
 
 }

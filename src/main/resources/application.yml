@@ -51,15 +51,26 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+info:
+  instanceId: ${spring.application.name}:${server.port}
+
 
 rabbitmq:
   book:
     exchange:
       name: cm-book-exchange
     queues:
-      queue-name: cm-book-1 # cm-book-2, cm-book-3
-      routing-key: cm-book-key-1 # cm-book-key-2, cm-book-key-3
+      queueNameOdd: cm-book-1 # cm-book-2, cm-book-3
+      routingKeyOdd: cm-book-key-1
+      queueNameEven: cm-book-2 # cm-book-key-2, cm-book-key-3
+      routingKeyEven: cm-book-key-2
 
   cart:
     exchange:

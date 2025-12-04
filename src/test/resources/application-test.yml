@@ -17,6 +17,10 @@ spring:
     open-in-view: false
     database-platform: org.hibernate.dialect.H2Dialect
 
+  data:
+    redis:
+      database: ${REDIS_TEST_RANGE:309}
+
 logging:
   level:
     org.hibernate.SQL: debug
@@ -27,3 +31,6 @@ eureka:
     enabled: false
     register-with-eureka: false
     fetch-registry: false
+
+server:
+  port: 9100

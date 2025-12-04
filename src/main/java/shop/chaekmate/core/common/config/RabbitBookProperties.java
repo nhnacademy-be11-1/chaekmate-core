@@ -23,7 +23,9 @@ public class RabbitBookProperties {
     @Getter
     @Setter
     public static class Queues {
-        private String queueName;
-        private String routingKey;
+        private String queueNameOdd;
+        private String routingKeyOdd;
+        private String queueNameEven;
+        private String routingKeyEven;
     }
 }
