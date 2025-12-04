@@ -26,7 +26,7 @@ import shop.chaekmate.core.order.dto.request.DeliveryPolicyDto;
 import shop.chaekmate.core.order.dto.response.DeliveryPolicyHistoryResponse;
 import shop.chaekmate.core.order.dto.response.DeliveryPolicyResponse;
 import shop.chaekmate.core.order.entity.DeliveryPolicy;
-import shop.chaekmate.core.order.exception.DeliveryPolicyNotFoundException;
+import shop.chaekmate.core.order.exception.NotFoundDeliveryPolicyException;
 import shop.chaekmate.core.order.exception.DuplicatedDeliveryPolicyException;
 import shop.chaekmate.core.order.repository.DeliveryPolicyRepository;
 
@@ -151,7 +151,7 @@ class DeliveryPolicyServiceTest {
     void 현재_배달_정책_조회_실패() {
         when(deliveryPolicyRepository.findByDeletedAtIsNull()).thenReturn(Optional.empty());
 
-        assertThrows(DeliveryPolicyNotFoundException.class, () -> deliveryPolicyService.getPolicy());
+        assertThrows(NotFoundDeliveryPolicyException.class, () -> deliveryPolicyService.getPolicy());
 
         verify(deliveryPolicyRepository, times(1)).findByDeletedAtIsNull();
     }
