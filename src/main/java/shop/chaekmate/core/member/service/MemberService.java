@@ -140,4 +140,9 @@ public class MemberService {
         String reason = request.reason();
         memberGradeHistoryRepository.save(new MemberGradeHistory(member, grade, reason));
     }
+
+    @Transactional(readOnly = true)
+    public List<Long> getMemberIdsByBirthMonth(int month) {
+        return memberRepository.findIdsByBirthMonth(month);
+    }
 }

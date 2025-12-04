@@ -16,6 +16,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query(value = "select count(*) from member where login_id = :loginId", nativeQuery = true)
     int existsAnyByLoginId(@Param("loginId") String loginId);
     boolean existsByEmail(@NotBlank(message = "이메일은 필수입니다.") @Email(message = "이메일 형식이 올바르지 않습니다.") @Size(max = 50, message = "이메일은 50자 이하로 입력해주세요.") String email);
+
     // 탈퇴 회원 목록 조회
     @Query(value = "select * from member where deleted_at is not null", nativeQuery = true)
     List<Member> findDeletedMembers();
@@ -26,4 +27,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying
     @Query(value = "update member set deleted_at = null where id = :id", nativeQuery = true)
     int restoreById(@Param("id") Long id);
+
+    @Query("SELECT m.id FROM Member m WHERE FUNCTION('MONTH', m.birthDate) = :month")
+    List<Long> findIdsByBirthMonth(@Param("month") int month);
 }
