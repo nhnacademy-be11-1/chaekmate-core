@@ -119,8 +119,8 @@ public class PointEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentCanceled(PaymentCanceledEvent event) {
         PaymentCancelResponse response = event.cancelResponse();
-        log.info("[포인트 이벤트] 결제 취소 이벤트 수신 - 주문번호: {}, 취소금액: {}",
-                response.orderNumber(), response.canceledAmount());
+        log.info("[포인트 이벤트] 결제 취소 이벤트 수신 - 주문번호: {}, 취소현금: {}, 취소포인트{}",
+                response.orderNumber(), response.canceledCash(), response.canceledPoint());
 
         try {
             Order order = orderRepository.findByOrderNumber(response.orderNumber())
