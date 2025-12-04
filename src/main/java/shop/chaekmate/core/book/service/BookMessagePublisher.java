@@ -3,10 +3,11 @@ package shop.chaekmate.core.book.service;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import shop.chaekmate.core.book.dto.rabbit.BookTaskMqMapping;
 import shop.chaekmate.core.book.dto.rabbit.EventType;
-import shop.chaekmate.core.common.config.RabbitProperties;
+import shop.chaekmate.core.common.config.RabbitBookProperties;
 
 @Service
 public class BookMessagePublisher {
@@ -17,14 +18,15 @@ public class BookMessagePublisher {
     private final String routingKey;
 
     public BookMessagePublisher(
-            RabbitProperties rabbitProperties,
-            RabbitTemplate rabbitTemplate, DirectExchange exchange,
+            RabbitBookProperties rabbitBookProperties,
+            RabbitTemplate rabbitTemplate,
+            @Qualifier("bookExchange") DirectExchange exchange, // @Qualifier 추가
             Jackson2JsonMessageConverter jsonMessageConverter) {
 
         this.rabbitTemplate = rabbitTemplate;
         rabbitTemplate.setMessageConverter(jsonMessageConverter);
         this.exchange = exchange;
-        this.routingKey = rabbitProperties.getQueues().getRoutingKey();
+        this.routingKey = rabbitBookProperties.getQueues().getRoutingKey();
     }
 
     public <T> void sendBookTaskMessage(EventType eventType, T bookMqRequest){
