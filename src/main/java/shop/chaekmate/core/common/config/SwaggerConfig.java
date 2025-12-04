@@ -172,30 +172,4 @@ public class SwaggerConfig {
                 .pathsToMatch("/reviews/**", "/admin/reviews/**")
                 .build();
     }
-
-    @Bean
-    public GroupedOpenApi orderApi() {
-        return GroupedOpenApi.builder()
-                .group("Order API")
-                .addOpenApiCustomizer(openApi -> openApi
-                        .info(new Info()
-                                .title("주문 관련 API")
-                                .description("주문 관련 기능")
-                                .version("v1.0")))
-                .pathsToMatch("/orders/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi reviewApi() {
-        return GroupedOpenApi.builder()
-                .group("Review API")
-                .addOpenApiCustomizer(openApi -> openApi
-                        .info(new Info()
-                                .title("리뷰 관련 API")
-                                .description("리뷰 관련 기능")
-                                .version("v1.0")))
-                .pathsToMatch("/reviews/**", "/admin/reviews/**")
-                .build();
-    }
 }
