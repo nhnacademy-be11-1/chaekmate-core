@@ -13,13 +13,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import shop.chaekmate.core.book.entity.Book;
 import shop.chaekmate.core.common.entity.BaseEntity;
 
 @Entity
 @Getter
 @Table(name = "cart_item")
+@SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = PROTECTED)
+@SQLDelete(sql = "UPDATE cart_item SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 public class CartItem extends BaseEntity {
 
     @Id

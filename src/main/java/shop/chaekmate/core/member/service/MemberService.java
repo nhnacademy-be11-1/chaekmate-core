@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.chaekmate.core.event.MemberRabbitEventPublisher;
 import shop.chaekmate.core.member.dto.request.CreateMemberGradeHistoryRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
@@ -29,6 +30,7 @@ public class MemberService {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final MemberGradeHistoryRepository memberGradeHistoryRepository;
     private final GradeRepository gradeRepository;
+    private final MemberRabbitEventPublisher memberRabbitEventPublisher;
 
     @Transactional
     public void createMember(CreateMemberRequest request) {
@@ -78,6 +80,9 @@ public class MemberService {
 
         // 회원가입 이벤트 발행
         eventPublisher.publishMemberCreated(memberResponse);
+
+        // 쿠폰 이벤트 발행
+        memberRabbitEventPublisher.publishMemberSignedUp(savedMember.getId());
     }
 
     private String generateRandomPassword() {

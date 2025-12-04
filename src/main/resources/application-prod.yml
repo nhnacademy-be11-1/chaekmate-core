@@ -12,3 +12,7 @@ spring:
         service-id: chaekmate-config    # Eureka 서비스 이름
       fail-fast: true
 
+# ===== RabbitMQ 회원 설정 (Prod) =====
+rabbitmq:
+  member:
+    exchange: prod-cm-member-fanout-exchange
