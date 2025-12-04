@@ -38,7 +38,7 @@ public class ReviewImageService {
                 && !review.getComment().trim().isEmpty()) {
             reviewEventPublisher.publishReviewCreated(reviewId, review.getMember().getId());
         }
-        
+
         return reviewImages.stream()
                 .map(image -> new ReviewImageResponse(image.getId(), image.getImageUrl()))
                 .toList();
