@@ -54,11 +54,6 @@ dooray:
   webhook:
     url: ${DOORAY_WEBHOOK_URL}
 
-
-chaekmate:
-  coupon:
-    url: http://localhost:9400
-
 management:
   endpoints:
     web:
