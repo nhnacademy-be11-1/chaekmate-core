@@ -141,9 +141,9 @@ public class SwaggerConfig {
                 .addOpenApiCustomizer(openApi -> openApi
                         .info(new Info()
                                 .title("결제 관련 API")
-                                .description("결제 승인, 취소 맟 (관리자)결제내역 조회 기능")
+                                .description("결제 승인, 취소 및 (관리자) 반품 승인, 결제내역 조회 기능")
                                 .version("v1.0")))
-                .pathsToMatch("/payments/**", "/admin/payments/histories/**")
+                .pathsToMatch("/payments/**", "/admin/payments/**")
                 .build();
     }
 

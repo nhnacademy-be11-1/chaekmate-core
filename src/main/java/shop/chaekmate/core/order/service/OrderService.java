@@ -7,6 +7,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.book.entity.Book;
@@ -22,6 +24,7 @@ import shop.chaekmate.core.order.dto.response.OrderSaveResponse;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
 import shop.chaekmate.core.order.entity.Wrapper;
+import shop.chaekmate.core.order.entity.type.OrderStatusType;
 import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
 import shop.chaekmate.core.order.exception.NotFoundWrapperException;
 import shop.chaekmate.core.order.repository.OrderRepository;
@@ -145,7 +148,7 @@ public class OrderService {
     public void verifyOrderStock(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
 
-        List<OrderedBook> items = orderedBookRepository.findByOrder(order);
+        List<OrderedBook> items = orderedBookRepository.findAllByOrder(order);
 
         for (OrderedBook item : items) {
             Book book = item.getBook();
@@ -160,7 +163,7 @@ public class OrderService {
     public void applyPaymentSuccess(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
 
-        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder((order));
+        List<OrderedBook> orderedBooks = orderedBookRepository.findAllByOrder((order));
 
         for (OrderedBook item : orderedBooks) {
             item.markPaymentCompleted();
@@ -178,7 +181,7 @@ public class OrderService {
     public void applyPaymentFail(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber).orElseThrow(NotFoundOrderNumberException::new);
 
-        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder((order));
+        List<OrderedBook> orderedBooks = orderedBookRepository.findAllByOrder((order));
 
         for (OrderedBook item : orderedBooks) {
             item.markPaymentFailed();
@@ -194,7 +197,7 @@ public class OrderService {
         Order order = orderRepository.findByOrderNumber(response.orderNumber())
                 .orElseThrow(NotFoundOrderNumberException::new);
 
-        List<OrderedBook> orderedBooks = orderedBookRepository.findByOrder(order);
+        List<OrderedBook> orderedBooks = orderedBookRepository.findAllByOrder(order);
 
         Map<Long, Integer> canceledMap = response.canceledBooks().stream()
                 .collect(Collectors.toMap(
@@ -234,5 +237,52 @@ public class OrderService {
         }
         // 아님 그대로 유지
     }
+    @Transactional
+    public void applyOrderReturnRequest(List<OrderedBook> returnBooks) {
+        for (OrderedBook item : returnBooks) {
+            item.markReturnRequest();
+        }
+    }
 
+    @Transactional
+    public void applyOrderReturn(String orderNumber, List<OrderedBook> returnBooks) {
+
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(NotFoundOrderNumberException::new);
+
+        // 승인된 책 상태 변경 및 재고 복구
+        for (OrderedBook item : returnBooks) {
+            item.markReturned();
+
+            Book book = item.getBook();
+            book.increaseStock(item.getQuantity());
+
+            log.info("[ORDER] 반품 승인 - orderedBookId={}, bookId={}, qty={}",
+                    item.getId(), book.getId(), item.getQuantity());
+        }
+
+        // 전체 반품인지 부분반품인지 체크
+        boolean allReturned = order.getOrderedBooks().stream()
+                .allMatch(ob -> ob.getUnitStatus() == OrderedBookStatusType.RETURNED);
+
+        if (allReturned) {
+            order.markReturned();
+            log.info("[ORDER] 전체 반품 완료 - orderNumber={}", orderNumber);
+        }
+    }
+
+    @Transactional
+    public void applyOrderedBookShipping(Long orderedBookId) {
+        OrderedBook ob = orderedBookRepository.findById(orderedBookId)
+                .orElseThrow(() -> new IllegalArgumentException("OrderedBook not found"));
+
+        // 개별 상품 배송 시작
+        ob.markShipping();
+
+        // 주문 대표 상태 변경
+        Order order = ob.getOrder();
+        order.markShipping();
+
+        log.info("[ORDER] 개별 상품 배송 시작 - orderedBookId={}, orderNumber={}", orderedBookId, order.getOrderNumber());
+    }
 }

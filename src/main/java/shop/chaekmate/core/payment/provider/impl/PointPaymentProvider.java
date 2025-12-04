@@ -65,29 +65,29 @@ public class PointPaymentProvider implements PaymentProvider {
 
         Payment payment = paymentRepository.findByOrderNumber(request.orderNumber()).orElseThrow(NotFoundOrderNumberException::new);
 
-        int cancelAmount = (int) request.cancelAmount();
+        int cancelPoint = request.pointCancelAmount();
 
-        if (cancelAmount > payment.getPointUsed()) {
+        if (cancelPoint > payment.getPointUsed()) {
             throw new ExceedCancelAmountException();
         }
 
-        payment.applyCancel(0, cancelAmount);
+        payment.applyCancel(0, cancelPoint);
 
         LocalDateTime canceledAt = LocalDateTime.now();
 
         paymentHistoryRepository.save(
                 (payment.getPaymentStatus() == PaymentStatusType.CANCELED)
-                        ? PaymentHistory.canceled(payment, cancelAmount, request.cancelReason(), canceledAt)
-                        : PaymentHistory.partialCanceled(payment, cancelAmount, request.cancelReason(), canceledAt)
+                        ? PaymentHistory.canceled(payment, cancelPoint, request.cancelReason(), canceledAt)
+                        : PaymentHistory.partialCanceled(payment, cancelPoint, request.cancelReason(), canceledAt)
         );
 
         return new PaymentCancelResponse(
                 payment.getOrderNumber(),
                 request.cancelReason(),
-                0L,                  // 현금 취소 없음
-                cancelAmount,  // 환급 포인트
+                0L,
+                cancelPoint,
                 canceledAt,
-                request.canceledBooks()
+                    request.canceledBooks()
         );
     }
 }

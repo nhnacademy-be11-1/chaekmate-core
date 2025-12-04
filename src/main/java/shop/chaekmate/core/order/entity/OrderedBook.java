@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -76,6 +77,15 @@ public class OrderedBook extends BaseEntity {
     @Column(length = 255)
     private String reason;
 
+    @Column
+    private LocalDateTime requestAt;
+
+    @Column
+    private LocalDateTime shippedAt;
+
+    @Column
+    private LocalDateTime deliveredAt;
+
     public static OrderedBook createOrderDetailReady(
             Order order,
             Book book,
@@ -127,11 +137,13 @@ public class OrderedBook extends BaseEntity {
 
     // 배송 시작
     public void markShipping() {
+        this.shippedAt = LocalDateTime.now();
         this.unitStatus = OrderedBookStatusType.SHIPPING;
     }
 
     // 배송 완료
     public void markDelivered() {
+        this.deliveredAt = LocalDateTime.now();
         this.unitStatus = OrderedBookStatusType.DELIVERED;
     }
 
@@ -142,6 +154,7 @@ public class OrderedBook extends BaseEntity {
 
     // 반품 요청
     public void markReturnRequest() {
+        this.requestAt = LocalDateTime.now();
         this.unitStatus = OrderedBookStatusType.RETURN_REQUEST;
     }
 
@@ -150,7 +163,9 @@ public class OrderedBook extends BaseEntity {
         this.unitStatus = OrderedBookStatusType.RETURNED;
     }
 
-    public void updateReason(String reason) {
+    //사유 등록
+    public void updateReason(String reason, LocalDateTime requestedAt) {
         this.reason = reason;
+        this.requestAt = requestedAt;
     }
 }

@@ -1,5 +1,6 @@
 package shop.chaekmate.core.order.dto.response;
 
+import java.time.LocalDateTime;
 import shop.chaekmate.core.order.entity.OrderedBook;
 
 public record OrderedBookHistoryResponse(
@@ -18,7 +19,10 @@ public record OrderedBookHistoryResponse(
         Integer couponDiscount,
         Integer pointUsed,
         String unitStatus,
-        Long totalPrice
+        Long totalPrice,
+        String returnReason,
+        LocalDateTime requestAt,
+        LocalDateTime deliveredAt
 ) {
     public static OrderedBookHistoryResponse from(OrderedBook ob) {
 
@@ -54,7 +58,10 @@ public record OrderedBookHistoryResponse(
                 couponDiscount,
                 pointUsed,
                 ob.getUnitStatus().name(),
-                ob.getTotalPrice()
+                ob.getTotalPrice(),
+                ob.getReason(),
+                ob.getRequestAt(),
+                ob.getDeliveredAt()
         );
     }
 }

@@ -10,6 +10,7 @@ import shop.chaekmate.core.order.dto.response.OrderHistoryResponse;
 import shop.chaekmate.core.order.dto.response.OrderedBookHistoryResponse;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.entity.type.OrderStatusType;
 import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
@@ -34,6 +35,26 @@ public class OrderHistoryService {
     public Page<OrderHistoryResponse> findNonMemberOrderHistory(String orderNumber, String ordererName, String ordererPhone, Pageable pageable) {
         Page<Order> ordersPage = orderRepository.searchNonMemberOrder(orderNumber, ordererName, ordererPhone, pageable);
         return convertToOrderHistoryResponsePage(ordersPage, pageable);
+    }
+
+    public Page<OrderHistoryResponse> findAllOrderPage(OrderStatusType orderStatus, OrderedBookStatusType unitStatus, Pageable pageable) {
+        Page<Order> ordersPage = orderRepository.findAllOrders(orderStatus, unitStatus, pageable);
+        return convertToOrderHistoryResponsePage(ordersPage, pageable);
+    }
+
+    public OrderHistoryResponse findOrderDetail(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalStateException("찾을 수 없음"+orderId));
+
+        List<OrderedBook> orderedBooks = orderedBookRepository.findAllByOrder(order);
+
+        List<OrderedBookHistoryResponse> bookResponses = orderedBooks.stream()
+                .filter(b -> b.getUnitStatus() != OrderedBookStatusType.PAYMENT_READY &&
+                        b.getUnitStatus() != OrderedBookStatusType.PAYMENT_FAILED)
+                .map(OrderedBookHistoryResponse::from)
+                .toList();
+
+        return OrderHistoryResponse.of(order, bookResponses);
     }
 
     private Page<OrderHistoryResponse> convertToOrderHistoryResponsePage(Page<Order> ordersPage, Pageable pageable) {

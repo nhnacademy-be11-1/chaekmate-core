@@ -15,6 +15,5 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
     where o.orderNumber = :orderNumber
 """)
     Optional<Order> findByOrderNumberFetch(String orderNumber);
-
-
+    Optional<Order> findAllById(Long orderId);
 }
