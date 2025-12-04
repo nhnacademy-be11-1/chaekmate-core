@@ -10,13 +10,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import shop.chaekmate.core.common.dto.ErrorResponse;
+import shop.chaekmate.core.order.dto.request.ReturnBooksRequest;
+import shop.chaekmate.core.order.dto.response.ReturnBooksResponse;
 import shop.chaekmate.core.payment.dto.request.PaymentApproveRequest;
 import shop.chaekmate.core.payment.dto.request.PaymentCancelRequest;
 import shop.chaekmate.core.payment.dto.response.base.PaymentResponse;
 import shop.chaekmate.core.payment.dto.response.impl.PaymentApproveResponse;
 import shop.chaekmate.core.payment.dto.response.PaymentCancelResponse;
 
-@Tag(name = "결제 API", description = "결제 승인 및 취소 관련 API")
+@Tag(name = "결제 API", description = "결제 승인, 취소, 반품 요청/승인 API")
 public interface PaymentControllerDocs {
 
     @Operation(
@@ -28,7 +30,7 @@ public interface PaymentControllerDocs {
                     @ApiResponse(responseCode = "400", description = "요청 데이터가 유효하지 않거나 금액 불일치 등의 오류가 발생했습니다.",
                             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류 또는 외부 결제 모듈 오류입니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
     ResponseEntity<PaymentResponse> approve(
@@ -38,6 +40,12 @@ public interface PaymentControllerDocs {
                     required = false
             )
             @RequestHeader("X-Member-Id") Long memberId,
+//            @Parameter(
+//                    name = "Guest-Id",
+//                    description = "비회원 식별자",
+//                    required = false
+//            )
+//            @RequestHeader("Guest-Id") String guestId,
             @RequestBody(
                     description = "결제 승인 요청 정보 (orderNumber, paymentKey, amount 등)",
                     required = true,
@@ -57,7 +65,7 @@ public interface PaymentControllerDocs {
                     @ApiResponse(responseCode = "404", description = "취소하려는 결제 정보를 찾을 수 없습니다.",
                             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류 또는 외부 결제 모듈 오류입니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
     ResponseEntity<PaymentCancelResponse> cancel(
@@ -73,5 +81,43 @@ public interface PaymentControllerDocs {
                     content = @Content(schema = @Schema(implementation = PaymentCancelRequest.class))
             )
             PaymentCancelRequest request
+    );
+
+    @Operation(
+            summary = "반품 요청",
+            description = "회원 또는 비회원이 반품 요청을 생성합니다. 부분 반품도 가능합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "반품 요청 생성 성공",
+                            content = @Content(schema = @Schema(implementation = ReturnBooksResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "유효하지 않은 요청",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    ResponseEntity<ReturnBooksResponse> requestReturn(
+            @Parameter(name = "X-Member-Id", description = "회원 ID/비회원 NULL", required = false)
+            @RequestHeader("X-Member-Id") Long memberId,
+            @RequestBody(
+                    description = "반품 요청 정보",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = ReturnBooksRequest.class)))
+            ReturnBooksRequest request
+    );
+
+    @Operation(
+            summary = "반품 승인 (관리자)",
+            description = "관리자가 고객의 반품 요청을 검토 후 승인합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "반품 승인 성공",
+                            content = @Content(schema = @Schema(implementation = ReturnBooksResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    ResponseEntity<ReturnBooksResponse> returnApprove(
+            @RequestBody(
+                    description = "반품 승인 요청 정보",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = ReturnBooksRequest.class)))
+            ReturnBooksRequest request
     );
 }

@@ -1,4 +1,4 @@
-package shop.chaekmate.core.order.repository;
+package shop.chaekmate.core.order.repository.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPAExpressions;
@@ -12,7 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import shop.chaekmate.core.order.entity.Order;
+import shop.chaekmate.core.order.entity.type.OrderStatusType;
 import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
+import shop.chaekmate.core.order.repository.OrderRepositoryCustom;
 
 import static shop.chaekmate.core.order.entity.QOrder.order;
 import static shop.chaekmate.core.order.entity.QOrderedBook.orderedBook;
@@ -45,7 +47,8 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
         JPAQuery<Order> query = queryFactory
                 .selectFrom(order)
-                .where(builder);
+                .where(builder)
+                .orderBy(order.createdAt.desc());
 
         List<Order> content = query
                 .offset(pageable.getOffset())
@@ -68,7 +71,8 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
         JPAQuery<Order> query = queryFactory
                 .selectFrom(order)
-                .where(builder);
+                .where(builder)
+                .orderBy(order.createdAt.desc());
 
         List<Order> content = query
                 .offset(pageable.getOffset())
@@ -82,6 +86,45 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
 
         return new PageImpl<>(content, pageable, countQuery.fetchOne());
     }
+
+    public Page<Order> findAllOrders(OrderStatusType orderStatus,
+                                     OrderedBookStatusType unitStatus,
+                                     Pageable pageable) {
+
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (orderStatus != null) {
+            builder.and(order.status.eq(orderStatus));
+        }
+
+        if (unitStatus != null) {
+            builder.and(order.id.in(
+                    JPAExpressions.select(orderedBook.order.id)
+                            .from(orderedBook)
+                            .where(orderedBook.unitStatus.eq(unitStatus))
+            ));
+        }
+
+        builder.and(validOrderCondition());
+
+        List<Order> content = queryFactory
+                .selectFrom(order)
+                .where(builder)
+                .orderBy(order.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = queryFactory
+                .select(order.id.count())
+                .from(order)
+                .where(builder)
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total == null ? 0 : total);
+    }
+
+
 
     private BooleanBuilder validOrderCondition() {
         return new BooleanBuilder().and(order.id.in(

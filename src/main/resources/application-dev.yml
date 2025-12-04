@@ -44,10 +44,6 @@ logging:
 
 # Spring Boot Actuator 서버 상태(헬스) 모니터링
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info
   health:
     db:
       enabled: true
@@ -56,3 +52,7 @@ management:
     rabbit:
       enabled: true
 
+# ===== RabbitMQ 회원 설정 (Dev) =====
+rabbitmq:
+  member:
+    exchange: dev-cm-member-fanout-exchange

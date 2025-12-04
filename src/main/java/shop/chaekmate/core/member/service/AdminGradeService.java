@@ -28,7 +28,7 @@ public class AdminGradeService {
         }
 
         // 등급 수정 시 자기 자신 제외하고 upgradeStandardAmount 중복 방지
-        if (gradeRepository.existsByUpgradeStandardAmountAndIdNot(gradeId, request.upgradeStandardAmount())){
+        if (Boolean.TRUE.equals(gradeRepository.existsByUpgradeStandardAmountAndIdNot(gradeId, request.upgradeStandardAmount()))){
             throw new DuplicatedGradeStandardAmountException();
         }
         grade.update(request.name(), request.pointRate(), request.upgradeStandardAmount());
@@ -39,7 +39,7 @@ public class AdminGradeService {
         int upgradeStandardAmount = request.upgradeStandardAmount();
 
         // 동일한 upgradeStandardAmount를 가진 등급이 이미 존재하면 예외
-        if (gradeRepository.existsByUpgradeStandardAmount(upgradeStandardAmount)){
+        if (Boolean.TRUE.equals(gradeRepository.existsByUpgradeStandardAmount(upgradeStandardAmount))){
             throw new DuplicatedGradeStandardAmountException();
         }
 

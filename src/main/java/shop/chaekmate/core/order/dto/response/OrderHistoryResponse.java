@@ -6,7 +6,6 @@ import shop.chaekmate.core.order.entity.type.OrderStatusType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
 public record OrderHistoryResponse(
         Long orderId,
         String orderNumber,
@@ -24,6 +23,7 @@ public record OrderHistoryResponse(
         int deliveryFee,
         long totalPrice,
         OrderStatusType status,
+        LocalDateTime createdAt,
         List<OrderedBookHistoryResponse> orderedBooks
 ) {
     public static OrderHistoryResponse of(Order order, List<OrderedBookHistoryResponse> orderedBooks) {
@@ -44,6 +44,7 @@ public record OrderHistoryResponse(
                 order.getDeliveryFee(),
                 order.getTotalPrice(),
                 order.getStatus(),
+                order.getCreatedAt(),
                 orderedBooks
         );
     }

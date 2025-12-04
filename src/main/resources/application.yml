@@ -15,6 +15,13 @@ spring:
       database: ${REDIS_RANGE}
       password: ${REDIS_PASSWORD}
 
+  config:
+    import: "optional:configserver:"    # configserver import 활성화
+
+  cloud:
+    config:
+      enabled: false # Config server 사용 설정 기본 비활성화
+
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -43,15 +50,40 @@ toss:
     url: https://api.tosspayments.com/v1
   secret-key: ${TOSS_SECRET_KEY}
 
+chaekmate:
+  coupon:
+    url: http://localhost:9400
+
 management:
   endpoints:
     web:
       exposure:
-        include: health, info
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+info:
+  instanceId: ${spring.application.name}:${server.port}
+
 
 rabbitmq:
-  exchange:
-    name: cm-book-exchange
-  queues:
-    queue-name:  cm-book-1 # cm-book-2, cm-book-3
-    routing-key:  cm-book-key-1 # cm-book-key-2, cm-book-key-3
+  book:
+    exchange:
+      name: cm-book-exchange
+    queues:
+      queueNameOdd: cm-book-1 # cm-book-2, cm-book-3
+      routingKeyOdd: cm-book-key-1
+      queueNameEven: cm-book-2 # cm-book-key-2, cm-book-key-3
+      routingKeyEven: cm-book-key-2
+
+  cart:
+    exchange:
+      name: cart.exchange
+    queues:
+      login-queue-name: cart.login.queue
+      logout-queue-name: cart.logout.queue
+      login-routing-key: cart.login
+      logout-routing-key: cart.logout

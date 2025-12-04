@@ -8,8 +8,7 @@ public enum OrderedBookStatusType {
     SHIPPING,           // 배송중
     DELIVERED,          // 배송완료
 
-    CANCEL_REQUEST,     // 고객이 취소 요청
-    CANCELED,           // 취소
+    CANCELED,           // 고객 취소(결제 완료(배송전) 가능)
 
     RETURN_REQUEST,     // 고객이 반품 요청
     RETURNED            // 반품

@@ -23,6 +23,7 @@ public class PaymentErrorService {
     private final PaymentHistoryRepository paymentHistoryRepository;
 
     // 트랜 잭션 분리(rollback x)
+//    NESTED
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveAbortedPayment(PaymentApproveRequest request, String reason) {
         try{

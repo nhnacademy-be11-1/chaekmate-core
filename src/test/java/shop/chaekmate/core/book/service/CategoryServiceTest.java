@@ -38,17 +38,11 @@ import shop.chaekmate.core.book.exception.CategoryHasBookException;
 import shop.chaekmate.core.book.exception.CategoryHasChildException;
 import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
 import shop.chaekmate.core.book.exception.category.CategoryNotFoundException;
-import shop.chaekmate.core.book.exception.ParentCategoryNotFoundException;
 import shop.chaekmate.core.book.repository.BookCategoryRepository;
 import shop.chaekmate.core.book.repository.CategoryRepository;
 
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -70,77 +64,77 @@ class CategoryServiceTest {
     @Test
     void 여러_카테고리의_전체_경로를_조회한다() {
         // given
-        Category 국내도서 = mock(Category.class);
-        Category 경영 = mock(Category.class);
-        Category 소설 = mock(Category.class);
+        Category category1 = mock(Category.class);
+        Category category2 = mock(Category.class);
+        Category category3 = mock(Category.class);
 
-        when(국내도서.getId()).thenReturn(1L);
-        when(국내도서.getName()).thenReturn("국내도서");
-        when(국내도서.getParentCategory()).thenReturn(null);
+        when(category1.getId()).thenReturn(1L);
+        when(category1.getName()).thenReturn("category1");
+        when(category1.getParentCategory()).thenReturn(null);
 
-        when(경영.getId()).thenReturn(3L);
-        when(경영.getName()).thenReturn("경영");
-        when(경영.getParentCategory()).thenReturn(국내도서);
+        when(category2.getId()).thenReturn(3L);
+        when(category2.getName()).thenReturn("category2");
+        when(category2.getParentCategory()).thenReturn(category1);
 
-        when(소설.getId()).thenReturn(7L);
-        when(소설.getName()).thenReturn("소설");
-        when(소설.getParentCategory()).thenReturn(국내도서);
+        when(category3.getId()).thenReturn(7L);
+        when(category3.getName()).thenReturn("category3");
+        when(category3.getParentCategory()).thenReturn(category1);
 
         // 동적으로 응답 (컬렉션 크기에 따라)
         given(categoryRepository.findAllById(anyCollection()))
                 .willAnswer(invocation -> {
                     Collection<Long> ids = invocation.getArgument(0);
                     if (ids.size() == 2) {
-                        return Arrays.asList(경영, 소설);
+                        return Arrays.asList(category2, category3);
                     } else {
-                        return Arrays.asList(국내도서, 경영, 소설);
+                        return Arrays.asList(category1, category2, category3);
                     }
                 });
 
         List<List<CategoryPathResponse>> result = categoryService.getCategoriesWithParents(Arrays.asList(3L, 7L));
 
-        List<CategoryPathResponse> path1 = result.get(0);
-        path1.sort((a, b) -> Integer.compare(a.depth(), b.depth()));
-        assertThat(path1.get(0).name()).isEqualTo("국내도서");
-        assertThat(path1.get(1).name()).isEqualTo("경영");
+        List<CategoryPathResponse> path1 = result.getFirst();
+        path1.sort(Comparator.comparingInt(CategoryPathResponse::depth));
+        assertThat(path1.get(0).name()).isEqualTo("category1");
+        assertThat(path1.get(1).name()).isEqualTo("category2");
 
         List<CategoryPathResponse> path2 = result.get(1);
-        path2.sort((a, b) -> Integer.compare(a.depth(), b.depth()));
-        assertThat(path2.get(0).name()).isEqualTo("국내도서");
-        assertThat(path2.get(1).name()).isEqualTo("소설");
+        path2.sort(Comparator.comparingInt(CategoryPathResponse::depth));
+        assertThat(path2.get(0).name()).isEqualTo("category1");
+        assertThat(path2.get(1).name()).isEqualTo("category3");
     }
 
     @Test
     void 계층_구조의_카테고리_경로를_조회한다_depth_3() {
-        Category 국내도서 = mock(Category.class);
-        Category IT = mock(Category.class);
-        Category 프로그래밍 = mock(Category.class);
-        Category Java = mock(Category.class);
+        Category category1 = mock(Category.class);
+        Category category4 = mock(Category.class);
+        Category category5 = mock(Category.class);
+        Category category6 = mock(Category.class);
 
-        when(국내도서.getId()).thenReturn(1L);
-        when(국내도서.getName()).thenReturn("국내도서");
-        when(국내도서.getParentCategory()).thenReturn(null);
+        when(category1.getId()).thenReturn(1L);
+        when(category1.getName()).thenReturn("category1");
+        when(category1.getParentCategory()).thenReturn(null);
 
-        when(IT.getId()).thenReturn(2L);
-        when(IT.getName()).thenReturn("IT");
-        when(IT.getParentCategory()).thenReturn(국내도서);
+        when(category4.getId()).thenReturn(2L);
+        when(category4.getName()).thenReturn("category4");
+        when(category4.getParentCategory()).thenReturn(category1);
 
-        when(프로그래밍.getId()).thenReturn(10L);
-        when(프로그래밍.getName()).thenReturn("프로그래밍");
-        when(프로그래밍.getParentCategory()).thenReturn(IT);
+        when(category5.getId()).thenReturn(10L);
+        when(category5.getName()).thenReturn("category5");
+        when(category5.getParentCategory()).thenReturn(category4);
 
-        when(Java.getId()).thenReturn(15L);
-        when(Java.getName()).thenReturn("Java");
-        when(Java.getParentCategory()).thenReturn(프로그래밍);
+        when(category6.getId()).thenReturn(15L);
+        when(category6.getName()).thenReturn("category6");
+        when(category6.getParentCategory()).thenReturn(category5);
 
         // 동적으로 응답 (컬렉션 크기에 따라)
         given(categoryRepository.findAllById(anyCollection()))
                 .willAnswer(invocation -> {
                     Collection<Long> ids = invocation.getArgument(0);
                     if (ids.size() == 1) {
-                        return List.of(Java);
+                        return List.of(category6);
                     } else {
-                        return Arrays.asList(국내도서, IT, 프로그래밍, Java);
+                        return Arrays.asList(category1, category4, category5, category6);
                     }
                 });
 
@@ -148,41 +142,41 @@ class CategoryServiceTest {
 
         assertThat(result).hasSize(1);
 
-        List<CategoryPathResponse> path = result.get(0);
+        List<CategoryPathResponse> path = result.getFirst();
         assertThat(path).hasSize(4);
 
-        path.sort((a, b) -> Integer.compare(a.depth(), b.depth()));
+        path.sort(Comparator.comparingInt(CategoryPathResponse::depth));
 
-        assertThat(path.get(0).name()).isEqualTo("국내도서");
-        assertThat(path.get(0).depth()).isEqualTo(0);
+        assertThat(path.get(0).name()).isEqualTo("category1");
+        assertThat(path.get(0).depth()).isZero();
 
-        assertThat(path.get(1).name()).isEqualTo("IT");
+        assertThat(path.get(1).name()).isEqualTo("category4");
         assertThat(path.get(1).depth()).isEqualTo(1);
 
-        assertThat(path.get(2).name()).isEqualTo("프로그래밍");
+        assertThat(path.get(2).name()).isEqualTo("category5");
         assertThat(path.get(2).depth()).isEqualTo(2);
 
-        assertThat(path.get(3).name()).isEqualTo("Java");
+        assertThat(path.get(3).name()).isEqualTo("category6");
         assertThat(path.get(3).depth()).isEqualTo(3);
     }
 
     @Test
     void 루트_카테고리_조회시_자기_자신만_반환한다_depth_0() {
-        Category 국내도서 = mock(Category.class);
+        Category category1 = mock(Category.class);
 
-        when(국내도서.getId()).thenReturn(1L);
-        when(국내도서.getName()).thenReturn("국내도서");
-        when(국내도서.getParentCategory()).thenReturn(null);
+        when(category1.getId()).thenReturn(1L);
+        when(category1.getName()).thenReturn("category1");
+        when(category1.getParentCategory()).thenReturn(null);
 
         given(categoryRepository.findAllById(anyCollection()))
-                .willReturn(List.of(국내도서));
+                .willReturn(List.of(category1));
 
         List<List<CategoryPathResponse>> result = categoryService.getCategoriesWithParents(List.of(1L));
 
         assertThat(result).hasSize(1);
 
-        List<CategoryPathResponse> path = result.get(0);
-        assertThat(path.get(0).name()).isEqualTo("국내도서");
+        List<CategoryPathResponse> path = result.getFirst();
+        assertThat(path.getFirst().name()).isEqualTo("category1");
     }
 
     @Test
