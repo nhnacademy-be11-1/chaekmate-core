@@ -21,6 +21,7 @@ import shop.chaekmate.core.cart.dto.CartItemReadDto;
 import shop.chaekmate.core.cart.dto.CartItemUpdateDto;
 import shop.chaekmate.core.cart.dto.request.CartItemCreateRequest;
 import shop.chaekmate.core.cart.dto.request.CartItemUpdateRequest;
+import shop.chaekmate.core.cart.dto.response.CartItemCountResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemListAdvancedResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemListResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemUpdateResponse;
@@ -45,7 +46,7 @@ public class CartController {
      * 비회원의 경우 Guest-Id 쿠키를 통해 guestId를 매핑하여 장바구니를 식별함</p>
      *
      * @param request   추가할 도서 ID 정보를 포함한 요청 객체
-     * @param memberId  회원 식별자(헤더), 없으면 비회원으로 간주
+     * @param memberId  회원 식별자(헤더)
      * @param guestId   비회원 식별자(쿠키), 회원일 경우 무시됨
      * @return          장바구니에 추가된 전체 아이템 리스트 응답
      */
@@ -75,8 +76,8 @@ public class CartController {
      * 장바구니 조회
      * - 장바구니 아이템 전체를 조회함
      *
-     * <p>회원/비회원 여부에 따라 다른 저장소를 조회하며,
-     * 도서 상세 정보를 포함한 확장된 응답을 반환함</p>
+     * <p>회원/비회원 모두 Redis 저장소를 조회하며,
+     * 도서 상세 정보를 포함한 응답을 반환함</p>
      *
      * @param memberId  회원 ID(헤더)
      * @param guestId   비회원 Guest ID(쿠키)
@@ -100,6 +101,38 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 장바구니 아이템 개수 조회
+     * - 장바구니에 담긴 도서 종류의 개수를 반환함
+     *
+     * <p>회원의 경우 X-Member-Id 헤더를 통해, 비회원의 경우 Guest-Id 쿠키를 통해
+     * 장바구니를 식별하며, 동일한 도서의 수량과 무관하게 도서 종류만 카운트함</p>
+     *
+     * <p>동일한 도서의 수량과 무관하게 도서 종류만 카운트함</p>
+     *
+     * <p>예시: 책A 2권, 책B 3권 → count = 2</p>
+     *
+     * @param memberId  회원 식별자(헤더)
+     * @param guestId   비회원 식별자(쿠키), 회원일 경우 무시됨
+     * @return          장바구니 내 도서 종류 개수 응답
+     */
+    @GetMapping("/carts/item-count")
+    public ResponseEntity<CartItemCountResponse> getCartItemCount(
+            @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
+            @CookieValue(name = "Guest-Id", required = false) String guestId)
+    {
+        String resolvedGuestId = (Objects.isNull(memberId)) ? guestId : null;
+
+        CartItemReadDto dto = new CartItemReadDto(
+                memberId,
+                resolvedGuestId
+        );
+
+        CartItemCountResponse response = this.cartService.getCartItemCount(dto);
+
+        return ResponseEntity.ok(response);
+    }
+
     // 장바구니 아이템 수량 변경
     /**
      * 장바구니 아이템 수량 변경
@@ -114,7 +147,7 @@ public class CartController {
     @PutMapping("/carts/items/{bookId}")
     public ResponseEntity<CartItemUpdateResponse> updateCartItem(
             @PathVariable Long bookId,
-            @RequestBody CartItemUpdateRequest request,
+            @Valid @RequestBody CartItemUpdateRequest request,
             @RequestHeader(value = "X-Member-Id", required = false) Long memberId,
             @CookieValue(name = "Guest-Id", required = false) String guestId
     )
@@ -137,8 +170,6 @@ public class CartController {
     /**
      * 장바구니 아이템 단일 삭제
      * - 장바구니에서 특정 아이템(도서 ID 기준)을 삭제함
-     *
-     * <p>회원 또는 비회원 장바구니 각각의 저장소에서 제거됨</p>
      *
      * @param bookId    삭제할 도서 ID
      * @param memberId  회원 ID(헤더)
@@ -169,8 +200,6 @@ public class CartController {
     /**
      * 장바구니 비우기
      * - 장바구니의 모든 아이템을 삭제(비우기)함
-     *
-     * <p>로그인/비로그인 사용자의 장바구니를 모두 지원함</p>
      *
      * @param memberId  회원 ID(헤더)
      * @param guestId   비회원 Guest ID(쿠키)

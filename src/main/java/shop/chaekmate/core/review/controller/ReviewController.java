@@ -3,6 +3,7 @@ package shop.chaekmate.core.review.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +56,7 @@ public class ReviewController implements ReviewControllerDocs {
     @GetMapping("/books/{bookId}/reviews")
     public ResponseEntity<PageResponse<ReadReviewResponse>> readReviewsByBookId(
             @PathVariable("bookId") Long bookId,
-            @PageableDefault(size = 10) Pageable pageable
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(PageResponse.from(reviewService.readReviewsByBookId(bookId, pageable)));
     }
