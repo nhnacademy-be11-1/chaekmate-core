@@ -60,3 +60,7 @@ management:
     env:
       enabled: true
 
+# ===== RabbitMQ 회원 설정 (Prod) =====
+rabbitmq:
+  member:
+    exchange: prod-cm-member-fanout-exchange
