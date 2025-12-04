@@ -10,13 +10,16 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import shop.chaekmate.core.member.dto.request.CreateMemberGradeHistoryRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
 import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
+import shop.chaekmate.core.member.dto.response.MemberResponse;
+
+import java.util.List;
 
 @Tag(name = "Member", description = "회원 API")
 public interface MemberControllerDocs {
@@ -117,6 +120,32 @@ public interface MemberControllerDocs {
     ResponseEntity<Void> deleteMember(@PathVariable Long memberId);
 
     @Operation(
+            summary = "회원 단건 조회",
+            description = "특정 회원의 상세 정보를 조회합니다.",
+            parameters = {
+                    @Parameter(
+                            name = "memberId",
+                            description = "조회할 회원 ID",
+                            required = true,
+                            example = "7"
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "회원 조회 성공",
+                            content = @Content(schema = @Schema(implementation = MemberResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "회원 없음",
+                            content = @Content
+                    )
+            }
+    )
+    ResponseEntity<MemberResponse> getMember(@PathVariable Long memberId);
+
+    @Operation(
             summary = "회원 등급 조회",
             description = "특정 회원의 현재 등급 정보를 조회합니다.",
             parameters = {
@@ -156,4 +185,25 @@ public interface MemberControllerDocs {
             }
     )
     ResponseEntity<List<GradeResponse>> getAllGrades();
+
+    @Operation(
+            summary = "회원 등급 이력 생성",
+            description = "회원의 등급 변경 이력을 생성합니다. (예: 등급 승급/강등 기록)",
+            requestBody = @RequestBody(
+                    required = true,
+                    description = "회원 등급 이력 생성 요청 본문",
+                    content = @Content(
+                            schema = @Schema(implementation = CreateMemberGradeHistoryRequest.class)
+                            // DTO 구조에 맞는 ExampleObject 는 필요하면 나중에 추가
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "등급 이력 생성 성공"),
+                    @ApiResponse(responseCode = "400", description = "유효성 검사 실패", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "회원 또는 등급 없음", content = @Content)
+            }
+    )
+    ResponseEntity<Void> createMemberGradeHistory(
+            @org.springframework.web.bind.annotation.RequestBody CreateMemberGradeHistoryRequest request
+    );
 }
