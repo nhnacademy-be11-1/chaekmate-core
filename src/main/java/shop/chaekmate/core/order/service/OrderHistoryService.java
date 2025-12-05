@@ -18,6 +18,7 @@ import shop.chaekmate.core.order.repository.OrderedBookRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +44,7 @@ public class OrderHistoryService {
     }
 
     public OrderHistoryResponse findOrderDetail(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalStateException("찾을 수 없음"+orderId));
+        Order order = orderRepository.findById(orderId).orElseThrow(NotFoundOrderNumberException::new);
 
         List<OrderedBook> orderedBooks = orderedBookRepository.findAllByOrder(order);
 

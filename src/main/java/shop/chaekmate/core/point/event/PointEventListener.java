@@ -42,7 +42,7 @@ public class PointEventListener {
 
         try {
             // 포인트 사용(차감) 처리
-            if (response.pointUsed() > 0) {
+            if (response.totalAmount() > 0) {
                 Order order = orderRepository.findByOrderNumber(response.orderNumber())
                         .orElseThrow(() -> new IllegalStateException("주문을 찾을 수 없습니다: " + response.orderNumber()));
 

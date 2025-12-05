@@ -274,7 +274,7 @@ public class OrderService {
     @Transactional
     public void applyOrderedBookShipping(Long orderedBookId) {
         OrderedBook ob = orderedBookRepository.findById(orderedBookId)
-                .orElseThrow(() -> new IllegalArgumentException("OrderedBook not found"));
+                .orElseThrow(NotFoundOrderNumberException::new);
 
         // 개별 상품 배송 시작
         ob.markShipping();

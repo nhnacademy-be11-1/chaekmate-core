@@ -30,7 +30,11 @@ import shop.chaekmate.core.payment.entity.PaymentHistory;
 import shop.chaekmate.core.payment.entity.type.ReturnReasonType;
 import shop.chaekmate.core.payment.event.PaymentEventPublisher;
 import shop.chaekmate.core.payment.event.ReturnRequestedEvent;
+import shop.chaekmate.core.payment.exception.ExceedCancelAmountException;
+import shop.chaekmate.core.payment.exception.InvalidRefundRequestTimeException;
 import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
+import shop.chaekmate.core.payment.exception.RefundBeforeDeliveredException;
+import shop.chaekmate.core.payment.exception.RefundPeriodExceededException;
 import shop.chaekmate.core.payment.provider.PaymentProvider;
 import shop.chaekmate.core.payment.provider.PaymentProviderFactory;
 import shop.chaekmate.core.payment.repository.PaymentHistoryRepository;
@@ -143,17 +147,9 @@ public class PaymentService {
 
             if (extraDeliveryFee > 0) {
                 // 현금 먼저 배송비 차감
-                long feeFromCash = Math.min(cashCancelAmount, extraDeliveryFee);
-                cashCancelAmount -= feeFromCash;
-
-                // 남은 배송비 포인트에서 차감
-                long remainFee = extraDeliveryFee - feeFromCash;
-                if (remainFee > 0) {
-                    if (remainFee > pointCancelAmount) {
-                        throw new IllegalStateException("배송비가 취소 포인트보다 클 수 없습니다.");
-                    }
-                    pointCancelAmount -= (int) remainFee;
-                }
+                CancelAmountResult amountResult = deductFee(cashCancelAmount, cancelPoint, extraDeliveryFee);
+                cashCancelAmount = amountResult.cancelCash();
+                pointCancelAmount = amountResult.cancelPoint();
             }
         }
 
@@ -246,16 +242,9 @@ public class PaymentService {
         long returnFee = calculateReturnFee(request.returnReason(), policy);
 
         // 반품비 처리 (현금 -> 포인트 순서)
-        long feeFromCash = Math.min(returnCash, returnFee);
-        returnCash -= feeFromCash;
-
-        long remainingFee = returnFee - feeFromCash;
-        if (remainingFee > 0) {
-            if (remainingFee > returnPoint) {
-                throw new IllegalStateException("반품비가 포인트 환불 금액보다 클 수 없습니다.");
-            }
-            returnPoint -= (int) remainingFee;
-        }
+        CancelAmountResult amountResult = deductFee(returnCash, returnPoint, returnFee);
+        returnCash = amountResult.cancelCash();
+        returnPoint = amountResult.cancelPoint();
 
         boolean isMember = order.getMember() != null;
         if (isMember) {
@@ -364,6 +353,27 @@ public class PaymentService {
         return remainAmount;
     }
 
+    private CancelAmountResult deductFee(long cashAmount, int pointAmount, long fee) {
+
+        // 1) 먼저 현금에서 차감
+        long usedFromCash = Math.min(cashAmount, fee);
+        long remainingCash = cashAmount - usedFromCash;
+
+        // 2) 남은 금액이 있다면 포인트에서 차감
+        long remainingFee = fee - usedFromCash;
+        int remainingPoint = pointAmount;
+
+        if (remainingFee > 0) {
+            if (remainingFee > pointAmount) {
+                throw new ExceedCancelAmountException();
+            }
+            remainingPoint -= (int) remainingFee;
+        }
+
+        return new CancelAmountResult(remainingCash, remainingPoint);
+    }
+
+
     //배송정책 찾기
     private DeliveryPolicy getPolicy(LocalDateTime paymentAt) {
         return deliveryPolicyRepository.findPolicyAt(paymentAt)
@@ -415,11 +425,11 @@ public class PaymentService {
         for (OrderedBook ob : books) {
 
             if (ob.getDeliveredAt() == null) {
-                throw new IllegalStateException("배송 완료 이전에는 환불을 요청할 수 없습니다.");
+                throw new RefundBeforeDeliveredException();
             }
 
             if (ob.getRequestAt() == null) {
-                throw new IllegalStateException("환불 요청 시간이 유효하지 않습니다.");
+                throw new InvalidRefundRequestTimeException();
             }
 
             long days = ChronoUnit.DAYS.between(
@@ -428,14 +438,12 @@ public class PaymentService {
             );
 
             if (reason.isCustomerFault()) {
-                // 고객 귀책 사유: 10일 이내만 가능
                 if (days > 10) {
-                    throw new IllegalStateException("단순변심/고객귀책 환불 가능 기간(10일)을 초과했습니다.");
+                    throw new RefundPeriodExceededException();
                 }
             } else {
-                // 판매자 귀책 사유: 30일 이내까지 가능
                 if (days > 30) {
-                    throw new IllegalStateException("파손/오배송 환불 가능 기간(30일)을 초과했습니다.");
+                    throw new RefundPeriodExceededException();
                 }
             }
         }

@@ -52,7 +52,6 @@ public class WrapperController implements WrapperControllerDocs {
         return ResponseEntity.noContent().build();
     }
 
-    //user
     //전체 조회
     @GetMapping("/wrappers")
     public ResponseEntity<List<WrapperResponse>> getWrappers() {

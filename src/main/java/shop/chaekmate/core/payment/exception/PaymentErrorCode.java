@@ -10,9 +10,14 @@ public enum PaymentErrorCode implements BaseErrorCode {
     NOT_FOUND_PAYMENT_METHOD(HttpStatus.NOT_FOUND, "PAYMENT-404-1", "해당 결제방식이 존재하지 않습니다."),
     NOT_FOUND_ORDER_NUMBER(HttpStatus.NOT_FOUND, "PAYMENT-404-2", "해당 주문번호가 존재하지 않습니다."),
     NOT_FOUND_PAYMENT_KEY(HttpStatus.NOT_FOUND, "PAYMENT-404-3", "해당 키가 존재하지 않습니다."),
+
     ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "PAYMENT-400-1", "이미 취소된 결제입니다."),
     INVALID_CANCEL_AMOUNT(HttpStatus.BAD_REQUEST, "PAYMENT-400-2", "취소 금액은 0보다 커야 합니다."),
-    EXCEED_CANCEL_AMOUNT(HttpStatus.BAD_REQUEST, "PAYMENT-400-3", "취소 금액이 결제 가능 금액(현금 또는 포인트)을 초과할 수 없습니다.");
+    EXCEED_CANCEL_AMOUNT(HttpStatus.BAD_REQUEST, "PAYMENT-400-3", "취소 금액이 결제 가능 금액(현금 또는 포인트)을 초과할 수 없습니다."),
+
+    REFUND_BEFORE_DELIVERED(HttpStatus.BAD_REQUEST, "REFUND-400-1", "배송 완료 이전에는 환불을 요청할 수 없습니다."),
+    INVALID_REFUND_REQUEST_TIME(HttpStatus.BAD_REQUEST, "REFUND-400-2", "환불 요청 시간이 유효하지 않습니다."),
+    REFUND_PERIOD_EXCEEDED(HttpStatus.BAD_REQUEST, "REFUND-400-3", "환불 가능 기간을 초과했습니다.");
 
     private final HttpStatus status;
     private final String code;

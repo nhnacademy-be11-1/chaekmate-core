@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,6 +43,7 @@ public class OrderHistoryController implements OrderHistoryControllerDocs {
         return ResponseEntity.ok(history);
     }
 
+    @Override
     @GetMapping("/orders/{orderId}")
     public ResponseEntity<OrderHistoryResponse> getOrderDetail(@PathVariable Long orderId) {
         OrderHistoryResponse response = orderHistoryService.findOrderDetail(orderId);
@@ -51,6 +51,7 @@ public class OrderHistoryController implements OrderHistoryControllerDocs {
     }
 
     @RequiredAdmin
+    @Override
     @GetMapping("/admin/orders")
     public ResponseEntity<Page<OrderHistoryResponse>> getAllOrders(
             @RequestParam(required = false) OrderStatusType orderStatus,

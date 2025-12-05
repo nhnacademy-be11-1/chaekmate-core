@@ -20,7 +20,8 @@ public class OrderedBookStatusScheduler {
     private final OrderedBookRepository orderedBookRepository;
     private final DeliveryEventPublisher eventPublisher;
 
-    @Scheduled(cron = "0 0 9 * * *") // 매일 오전 9시
+    @Scheduled(cron = "0 */10 * * * *", zone = "Asia/Seoul") // 10분마다 실행
+//    @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul") // 매일 오전 9시
     @Transactional
     public void autoCompleteShippingBooks() {
 
@@ -34,16 +35,27 @@ public class OrderedBookStatusScheduler {
 
         for (OrderedBook ob : shippingBooks) {
 
-            // 출고 시각
-            LocalDateTime shippedAt = ob.getShippedAt();
-            LocalDateTime deliveryAt = ob.getOrder().getDeliveryAt().atStartOfDay();
-            // 출고 + 2일
-            LocalDateTime shippedPlus3 = shippedAt.plusDays(2);
+            /// 테스트
+            // 테스트: 출고 시각을 현재 시각으로 설정
+            LocalDateTime shippedAt = now;
+
+            // 테스트: 희망일도 현재 시각(당일 00시 대신 now로)
+            LocalDateTime deliveryAt = now;
+
+            // 테스트: 출고 + 5분 뒤를 배송 완료 기준으로 사용
+            LocalDateTime shippedPlus3 = now.plusMinutes(5);
+
+//            // 출고 시각
+//            LocalDateTime shippedAt = ob.getShippedAt();
+//            // 희망일
+//            LocalDateTime deliveryAt = ob.getOrder().getDeliveryAt().atStartOfDay();
+//            // 출고 + 1일
+//            LocalDateTime shippedPlus3 = shippedAt.plusDays(1);
 
             // 배송희망일 고려
             LocalDateTime autoCompleteAt = shippedPlus3.isAfter(deliveryAt) ? shippedPlus3 : deliveryAt;
 
-            // 아직 자동완료 시간이 지나지 않았으면 skip
+            // 아직 자동완료 시간이 지나지 않았으면 패스
             if (now.isBefore(autoCompleteAt)) {
                 continue;
             }
