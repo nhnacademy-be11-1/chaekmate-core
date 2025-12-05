@@ -62,6 +62,8 @@ management:
   endpoint:
     health:
       show-details: always
+    shutdown:
+      access: unrestricted
   info:
     env:
       enabled: true
