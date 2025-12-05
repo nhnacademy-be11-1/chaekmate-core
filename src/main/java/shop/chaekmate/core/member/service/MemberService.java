@@ -107,12 +107,26 @@ public class MemberService {
 
     @Transactional
     public void updateMember(Long memberId, UpdateMemberRequest request) {
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
 
-        if (isDuplicateEmail(request.email())){
+        // 이메일이 변경된 경우에만 중복 체크
+        if (!member.getEmail().equals(request.email())
+                && memberRepository.existsByEmail(request.email())) {
             throw new DuplicatedEmailException();
         }
-        member.update(request.name(), request.phone(), request.email());
+
+        member.update(
+                request.name(),
+                request.phone(),
+                request.email()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isValidPassword(Long memberId, String password) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        return encoder.matches(password, member.getPassword());
     }
 
     @Transactional
