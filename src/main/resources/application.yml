@@ -76,8 +76,8 @@ rabbitmq:
     queues:
       queueNameOdd: cm-book-1 # cm-book-2, cm-book-3
       routingKeyOdd: cm-book-key-1
-      queueNameEven: cm-book-2 # cm-book-key-2, cm-book-key-3
-      routingKeyEven: cm-book-key-2
+      queueNameEven: cm-book-1 # cm-book-key-2, cm-book-key-3
+      routingKeyEven: cm-book-key-1
 
   cart:
     exchange:
