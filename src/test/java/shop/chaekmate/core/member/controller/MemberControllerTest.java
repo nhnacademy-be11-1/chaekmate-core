@@ -1,5 +1,6 @@
 package shop.chaekmate.core.member.controller;
 
+import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -12,16 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.request.UpdateMemberRequest;
+import shop.chaekmate.core.member.dto.request.VerifyPasswordRequest;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.service.MemberService;
-
-import static org.mockito.BDDMockito.*;
 
 @SpringBootTest
 @Transactional
@@ -167,9 +168,62 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.data[3].name").value("플래티넘"));
     }
 
+    @Test
+    void 회원정보_수정_성공() throws Exception {
+        Long memberId = 1L;
+        var updateReq = createUpdateReq(
+                "수정된 이름",
+                "01077778888",
+                "updated@example.com"
+        );
+
+        mvc.perform(post("/members/{memberId}", memberId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(updateReq)))
+                .andExpect(status().isCreated());
+
+        then(memberService).should()
+                .updateMember(eq(memberId), any(UpdateMemberRequest.class));
+    }
+
+    @Test
+    void 비밀번호_검증_API_성공_및_실패_케이스() throws Exception {
+        Long memberId = 1L;
+        String correctPassword = "Pw123456!";
+        String wrongPassword = "WrongPw123!";
+
+        given(memberService.isValidPassword(memberId, correctPassword)).willReturn(true);
+        given(memberService.isValidPassword(memberId, wrongPassword)).willReturn(false);
+
+        // 1) 올바른 비밀번호일 때
+        var correctBody = new VerifyPasswordRequest(correctPassword);
+
+        mvc.perform(post("/members/{memberId}/verify-password", memberId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(correctBody)))
+                .andExpect(status().isOk())
+                // AvailabilityResponse(boolean available) → data.available 로 내려온다고 가정
+                .andExpect(jsonPath("$.data.available").value(true));
+
+        // 2) 틀린 비밀번호일 때
+        var wrongBody = new VerifyPasswordRequest(wrongPassword);
+
+        mvc.perform(post("/members/{memberId}/verify-password", memberId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(wrongBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.available").value(false));
+    }
+
     private CreateMemberRequest createReq(
             String loginId, String password, String name, String phone, String email, LocalDate birth
     ) {
         return new CreateMemberRequest(loginId, password, name, phone, email, birth);
+    }
+
+    private UpdateMemberRequest createUpdateReq(
+            String name, String phone, String email
+    ) {
+        return new UpdateMemberRequest(name, phone, email);
     }
 }
