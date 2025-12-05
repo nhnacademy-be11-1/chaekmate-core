@@ -23,6 +23,7 @@ import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
 
 import java.time.LocalDate;
+import shop.chaekmate.core.order.repository.impl.OrderRepositoryImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,12 +54,12 @@ class OrderHistoryRepositoryTest {
                 LocalDateTime.now()).build());
 
         order1 = orderRepository.save(Order.createOrderReady(member1, "order123", "tester", "010-1234-5678", "test@email.com", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 10000));
-        OrderedBook ob1 = OrderedBook.createOrderDetailReady(order1, book1, 1, 1000, 900, 100, null, 0, null, 0, 0, 900);
+        OrderedBook ob1 = OrderedBook.createOrderDetailReady(order1, book1, 1, 1000, 900, 100, null, 0, null, 0, 0, 900,900);
         ob1.markPaymentCompleted();
         orderedBookRepository.save(ob1);
 
         order2 = orderRepository.save(Order.createOrderReady(member1, "order456", "tester2", "010-4567-8901", "test2@email.com", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 20000));
-        OrderedBook ob2 = OrderedBook.createOrderDetailReady(order2, book1, 1, 1000, 900, 100, null, 0, null, 0, 0, 900);
+        OrderedBook ob2 = OrderedBook.createOrderDetailReady(order2, book1, 1, 1000, 900, 100, null, 0, null, 0, 0, 900,900);
         orderedBookRepository.save(ob2); // Stays as PAYMENT_READY
     }
 

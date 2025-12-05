@@ -3,6 +3,7 @@ package shop.chaekmate.core.order.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 @Schema(description = "주문 상품 저장 요청")
 public record OrderedBookSaveRequest(
@@ -42,6 +43,10 @@ public record OrderedBookSaveRequest(
 
         @Schema(description = "이 상품의 최종 단가", example = "10500")
         @Positive(message = "최종 단가는 0보다 커야 합니다.")
-        int finalUnitPrice
+        int finalUnitPrice,
+
+        @Schema(description = "이 상품의 최종 가격", example = "10500")
+        @PositiveOrZero(message = "최종 단가는 0보다 커야 합니다.")
+        long totalPrice
 
 ) { }

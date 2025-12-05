@@ -1,6 +1,5 @@
 package shop.chaekmate.core.cart.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +12,8 @@ import shop.chaekmate.core.book.repository.BookRepository;
 import shop.chaekmate.core.cart.dto.CartItemCreateDto;
 import shop.chaekmate.core.cart.dto.CartItemDeleteAllDto;
 import shop.chaekmate.core.cart.dto.CartItemDeleteDto;
+import shop.chaekmate.core.cart.dto.CartItemDeleteListDto;
+import shop.chaekmate.core.cart.dto.CartItemDeleteSimpleDto;
 import shop.chaekmate.core.cart.dto.CartItemUpdateDto;
 import shop.chaekmate.core.cart.dto.CartOwner;
 import shop.chaekmate.core.cart.dto.response.CartItemAdvancedResponse;
@@ -20,6 +21,7 @@ import shop.chaekmate.core.cart.dto.response.CartItemListAdvancedResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemListResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemResponse;
 import shop.chaekmate.core.cart.dto.response.CartItemUpdateResponse;
+import shop.chaekmate.core.cart.dto.response.CartItemCountResponse;
 import shop.chaekmate.core.cart.exception.BookInsufficientStockException;
 import shop.chaekmate.core.cart.exception.CartItemNotFoundException;
 import shop.chaekmate.core.cart.exception.CartNotFoundException;
@@ -28,33 +30,29 @@ import shop.chaekmate.core.cart.repository.CartRedisRepository;
 /**
  * 장바구니 관련 비즈니스 로직을 처리하는 서비스 클래스
  * <p>
- * 회원/비회원 공통으로 CartOwner DTO 를 기반으로 장바구니를 조회하며,
- * Redis 기반 CartRedisRepository 를 활용하여 장바구니 아이템 CRUD 작업을 수행함
+ * Write-Through 패턴 적용:
+ * - 회원: 모든 쓰기 작업은 Redis + DB 동시 반영
+ * - 비회원: Redis만 사용 (DB 저장X)
  */
-
 @Service
 @RequiredArgsConstructor
 public class CartService {
 
     private final CartRedisRepository cartRedisRepository;
+    private final CartSyncService cartSyncService;
     private final BookRepository bookRepository;
     private final BookImageRepository bookImageRepository;
 
     /**
-     * 장바구니 아이템을 추가함 (수량은 항상 1로 고정)
+     * 장바구니 아이템을 추가함 (Write-Through)
      * <ul>
-     *     <li>장바구니가 존재하지 않으면 자동 생성</li>
-     *     <li>이미 존재하는 도서인 경우 Redis HashOperations.put 으로 수량 overwrite</li>
-     *     <li>최종적으로 장바구니 전체 목록을 반환</li>
+     *     <li>회원: 1. Redis에 저장 → 2. DB에 동시 저장 (백업)</li>
+     *     <li>비회원: Redis만 저장</li>
      * </ul>
-     *
-     * @param dto 생성 요청 DTO (owner + bookId 포함)
-     * @return 장바구니 전체 아이템 목록 응답 DTO
      */
     @Transactional
     public CartItemListResponse addCartItem(CartItemCreateDto dto) {
-
-        // 장바구니 조회
+        // 장바구니 조회 또는 생성
         String cartId = this.resolveOrCreateCartId(dto);
 
         // 도서 재고 검증
@@ -66,8 +64,13 @@ public class CartService {
             throw new BookInsufficientStockException();
         }
 
-        // 장바구니 아이템 생성 및 추가
+        // 1. Redis 저장 (회원/비회원, 우선 저장)
         this.cartRedisRepository.putCartItem(cartId, dto.bookId(), dto.quantity());
+
+        // 2. DB 저장 (회원, Write-Through)
+        if (Objects.nonNull(dto.memberId())) {
+            this.cartSyncService.saveOrUpdateCartItem(dto.memberId(), dto.bookId(), dto.quantity());
+        }
 
         // 장바구니 전체 조회 후 Response DTO 반환
         Map<Long, Integer> itemsMap = this.cartRedisRepository.getAllCartItems(cartId);
@@ -82,27 +85,15 @@ public class CartService {
     /**
      * 장바구니 아이템 목록을 조회하고 도서 정보 및 대표 이미지까지 포함하여 반환함
      * <ul>
-     *     <li>장바구니가 존재하지 않으면 자동 생성</li>
-     *     <li>도서 존재 여부 검증: bookRepository.findById → BookNotFoundException</li>
-     *     <li>대표 이미지: createdAt 기준 오름차순 1번째 이미지</li>
+     *     <li>Redis 조회</li>
      * </ul>
-     *
-     * @param dto 장바구니 소유자 정보 DTO
-     * @return 도서 상세 정보가 포함된 장바구니 아이템 목록 응답 DTO
-     * @throws BookNotFoundException 도서가 존재하지 않는 경우
      */
     @Transactional(readOnly = true)
     public CartItemListAdvancedResponse getCartItemsWithBookInfo(CartOwner dto) {
-        // 장바구니 조회
-        String cartId = this.resolveCartId(dto);
+        // 장바구니 조회 또는 생성
+        String cartId = this.resolveOrCreateCartId(dto);
 
-        // 장바구니가 없으면 빈 목록 반환
-        if (Objects.isNull(cartId)) {
-            return new CartItemListAdvancedResponse(null, Collections.emptyList());
-        }
-
-        // 장바구니 아이템 전체 조회
-        // - bookId --> quantity
+        // Redis에서 장바구니 아이템 조회
         Map<Long, Integer> cartItems = this.cartRedisRepository.getAllCartItems(cartId);
 
         // 각 책 정보 + 대표 이미지 조회 후 DTO 변환
@@ -116,7 +107,7 @@ public class CartService {
 
             // 책 이미지 조회 (대표 이미지 선택)
             var images = this.bookImageRepository.findAllByBookIdOrderByCreatedAtAsc(bookId);
-            String bookImageUrl = images.isEmpty() ? null : images.get(0).getImageUrl();
+            String bookImageUrl = images.isEmpty() ? null : images.getFirst().getImageUrl();
 
             return new CartItemAdvancedResponse(
                     book.getId(),
@@ -133,13 +124,11 @@ public class CartService {
     }
 
     /**
-     * 장바구니 내 특정 아이템의 수량을 업데이트함
+     * 장바구니 내 특정 아이템의 수량을 업데이트함 (Write-Through)
      * <ul>
-     *     <li>Redis의 putCartItem을 사용하여 해당 key의 수량을 그대로 저장</li>
+     *     <li>회원: 1. Redis 업데이트 → 2. DB 업데이트</li>
+     *     <li>비회원: Redis만 업데이트</li>
      * </ul>
-     *
-     * @param dto bookId 및 새로운 quantity를 포함한 DTO
-     * @return 업데이트 결과 응답 DTO
      */
     @Transactional
     public CartItemUpdateResponse updateCartItem(CartItemUpdateDto dto) {
@@ -157,15 +146,23 @@ public class CartService {
             throw new BookInsufficientStockException();
         }
 
+        // 1. Redis 업데이트 (회원/비회원, 우선 업데이트)
         this.cartRedisRepository.putCartItem(cartId, dto.bookId(), dto.quantity());
+
+        // 2. DB 업데이트 (회원, Write-Through)
+        if (Objects.nonNull(dto.memberId())) {
+            this.cartSyncService.saveOrUpdateCartItem(dto.memberId(), dto.bookId(), dto.quantity());
+        }
 
         return new CartItemUpdateResponse(dto.bookId(), dto.quantity());
     }
 
     /**
-     * 장바구니에서 특정 도서 아이템을 삭제함
-     * @param dto 삭제 요청 DTO (owner + bookId)
-     * @throws CartItemNotFoundException 장바구니에 해당 아이템이 존재하지 않는 경우
+     * 장바구니에서 특정 도서 아이템을 삭제함 (Write-Through)
+     * <ul>
+     *     <li>회원: 1. Redis 삭제 → 2. DB 삭제</li>
+     *     <li>비회원: Redis만 삭제</li>
+     * </ul>
      */
     @Transactional
     public void deleteCartItem(CartItemDeleteDto dto) {
@@ -180,15 +177,52 @@ public class CartService {
             throw new CartItemNotFoundException();
         }
 
+        // 1. Redis 삭제 (회원/비회원, 우선 삭제)
         this.cartRedisRepository.deleteCartItem(cartId, dto.bookId());
+
+        // 2. DB 삭제 (회원, Write-Through)
+        if (Objects.nonNull(dto.memberId())) {
+            this.cartSyncService.deleteCartItem(dto.memberId(), dto.bookId());
+        }
     }
 
     /**
-     * 장바구니 내 모든 아이템을 삭제함
-     * <p>
-     * 장바구니는 유지되며 아이템 Hash만 비워짐
-     *
-     * @param dto owner 정보 DTO
+     * 결제 승인된 장바구니 아이템들을 일괄 삭제함 (Write-Through)
+     * <ul>
+     *     <li>회원: 1. Redis 일괄 삭제 → 2. DB 일괄 삭제</li>
+     *     <li>비회원: Redis만 삭제</li>
+     * </ul>
+     */
+    @Transactional
+    public void deleteCartItems(CartItemDeleteListDto dto) {
+        String cartId = this.resolveCartId(dto);
+
+        if (Objects.isNull(cartId)) {
+            throw new CartNotFoundException();
+        }
+
+        // 삭제할 bookId 리스트 추출
+        List<Long> bookIds = dto.items().stream()
+                .map(CartItemDeleteSimpleDto::bookId)
+                .toList();
+
+        // 1. Redis 일괄 삭제 (회원/비회원, 우선 삭제)
+        bookIds.forEach(bookId ->
+                this.cartRedisRepository.deleteCartItem(cartId, bookId)
+        );
+
+        // 2. DB 일괄 삭제 (회원, Write-Through)
+        if (Objects.nonNull(dto.memberId())) {
+            this.cartSyncService.deleteCartItems(dto.memberId(), bookIds);
+        }
+    }
+
+    /**
+     * 장바구니 내 모든 아이템을 삭제함 (Write-Through)
+     * <ul>
+     *     <li>회원: 1. Redis 전체 삭제 → 2. DB 전체 삭제</li>
+     *     <li>비회원: Redis만 삭제</li>
+     * </ul>
      */
     @Transactional
     public void deleteAllCartItems(CartItemDeleteAllDto dto) {
@@ -197,23 +231,108 @@ public class CartService {
             throw new CartNotFoundException();
         }
 
+        // 1. Redis 전체 삭제 (회원/비회원, 우선 전체 삭제)
         this.cartRedisRepository.deleteAllCartItems(cartId);
+
+        // 2. DB 전체 삭제 (회원, Write-Through)
+        if (Objects.nonNull(dto.memberId())) {
+            this.cartSyncService.deleteAllCartItems(dto.memberId());
+        }
     }
 
     /**
-     * CartOwner DTO 로부터 ownerId (memberId 또는 guestId)를 추출함
+     * 장바구니 내 모든 아이템 개수를 반환함 (Redis 조회)
+     */
+    @Transactional(readOnly = true)
+    public CartItemCountResponse getCartItemCount(CartOwner dto) {
+        // 장바구니 조회
+        String cartId = this.resolveCartId(dto);
+
+        // 장바구니가 없는 경우
+        if (Objects.isNull(cartId)) {
+            return new CartItemCountResponse(0);
+        }
+
+        // Redis에서 아이템 개수 조회
+        int count = this.cartRedisRepository.getCartItemSize(cartId);
+        return new CartItemCountResponse(count);
+    }
+
+    /**
+     * 로그인 시 DB → Redis 로딩 (세션 초기화)
      * <ul>
-     *     <li>회원: memberId 사용</li>
-     *     <li>비회원: guestId 사용</li>
-     *     <li>둘 다 null 인 경우 예외 발생</li>
+     *     <li>1. DB에서 회원 장바구니 조회</li>
+     *     <li>2. 비회원 장바구니와 병합</li>
+     *     <li>3. Redis에 저장</li>
      * </ul>
      *
-     * @param dto CartOwner DTO
-     * @return ownerId 문자열
-     * @throws IllegalArgumentException ID 정보가 없는 경우
+     * @param memberId 회원 ID
+     * @param guestId 비회원 ID
+     * @return 로딩된 cartId
      */
+    @Transactional
+    public String loadCartOnLogin(Long memberId, String guestId) {
+        String memberOwnerId = memberId.toString();
+
+        // 1. 회원 장바구니 조회 또는 생성
+        String cartId = this.cartRedisRepository.findCartIdByOwner(memberOwnerId);
+        if (Objects.isNull(cartId)) {
+            cartId = this.cartRedisRepository.createCart(memberOwnerId);
+        }
+        final String finalCartId = cartId;
+
+        // 2. DB에서 회원 장바구니 조회
+        Map<Long, Integer> dbItems = this.cartSyncService.loadCartItemsFromDb(memberId);
+
+        // 3. 비회원 장바구니 병합 (존재하는 경우)
+        Map<Long, Integer> guestItems = Map.of();
+        if (Objects.nonNull(guestId)) {
+            String guestCartId = this.cartRedisRepository.findCartIdByOwner(guestId);
+            if (Objects.nonNull(guestCartId)) {
+                guestItems = this.cartRedisRepository.getAllCartItems(guestCartId);
+                // 비회원 Redis 장바구니 삭제
+                this.cartRedisRepository.deleteAllCartItems(guestCartId);
+            }
+        }
+
+        // 4. DB 아이템을 Redis에 로딩
+        dbItems.forEach((bookId, quantity) ->
+                this.cartRedisRepository.putCartItem(finalCartId, bookId, quantity)
+        );
+
+        // 5. 비회원 아이템 병합 (수량은 더하기)
+        guestItems.forEach((bookId, guestQuantity) -> {
+            Integer currentQuantity = this.cartRedisRepository.getCartItem(finalCartId, bookId);
+            int newQty = Objects.nonNull(currentQuantity) ? currentQuantity + guestQuantity : guestQuantity;
+
+            // Redis + DB 동시 저장
+            this.cartRedisRepository.putCartItem(finalCartId, bookId, newQty);
+            this.cartSyncService.saveOrUpdateCartItem(memberId, bookId, newQty);
+        });
+
+        return finalCartId;
+    }
+
+    /**
+     * 로그아웃 시 Redis만 삭제 (DB는 유지)
+     * <p>DB에는 이미 모든 변경사항이 반영되어 있으므로 추가 작업 불필요</p>
+     *
+     * @param memberId 회원 ID
+     */
+    @Transactional
+    public void clearCartOnLogout(Long memberId) {
+        String ownerId = memberId.toString();
+        String cartId = this.cartRedisRepository.findCartIdByOwner(ownerId);
+
+        if (Objects.nonNull(cartId)) {
+            // Redis 장바구니만 삭제 (세션 종료)
+            this.cartRedisRepository.deleteAllCartItems(cartId);
+        }
+    }
+
+    /* =========================== 내부 유틸 메서드 =========================== */
+
     private String resolveOwnerId(CartOwner dto) {
-        // 회원ID 존재하는 경우 (로그인O), 우선 적용 --> 즉, Guest ID 무시
         if (Objects.nonNull(dto.memberId())) {
             return dto.memberId().toString();
         } else if (Objects.nonNull(dto.guestId())) {
@@ -223,26 +342,10 @@ public class CartService {
         }
     }
 
-    /**
-     * ownerId 기반으로 Redis 에 저장된 장바구니 ID(cartId)를 조회함
-     * <ul>
-     *     <li>장바구니가 존재하지 않으면 null 반환</li>
-     * </ul>
-     *
-     * @param dto CartOwner DTO
-     * @return cartId (문자열) 또는 null
-     */
     private String resolveCartId(CartOwner dto) {
         return this.cartRedisRepository.findCartIdByOwner(this.resolveOwnerId(dto));
     }
 
-    /**
-     * 장바구니 ID(cartId)를 조회하며, 존재하지 않을 경우 자동으로 생성함
-     * <p>쓰기 작업이 필요한 메서드에서만 사용</p>
-     *
-     * @param dto CartOwner DTO
-     * @return 생성되었거나 기존에 존재하던 cartId 문자열
-     */
     private String resolveOrCreateCartId(CartOwner dto) {
         String cartId = this.resolveCartId(dto);
         if (Objects.isNull(cartId)) {
@@ -251,5 +354,4 @@ public class CartService {
         }
         return cartId;
     }
-
 }

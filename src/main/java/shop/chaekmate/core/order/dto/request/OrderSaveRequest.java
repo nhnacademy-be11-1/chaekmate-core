@@ -55,7 +55,7 @@ public record OrderSaveRequest(
         int deliveryFee,
 
         @Schema(description = "총 결제 금액", example = "35000")
-        @Positive(message = "총 결제 금액은 0보다 커야 합니다.")
+        @PositiveOrZero(message = "총 결제 금액은 음수일 수 없습니다.")
         long totalPrice,
 
         @Schema(description = "주문 상품 목록")

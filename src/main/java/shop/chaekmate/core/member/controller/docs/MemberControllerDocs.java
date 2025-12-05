@@ -10,13 +10,18 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import shop.chaekmate.core.member.dto.request.CreateMemberGradeHistoryRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.request.UpdateMemberRequest;
+import shop.chaekmate.core.member.dto.request.VerifyPasswordRequest;
 import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
+import shop.chaekmate.core.member.dto.response.MemberResponse;
+
+import java.util.List;
 
 @Tag(name = "Member", description = "회원 API")
 public interface MemberControllerDocs {
@@ -104,6 +109,96 @@ public interface MemberControllerDocs {
     );
 
     @Operation(
+            summary = "회원 정보 수정",
+            description = "회원의 기본 정보를 수정합니다.",
+            parameters = {
+                    @Parameter(
+                            name = "memberId",
+                            description = "수정할 회원 ID",
+                            required = true,
+                            example = "7"
+                    )
+            },
+            requestBody = @RequestBody(
+                    required = true,
+                    description = "회원 정보 수정 요청 본문",
+                    content = @Content(
+                            schema = @Schema(implementation = UpdateMemberRequest.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "회원 정보 수정 예시",
+                                            value = """
+                                                    {
+                                                      "name": "수정된 이름",
+                                                      "phone": "010-9999-8888",
+                                                      "email": "new-email@example.com",
+                                                      "birthDate": "1999-12-31"
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "회원 정보 수정 성공"),
+                    @ApiResponse(responseCode = "400", description = "유효성 검사 실패", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "회원 없음", content = @Content)
+            }
+    )
+    ResponseEntity<Void> updateMember(
+            @PathVariable Long memberId,
+            @Valid
+            @org.springframework.web.bind.annotation.RequestBody UpdateMemberRequest request
+    );
+
+    @Operation(
+            summary = "비밀번호 검증",
+            description = "회원의 현재 비밀번호가 올바른지 검증합니다. (마이페이지 수정 전 비밀번호 확인 등)",
+            parameters = {
+                    @Parameter(
+                            name = "memberId",
+                            description = "회원 ID",
+                            required = true,
+                            example = "7"
+                    )
+            },
+            requestBody = @RequestBody(
+                    required = true,
+                    description = "검증할 비밀번호",
+                    content = @Content(
+                            schema = @Schema(implementation = VerifyPasswordRequest.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "비밀번호 검증 예시",
+                                            value = """
+                                                    {
+                                                      "password": "Pa$$word1234!"
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "비밀번호 검증 결과 반환",
+                            content = @Content(schema = @Schema(implementation = AvailabilityResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "회원 없음",
+                            content = @Content
+                    )
+            }
+    )
+    ResponseEntity<AvailabilityResponse> verifyPassword(
+            @PathVariable Long memberId,
+            @Valid
+            @org.springframework.web.bind.annotation.RequestBody VerifyPasswordRequest request
+    );
+
+    @Operation(
             summary = "회원 삭제",
             description = "회원을 삭제합니다. (소프트 삭제인 경우 삭제 표시 처리)",
             parameters = {
@@ -115,6 +210,32 @@ public interface MemberControllerDocs {
             }
     )
     ResponseEntity<Void> deleteMember(@PathVariable Long memberId);
+
+    @Operation(
+            summary = "회원 단건 조회",
+            description = "특정 회원의 상세 정보를 조회합니다.",
+            parameters = {
+                    @Parameter(
+                            name = "memberId",
+                            description = "조회할 회원 ID",
+                            required = true,
+                            example = "7"
+                    )
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "회원 조회 성공",
+                            content = @Content(schema = @Schema(implementation = MemberResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "회원 없음",
+                            content = @Content
+                    )
+            }
+    )
+    ResponseEntity<MemberResponse> getMember(@PathVariable Long memberId);
 
     @Operation(
             summary = "회원 등급 조회",
@@ -156,4 +277,24 @@ public interface MemberControllerDocs {
             }
     )
     ResponseEntity<List<GradeResponse>> getAllGrades();
+
+    @Operation(
+            summary = "회원 등급 이력 생성",
+            description = "회원의 등급 변경 이력을 생성합니다. (예: 등급 승급/강등 기록)",
+            requestBody = @RequestBody(
+                    required = true,
+                    description = "회원 등급 이력 생성 요청 본문",
+                    content = @Content(
+                            schema = @Schema(implementation = CreateMemberGradeHistoryRequest.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "등급 이력 생성 성공"),
+                    @ApiResponse(responseCode = "400", description = "유효성 검사 실패", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "회원 또는 등급 없음", content = @Content)
+            }
+    )
+    ResponseEntity<Void> createMemberGradeHistory(
+            @org.springframework.web.bind.annotation.RequestBody CreateMemberGradeHistoryRequest request
+    );
 }

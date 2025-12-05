@@ -68,4 +68,10 @@ public class Member extends BaseEntity {
         this.birthDate = birthDate;
         this.platformType = platformType;
     }
+
+    public void update(String name, String phone, String email) {
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+    }
 }

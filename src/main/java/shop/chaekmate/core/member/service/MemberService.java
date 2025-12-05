@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.chaekmate.core.event.MemberRabbitEventPublisher;
 import shop.chaekmate.core.member.dto.request.CreateMemberGradeHistoryRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.request.UpdateMemberRequest;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.dto.response.MemberResponse;
 import shop.chaekmate.core.member.entity.Grade;
@@ -29,6 +31,7 @@ public class MemberService {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final MemberGradeHistoryRepository memberGradeHistoryRepository;
     private final GradeRepository gradeRepository;
+    private final MemberRabbitEventPublisher memberRabbitEventPublisher;
 
     @Transactional
     public void createMember(CreateMemberRequest request) {
@@ -78,6 +81,9 @@ public class MemberService {
 
         // 회원가입 이벤트 발행
         eventPublisher.publishMemberCreated(memberResponse);
+
+        // 쿠폰 이벤트 발행
+        memberRabbitEventPublisher.publishMemberSignedUp(savedMember.getId());
     }
 
     private String generateRandomPassword() {
@@ -100,8 +106,32 @@ public class MemberService {
     }
 
     @Transactional
-    public void deleteMember(Long id) {
-        Member member = memberRepository.findById(id)
+    public void updateMember(Long memberId, UpdateMemberRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        // 이메일이 변경된 경우에만 중복 체크
+        if (!member.getEmail().equals(request.email())
+                && memberRepository.existsByEmail(request.email())) {
+            throw new DuplicatedEmailException();
+        }
+
+        member.update(
+                request.name(),
+                request.phone(),
+                request.email()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isValidPassword(Long memberId, String password) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        return encoder.matches(password, member.getPassword());
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
         memberRepository.delete(member);
     }
@@ -134,5 +164,10 @@ public class MemberService {
         Grade grade = gradeRepository.findByName(request.gradeName()).orElseThrow(GradeNotFoundException::new);
         String reason = request.reason();
         memberGradeHistoryRepository.save(new MemberGradeHistory(member, grade, reason));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getMemberIdsByBirthMonth(int month) {
+        return memberRepository.findIdsByBirthMonth(month);
     }
 }

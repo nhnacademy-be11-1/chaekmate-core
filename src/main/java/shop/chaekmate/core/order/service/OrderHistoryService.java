@@ -10,12 +10,15 @@ import shop.chaekmate.core.order.dto.response.OrderHistoryResponse;
 import shop.chaekmate.core.order.dto.response.OrderedBookHistoryResponse;
 import shop.chaekmate.core.order.entity.Order;
 import shop.chaekmate.core.order.entity.OrderedBook;
+import shop.chaekmate.core.order.entity.type.OrderStatusType;
+import shop.chaekmate.core.order.entity.type.OrderedBookStatusType;
 import shop.chaekmate.core.order.repository.OrderRepository;
 import shop.chaekmate.core.order.repository.OrderedBookRepository;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import shop.chaekmate.core.payment.exception.NotFoundOrderNumberException;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +38,25 @@ public class OrderHistoryService {
         return convertToOrderHistoryResponsePage(ordersPage, pageable);
     }
 
+    public Page<OrderHistoryResponse> findAllOrderPage(OrderStatusType orderStatus, OrderedBookStatusType unitStatus, Pageable pageable) {
+        Page<Order> ordersPage = orderRepository.findAllOrders(orderStatus, unitStatus, pageable);
+        return convertToOrderHistoryResponsePage(ordersPage, pageable);
+    }
+
+    public OrderHistoryResponse findOrderDetail(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(NotFoundOrderNumberException::new);
+
+        List<OrderedBook> orderedBooks = orderedBookRepository.findAllByOrder(order);
+
+        List<OrderedBookHistoryResponse> bookResponses = orderedBooks.stream()
+                .filter(b -> b.getUnitStatus() != OrderedBookStatusType.PAYMENT_READY &&
+                        b.getUnitStatus() != OrderedBookStatusType.PAYMENT_FAILED)
+                .map(OrderedBookHistoryResponse::from)
+                .toList();
+
+        return OrderHistoryResponse.of(order, bookResponses);
+    }
+
     private Page<OrderHistoryResponse> convertToOrderHistoryResponsePage(Page<Order> ordersPage, Pageable pageable) {
         List<Order> orders = ordersPage.getContent();
 
@@ -45,8 +67,8 @@ public class OrderHistoryService {
         List<OrderedBook> allOrderedBooks = orderedBookRepository.findAllByOrderIn(orders);
 
         Map<Long, List<OrderedBookHistoryResponse>> orderedBooksByOrderId = allOrderedBooks.stream()
-                .filter(book -> book.getUnitStatus() != shop.chaekmate.core.order.entity.type.OrderedBookStatusType.PAYMENT_READY
-                        && book.getUnitStatus() != shop.chaekmate.core.order.entity.type.OrderedBookStatusType.PAYMENT_FAILED)
+                .filter(book -> book.getUnitStatus() != OrderedBookStatusType.PAYMENT_READY
+                        && book.getUnitStatus() != OrderedBookStatusType.PAYMENT_FAILED)
                 .collect(Collectors.groupingBy(
                         orderedBook -> orderedBook.getOrder().getId(),
                         Collectors.mapping(OrderedBookHistoryResponse::from, Collectors.toList())

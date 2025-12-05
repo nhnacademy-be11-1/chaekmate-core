@@ -1,5 +1,6 @@
 package shop.chaekmate.core.review.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import shop.chaekmate.core.review.dto.request.CreateReviewRequest;
 import shop.chaekmate.core.review.dto.request.UpdateReviewRequest;
 import shop.chaekmate.core.review.dto.response.CreateReviewResponse;
 import shop.chaekmate.core.review.dto.response.ReadReviewResponse;
+import shop.chaekmate.core.review.dto.response.ReviewImageResponse;
 import shop.chaekmate.core.review.dto.response.UpdateReviewResponse;
 import shop.chaekmate.core.review.entity.Review;
 import shop.chaekmate.core.review.exception.MemberNotFoundException;
@@ -20,6 +22,7 @@ import shop.chaekmate.core.review.exception.OrderedBookNotFoundException;
 import shop.chaekmate.core.review.exception.ReviewNotFoundException;
 import shop.chaekmate.core.review.repository.ReviewImageRepository;
 import shop.chaekmate.core.review.repository.ReviewRepository;
+import shop.chaekmate.core.review.event.ReviewEventPublisher;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,8 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final OrderedBookRepository orderedBookRepository;
     private final ReviewImageRepository reviewImageRepository;
+    private final ReviewImageService reviewImageService;
+    private final ReviewEventPublisher reviewEventPublisher;
 
     //Review 생성 기능
     @Transactional
@@ -47,13 +52,21 @@ public class ReviewService {
 
         Review saved = reviewRepository.save(review);
 
-        return new CreateReviewResponse(
+        CreateReviewResponse response = new CreateReviewResponse(
                 saved.getId(),
                 saved.getMember().getId(),
                 saved.getOrderedBook().getId(),
                 saved.getComment(),
                 saved.getRating()
         );
+
+        // 리뷰 생성 시 이미지는 별도로 추가되므로, 텍스트만 있는 경우 텍스트 리뷰 이벤트 발행
+        // (이미지 추가 시 ReviewImageService.addImages에서 이미지 리뷰로 업그레이드)
+        if (saved.getComment() != null && !saved.getComment().trim().isEmpty()) {
+            reviewEventPublisher.publishTextReviewCreated(response);
+        }
+
+        return response;
     }
 
     //Review 단일 조회 기능
@@ -62,6 +75,8 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(ReviewNotFoundException::new);
 
+        List<ReviewImageResponse> images = reviewImageService.findImages(reviewId);
+
         return new ReadReviewResponse(
                 review.getId(),
                 review.getMember().getId(),
@@ -69,7 +84,8 @@ public class ReviewService {
                 review.getComment(),
                 review.getRating(),
                 review.getCreatedAt(),
-                review.getUpdatedAt()
+                review.getUpdatedAt(),
+                images
         );
     }
 
@@ -85,7 +101,8 @@ public class ReviewService {
                         review.getComment(),
                         review.getRating(),
                         review.getCreatedAt(),
-                        review.getUpdatedAt()
+                        review.getUpdatedAt(),
+                        reviewImageService.findImages(review.getId())
                 ));
     }
 

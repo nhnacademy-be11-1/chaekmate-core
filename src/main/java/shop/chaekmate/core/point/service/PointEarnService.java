@@ -71,7 +71,6 @@ public class PointEarnService {
         }
     }
 
-    //TODO: 후에 주문 exception 바꾸기
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CreatePointHistoryResponse earnPointForOrder(String orderNumber, long totalAmount) {
 
@@ -144,5 +143,52 @@ public class PointEarnService {
         double calculatedPoint = amount * pointRateDecimal;
 
         return (int) calculatedPoint;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public CreatePointHistoryResponse earnPointForReview(Long memberId, Long reviewId) {
+        return earnPointForReview(memberId, reviewId, PointEarnedType.IMAGE_REVIEW, "이미지 리뷰 작성");
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public CreatePointHistoryResponse earnPointForTextReview(Long memberId, Long reviewId) {
+        return earnPointForReview(memberId, reviewId, PointEarnedType.TEXT_REVIEW, "텍스트 리뷰 작성");
+    }
+
+    private CreatePointHistoryResponse earnPointForReview(Long memberId, Long reviewId, PointEarnedType pointEarnedType, String sourcePrefix) {
+        log.info("[포인트 적립] 리뷰 작성 포인트 적립 시작 - 회원ID: {}, 리뷰ID: {}, 타입: {}", memberId, reviewId, pointEarnedType);
+
+        if (!memberRepository.existsById(memberId)) {
+            log.warn("[포인트 적립] 회원을 찾을 수 없음 - 회원ID: {}", memberId);
+            throw new MemberNotFoundException();
+        }
+
+        try {
+            var policy = pointService.getPolicyByType(pointEarnedType);
+            int reviewPoint = policy.point();
+
+            if (reviewPoint <= 0) {
+                log.info("[포인트 적립] 리뷰 작성 포인트가 0이므로 적립하지 않음 - 회원ID: {}, 리뷰ID: {}, 타입: {}", memberId, reviewId, pointEarnedType);
+                return null;
+            }
+
+            CreatePointHistoryRequest request = new CreatePointHistoryRequest(
+                    null,
+                    memberId,
+                    PointSpendType.EARN,
+                    reviewPoint,
+                    String.format("%s - 리뷰ID: %s", sourcePrefix, reviewId)
+            );
+
+            CreatePointHistoryResponse response = pointHistoryService.earnPointHistory(memberId, request);
+            log.info("[포인트 적립] 리뷰 작성 포인트 적립 완료 - 회원ID: {}, 리뷰ID: {}, 타입: {}, 포인트: {}", memberId, reviewId, pointEarnedType, reviewPoint);
+            return response;
+        } catch (shop.chaekmate.core.point.exception.PointPolicyNotFoundException e) {
+            log.warn("[포인트 적립] 리뷰 작성 포인트 정책이 설정되지 않아 포인트를 적립하지 않음 - 회원ID: {}, 리뷰ID: {}, 타입: {}", memberId, reviewId, pointEarnedType);
+            return null;
+        } catch (Exception e) {
+            log.error("[포인트 적립] 리뷰 작성 포인트 적립 실패 - 회원ID: {}, 리뷰ID: {}, 타입: {}, 오류: {}", memberId, reviewId, pointEarnedType, e.getMessage(), e);
+            throw e;
+        }
     }
 }

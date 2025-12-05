@@ -82,7 +82,7 @@ class ReviewImageControllerTest {
                 .isSaleEnd(false)
                 .build());
         Order order = orderRepository.save(Order.createOrderReady(member, "order1", "n", "p", "e", "r", "p", "z", "s", "d", "r", LocalDate.now(), 0, 9000));
-        OrderedBook orderedBook = orderedBookRepository.save(OrderedBook.createOrderDetailReady(order, book, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000));
+        OrderedBook orderedBook = orderedBookRepository.save(OrderedBook.createOrderDetailReady(order, book, 1, 10000, 9000, 0, null, 0, null, 0, 0, 9000, 9000));
         review = reviewRepository.save(Review.createReview(member, orderedBook, "comment", 5));
     }
 
