@@ -12,6 +12,19 @@ spring:
         service-id: chaekmate-config    # Eureka 서비스 이름
       fail-fast: true
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL_PROD}
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 30
+
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+
 # ===== RabbitMQ 회원 설정 (Prod) =====
 rabbitmq:
   member:

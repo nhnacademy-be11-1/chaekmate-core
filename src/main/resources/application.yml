@@ -50,9 +50,9 @@ toss:
     url: https://api.tosspayments.com/v1
   secret-key: ${TOSS_SECRET_KEY}
 
-chaekmate:
-  coupon:
-    url: http://localhost:9400
+dooray:
+  webhook:
+    url: ${DOORAY_WEBHOOK_URL}
 
 management:
   endpoints:

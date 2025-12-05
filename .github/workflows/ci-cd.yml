@@ -32,6 +32,7 @@ jobs:
       ALADIN_API_KEY: ${{ secrets.ALADIN_API_KEY }}
       TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
       EUREKA_URL_PROD: ${{ secrets.EUREKA_URL_PROD }}
+      DOORAY_WEBHOOK_URL: ${{ secrets.DOORAY_WEBHOOK_URL }}
 
 
     steps:
@@ -121,5 +122,5 @@ jobs:
             export ALADIN_API_KEY="${{ secrets.ALADIN_API_KEY }}"
             export TOSS_SECRET_KEY="${{ secrets.TOSS_SECRET_KEY }}"
             export EUREKA_URL_PROD="${{ secrets.EUREKA_URL_PROD }}"
-            
+            export DOORAY_WEBHOOK_URL="${{ secrets.DOORAY_WEBHOOK_URL }}"    
             bash -lc ./startup.sh
