@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import shop.chaekmate.core.member.controller.docs.MemberControllerDocs;
 import shop.chaekmate.core.member.dto.request.CreateMemberGradeHistoryRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.request.UpdateMemberRequest;
 import shop.chaekmate.core.member.dto.response.AvailabilityResponse;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.dto.response.MemberResponse;
@@ -41,6 +42,12 @@ public class MemberController implements MemberControllerDocs {
     public ResponseEntity<AvailabilityResponse> checkEmail(@RequestParam("email") String email) {
         boolean exists = memberService.isDuplicateEmail(email);
         return ResponseEntity.ok(new AvailabilityResponse(!exists));
+    }
+
+    @PostMapping("/{memberId}")
+    public ResponseEntity<MemberResponse> updateMEmber(@PathVariable Long memberId, UpdateMemberRequest request) {
+        memberService.updateMember(memberId, request);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{memberId}")

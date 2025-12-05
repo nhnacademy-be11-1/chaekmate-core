@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.chaekmate.core.event.MemberRabbitEventPublisher;
 import shop.chaekmate.core.member.dto.request.CreateMemberGradeHistoryRequest;
 import shop.chaekmate.core.member.dto.request.CreateMemberRequest;
+import shop.chaekmate.core.member.dto.request.UpdateMemberRequest;
 import shop.chaekmate.core.member.dto.response.GradeResponse;
 import shop.chaekmate.core.member.dto.response.MemberResponse;
 import shop.chaekmate.core.member.entity.Grade;
@@ -105,8 +106,18 @@ public class MemberService {
     }
 
     @Transactional
-    public void deleteMember(Long id) {
-        Member member = memberRepository.findById(id)
+    public void updateMember(Long memberId, UpdateMemberRequest request) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+        if (isDuplicateEmail(request.email())){
+            throw new DuplicatedEmailException();
+        }
+        member.update(request.name(), request.phone(), request.email());
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
         memberRepository.delete(member);
     }
