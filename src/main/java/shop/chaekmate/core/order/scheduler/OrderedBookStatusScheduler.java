@@ -43,7 +43,7 @@ public class OrderedBookStatusScheduler {
 //            LocalDateTime shippedPlus3 = shippedAt.plusDays(1);
 
             // 테스트
-            LocalDateTime shippedPlus3 = now.plusMinutes(5);
+            LocalDateTime shippedPlus3 = shippedAt.plusMinutes(5);
 
 
             // 배송희망일 고려
